@@ -41,6 +41,30 @@ class WEER:
         """
         return entropy(true_distribution, simulated_distribution)
 
+def bin_data(data, bins):
+    """
+    Bin the data into discrete intervals.
+    """
+    # with density=True the first element of the return tuple will be 
+    # the counts normalized to form a probability density, 
+    # i.e., the area (or integral) under the histogram will sum to 1
+    # this normalzation is needed for KL divergence calc
+    hist, bin_edges = np.histogram(data, bins=bins, density=True)
+    return hist
+
+def kl_divergence(true_distribution, simulated_distribution, bins=10, epsilon=1e-10):
+    """
+    Calculate KL divergence between two distributions using binning.
+    """
+    true_hist = bin_data(true_distribution, bins)
+    simulated_hist = bin_data(simulated_distribution, bins)
+
+    # Add a small constant epsilon to avoid division by zero
+    true_hist += epsilon
+    simulated_hist += epsilon
+
+    return entropy(true_hist, simulated_hist)
+
 if __name__ == "__main__":
     # test data (1D array of 1D ODLD endpoints)
     #pcoords = np.loadtxt('pcoords.txt')
@@ -57,25 +81,26 @@ if __name__ == "__main__":
     # TODO:
 
     # KL divergence test
-    p = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
-    q = np.array([90, 2.2, 28, 4.5, 5.5])
+    #p = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+    #q = np.array([90, 2.2, 28, 4.5, 5.5])
 
     # normalize so both sum to 1
-    p /= np.sum(p)
-    q /= np.sum(q)
+    #p /= np.sum(p)
+    #q /= np.sum(q)
 
-    print(np.sum(p), np.sum(q))
+    #print(np.sum(p), np.sum(q))
 
     # print(entropy(p, q))
     # print(rel_entr(p, q), sum(rel_entr(p, q)))
     # print(kl_div(p, q), sum(kl_div(p, q)))
     
-    print(entropy(p, q), sum(rel_entr(p, q)), sum(kl_div(p, q)))
+    #print(entropy(p, q), sum(rel_entr(p, q)), sum(kl_div(p, q)))
 
-    # # Example usage:
-    # true_distances = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
-    # simulated_distances = np.array([1.2, 2.2, 2.8, 4.5, 5.5])
+    # can use bins to compare arrays of varying sizes
+    # TODO: I should include a layer where I only compare hist from the pcoord 
+    #       value range min / max from true_dist that I see on my simulated range
+    true_distribution = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
+    simulated_distribution = np.array([1.2, 2.2, 2.8, 4.5, 5.5, 6.0, 5.0])
 
-    # # Ensure both distributions sum to 1 (normalized)
-    # true_distribution = true_distances / np.sum(true_distances)
-    # simulated_distribution = simulated_distances / np.sum(simulated_distances)
+    kl_divergence_value = kl_divergence(true_distribution, simulated_distribution)
+    print("KL Divergence:", kl_divergence_value)
