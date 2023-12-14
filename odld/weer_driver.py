@@ -36,9 +36,15 @@ class WEERDriver(WEDriver):
             target_count = self.bin_target_counts[ibin]
             subgroups = self.subgroup_function(self, ibin, **self.subgroup_function_kwargs)
             total_number_of_subgroups += len(subgroups)
-            # Clear the bin
+            # grab segments and weights and pcoords
             segments = np.array(sorted(bin, key=operator.attrgetter('weight')), dtype=np.object_)
             weights = np.array(list(map(operator.attrgetter('weight'), segments)))
+            pcoords = np.array(list(map(operator.attrgetter('pcoord'), segments)))
+
+            # TODO: update weights based on WEER
+            reweight = WEER()            
+
+            # Calculate ideal weight and clear the bin
             ideal_weight = weights.sum() / target_count
             bin.clear()
             # Determines to see whether we have more sub bins than we have target walkers in a bin (or equal to), and then uses
