@@ -37,9 +37,9 @@ def plot_odld(A=2, B=5, C=0.5, x0=1):
 #plot_odld()
 
 def odld_1d_potential(A=2, B=5, C=0.5, x0=1):
-    #x = np.arange(0.5, 10.1, 0.05) 
+    x = np.arange(0.5, 10.1, 0.1) 
     #x = np.arange(-10, 10.1, 0.1) 
-    x = np.arange(-10, 0, 0.1) 
+    #x = np.arange(-10, 0, 0.1) 
     twopi_by_A = 2 * np.pi / A
     half_B = B / 2
 
@@ -53,13 +53,16 @@ def odld_1d_potential(A=2, B=5, C=0.5, x0=1):
     # normalize the plot to have lowest value as baseline
     potential -= np.min(potential)
 
+    # save off the xy values of the true odld dist
+    np.savetxt("true_1d_odld.txt", np.hstack((x.reshape(-1,1), potential.reshape(-1,1))))
+
     plt.plot(x, potential, color='k', alpha=0.5, label='ODLD potential', linestyle="--")
     return potential
-#odld_1d_potential()
-odld_1d_potential(x0=0, B=10)
+odld_1d_potential()
+#odld_1d_potential(x0=0, B=10)
 
 plt.legend()
-plt.ylim(0, 30)
+#plt.ylim(0, 30)
 plt.xlabel("ODLD Position")
 
 plt.tight_layout()
