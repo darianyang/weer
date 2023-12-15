@@ -96,23 +96,40 @@ class WEER:
         else:
             raise ValueError("Optimization failed.")
 
-    def odld_1d_potential(self, A=2, B=5, C=0.5, x0=1):
-        x = np.arange(0.1, 10.1, 0.1) 
-        twopi_by_A = 2 * np.pi / A
-        half_B = B / 2
 
-        xarg = twopi_by_A * (x - x0)
+def make_pdist(pcoord, weights, bins=100):
+    '''
+    Make a 1D pdist in units of kT.
 
-        eCx = np.exp(C * x)
-        eCx_less_one = eCx - 1.0
+    Parameters
+    ----------
+    pcoord : array
+    weights : array
+    bins : int
+    '''
+    # make an 1D array to fit the hist values based off of bin count
+    histogram = np.zeros((bins))
 
-        potential = -half_B / eCx_less_one * np.cos(xarg)
+    # loop each segment in the current iteration
+    for seg in range(0, pcoord.shape[0]):
+        counts, bins = np.histogram(pcoord[seg], bins=bins,
+                                    range=(np.min(pcoord), np.max(pcoord)))
 
-        # normalize the plot to have lowest value as baseline
-        potential -= np.min(potential)
+        # multiply counts vector by weight scalar from weight array
+        counts = np.multiply(counts, weights[seg])
 
-        plt.plot(x, potential, color='k', alpha=0.5, label='ODLD potential', linestyle="--")
-        return potential
+        # add all of the weighted walkers to total array for the 
+        # resulting linear combination
+        histogram = np.add(histogram, counts)
+
+    # get bin midpoints
+    midpoints_x = (bins[:-1] + bins[1:]) / 2
+    
+    # normalize hist to kT
+    histogram = -np.log(histogram / np.max(histogram))
+
+    return midpoints_x, histogram
+
 
 if __name__ == "__main__":
     # test data (1D array of 1D ODLD endpoints)
@@ -125,14 +142,21 @@ if __name__ == "__main__":
 
     import matplotlib.pyplot as plt
     #plt.hist(pcoords, bins=50)
-    print(pcoords.reshape(-1))
-    hist, bin_edges = np.histogram(pcoords.reshape(-1), bins=100)
+    #print(pcoords.reshape(-1))
+    #hist, bin_edges = np.histogram(pcoords.reshape(-1), bins=100)
     # TODO: NEXT, make the pdist, use this to compare to true_dist
+    x, hist = make_pdist(pcoords, weights)
+    plt.plot(x, hist)
+    plt.show()
 
+    # TODO: note that I'm comparing the ODLD potential which
+    #       is already in same units as kT from WE
+    #       but for future, e.g. EPR distance, I would need
+    #       to probably normalize dists to 1, but KL div already
+    #       needs this done anyway... so should be fine
     #true_dist = np.loadtxt("true_1d_odld.txt")
     #plt.plot(true_dist[:,0], true_dist[:,1])
-
-    plt.show()
+    #plt.show()
 
     # this is the full pcoord array, in this case (80, 5, 2)
     # for 80 walkers, 5 frames of simulation each, and 2 pcoords (X and Y)
