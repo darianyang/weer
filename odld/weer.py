@@ -22,7 +22,7 @@ class WEER:
             For multi-dimensional pcoords, the first dimension should be the 
             same metric as true_dist.
         TODO: add a way to only run reweighting every n iterations
-
+              and it would be useful to take data from n iteration back
         '''
         # pcoord dimension 0 should be the same metric as true_dist
         if pcoords.ndim == 1:
@@ -38,6 +38,8 @@ class WEER:
     def bin_data(self, data, bins, weights=None):
         """
         Bin the data into discrete intervals.
+        This is to account for different length arrays between true and simulated
+        distributions. Could also 
         """
         # with density=True the first element of the return tuple will be 
         # the counts normalized to form a probability density, 
@@ -114,11 +116,22 @@ class WEER:
 
 if __name__ == "__main__":
     # test data (1D array of 1D ODLD endpoints)
-    pcoords = np.loadtxt('pcoords.txt')
-    weights = np.loadtxt('weights.txt')
+    #pcoords = np.loadtxt('pcoords.txt')
+    #weights = np.loadtxt('weights.txt')
+    #pcoords = np.loadtxt('3000i_pcoord.txt')
+    # for this method I also will be better off using the entire pcoord data
+    pcoords = np.loadtxt('3000i_pcoord_full.txt')
+    weights = np.loadtxt('3000i_weight.txt')
 
     import matplotlib.pyplot as plt
-    plt.hist(pcoords, bins=50)
+    #plt.hist(pcoords, bins=50)
+    print(pcoords.reshape(-1))
+    hist, bin_edges = np.histogram(pcoords.reshape(-1), bins=100)
+    # TODO: NEXT, make the pdist, use this to compare to true_dist
+
+    #true_dist = np.loadtxt("true_1d_odld.txt")
+    #plt.plot(true_dist[:,0], true_dist[:,1])
+
     plt.show()
 
     # this is the full pcoord array, in this case (80, 5, 2)
@@ -130,7 +143,7 @@ if __name__ == "__main__":
     # weights = np.array([0.02] * 50)
 
     # WEER test
-    reweight = WEER()
+    #reweight = WEER()
 
     # KL divergence test
     #p = np.array([1.0, 2.0, 3.0, 4.0, 5.0])

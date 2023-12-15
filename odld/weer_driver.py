@@ -41,8 +41,16 @@ class WEERDriver(WEDriver):
             weights = np.array(list(map(operator.attrgetter('weight'), segments)))
             pcoords = np.array(list(map(operator.attrgetter('pcoord'), segments)))
 
+            # get all pcoords, not just the final frame
+            curr_segments = np.array(sorted(self.current_iter_segments, 
+                                            key=operator.attrgetter('weight')), dtype=np.object_)
+            curr_pcoords = np.array(list(map(operator.attrgetter('pcoord'), curr_segments)))
+
             # TODO: update weights based on WEER
-            reweight = WEER()            
+            reweight = WEER(curr_pcoords, weights, 'true_1d_odld.txt')
+            # TODO: somehow set new weights to each segment
+            weights = reweight.method()
+            map(operator.attrgetter('weight'), segments) = weights
 
             # Calculate ideal weight and clear the bin
             ideal_weight = weights.sum() / target_count
