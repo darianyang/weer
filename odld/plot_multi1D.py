@@ -2,14 +2,17 @@ import wedap
 import matplotlib.pyplot as plt
 import numpy as np
 
-h5_list = ["hk1b.h5", "hk10b.h5", "mab10b.h5", "wevo.h5", "lcas.h5"]
+#h5_list = ["hk1b.h5", "hk10b.h5", "mab10b.h5", "wevo.h5", "lcas.h5"]
 #h5_list = ["west_lowS.h5"]
+h5_list = ["west_test.h5", "west_test_stdMD.h5"]
 
 fig, ax = plt.subplots()
 
-# for h5 in h5_list:
-#     wedap.H5_Plot(h5=h5, data_type="average", first_iter=250, plot_mode="line", 
-#                   data_label=h5, ax=ax).plot()
+for h5 in h5_list:
+    wedap.H5_Plot(h5=h5, data_type="average", last_iter=500, plot_mode="line", 
+                  data_label=h5, ax=ax).plot()
+    # wedap.H5_Plot(h5=h5, data_type="average", first_iter=500, plot_mode="line", 
+    #               data_label=h5, ax=ax).plot()
 
     # wedap.H5_Plot(h5=h5, data_type="average", last_iter=1000, plot_mode="line", 
     #               data_label="1000i", ax=ax).plot()

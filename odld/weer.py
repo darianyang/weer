@@ -42,6 +42,7 @@ class WEER:
         # TODO: update this throughout the methods
         self.bins = bins
         # precalculate constant histrange
+        # TODO: should this be for the pcoords or true dist?
         self.histrange = (np.min(pcoords), np.max(pcoords))
 
     def bin_data(self, data, bins, weights=None):
@@ -203,6 +204,7 @@ class WEER:
         '''
 
         # TODO: make sure new and old weights sum to 1
+        #       also, ensure no zero values in new weights
 
         # calc KL divergence from true dist
         #kld = self.kl_divergence(self.weights, self.true_dist[:,1], simulated_dist)
