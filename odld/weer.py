@@ -138,16 +138,21 @@ class WEER:
         bounds = [(0, 1) for _ in range(len(initial_weights))]
 
         # Optimization
+        # TODO: when dists are already close, using a maxiter of 30 seems to work better
+        #       otherwise it over optimizes, which may be remedied with more data
         result = minimize(objective_function, initial_weights, method='SLSQP',
-                          constraints=constraints, bounds=bounds)
+                          constraints=constraints, bounds=bounds, options={'maxiter':30})
 
         print(result)
 
-        if result.success:
-            optimized_weights = result.x
-            return optimized_weights
-        else:
-            raise ValueError("Optimization failed.")
+        # if result.success:
+        #     optimized_weights = result.x
+        #     return optimized_weights
+        # else:
+        #     raise ValueError("Optimization failed.")
+
+        optimized_weights = result.x
+        return optimized_weights
 
     def make_pdist(self, pcoord, weights, bins=100):
         '''
@@ -209,13 +214,14 @@ class WEER:
         # test plot to compare to post weight opt
         # TODO: temp fix here for shape mismatch, need better solution
         #       need same shape for KLD calc
+
         # make simulated dist pdist
-        test_x, test_simulated_dist = self.make_pdist(self.pcoords, self.weights)
-        test_true_dist = self.true_dist[:,1]
-        test_simulated_dist = test_simulated_dist[:-4]
-        test_x = test_x[:-4]
-        plt.plot(test_x, test_true_dist)
-        plt.plot(test_x, test_simulated_dist)
+        # test_x, test_simulated_dist = self.make_pdist(self.pcoords, self.weights)
+        # test_true_dist = self.true_dist[:,1]
+        # test_simulated_dist = test_simulated_dist[:-4]
+        # test_x = test_x[:-4]
+        # plt.plot(test_x, test_true_dist)
+        # plt.plot(test_x, test_simulated_dist)
 
         # # Ensure both distributions sum to 1 (normalized for KLD)
         # true_dist = true_dist / np.sum(true_dist)
@@ -229,12 +235,12 @@ class WEER:
         print("Initial KL div: ", kld)
 
         # TODO: OPT test
-        opt_weights = self.optimize_weights(self.weights, true_dist, self.pcoords)
+        opt_weights = self.optimize_weights(self.weights, self.true_dist, self.pcoords)
 
         # new pdist with updated weights
-        x, new_sim_dist = self.make_pdist(self.pcoords, opt_weights)
-        plt.plot(x, new_sim_dist)
-        plt.show()
+        #x, new_sim_dist = self.make_pdist(self.pcoords, opt_weights)
+        # plt.plot(x, new_sim_dist)
+        # plt.show()
 
         # KDE test
         # sim_x, sim_y = self.plot_kde(simulated_dist)
@@ -251,6 +257,7 @@ class WEER:
         # plt.plot(true_x, true_y)
         # plt.plot(sim_x, sim_y)
         # plt.show()
+        return opt_weights
 
     def plot_kde(self, data):
         """
@@ -280,10 +287,10 @@ if __name__ == "__main__":
     # for this method I also will be better off using the entire pcoord data
     # TODO: even more data will prob be better, having e.g. n iters of pcoords
     #       guidelines could be enough to make a properly filled out pdist
-    # pcoords = np.loadtxt('3000i_pcoord_full.txt')
-    # weights = np.loadtxt('3000i_weight.txt')
-    pcoords = np.loadtxt('30i_pcoord_full.txt')
-    weights = np.loadtxt('30i_weight.txt')
+    pcoords = np.loadtxt('3000i_pcoord_full.txt')
+    weights = np.loadtxt('3000i_weight.txt')
+    # pcoords = np.loadtxt('30i_pcoord_full.txt')
+    # weights = np.loadtxt('30i_weight.txt')
 
     import matplotlib.pyplot as plt
     #plt.hist(pcoords, bins=50)
@@ -315,6 +322,7 @@ if __name__ == "__main__":
     # WEER test
     reweight = WEER(pcoords, weights, true_dist)
     reweight.run_weer()
+
 
     # KL divergence test
     #p = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
