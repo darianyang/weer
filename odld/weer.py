@@ -10,7 +10,7 @@ class WEER:
     '''
     Weighted ensemble with ensemble reweighting.
     '''
-    def __init__(self, pcoords, weights, true_dist):
+    def __init__(self, pcoords, weights, true_dist, bins=100):
         '''
         Parameters
         ----------
@@ -22,6 +22,7 @@ class WEER:
             Array of the true distibution values to compare pcoord values to.
             For multi-dimensional pcoords, the first dimension should be the 
             same metric as true_dist.
+        bins : int
         TODO: add a way to only run reweighting every n iterations
               and it would be useful to take data from n iteration back
         '''
@@ -38,6 +39,10 @@ class WEER:
 
         self.weights = weights
         self.true_dist = true_dist
+        # TODO: update this throughout the methods
+        self.bins = bins
+        # precalculate constant histrange
+        self.histrange = (np.min(pcoords), np.max(pcoords))
 
     def bin_data(self, data, bins, weights=None):
         """
@@ -94,15 +99,34 @@ class WEER:
         #simulated_hist += epsilon
 
         # testing out the alignment instead
-        true_distribution, simulated_distribution = \
-            self.align_support(true_distribution, simulated_distribution)
+        # true_distribution, simulated_distribution = \
+        #     self.align_support(true_distribution, simulated_distribution)
 
-        return entropy(true_distribution, simulated_distribution)
+        # TODO: TEST of just using the pdist values from sim compared to true
 
-    def optimize_weights(self, true_distribution, initial_weights, simulated_distribution):
+        # make simulated dist pdist
+        x, simulated_dist = self.make_pdist(simulated_distribution, weights)
+
+        # TODO: temp fix here for shape mismatch, need better solution
+        #       need same shape for KLD calc
+        true_dist = true_distribution[:,1]
+        simulated_dist = simulated_dist[:-4]
+
+        # Ensure both distributions sum to 1 (normalized for KLD)
+        true_dist = true_dist / np.sum(true_dist)
+        simulated_dist = simulated_dist / np.sum(simulated_dist)
+
+        return entropy(true_dist, simulated_dist)
+
+    def optimize_weights(self, initial_weights, true_distribution, simulated_distribution):
         """
         Optimize weights to minimize KL divergence.
         """
+        # # constant initial weights guess
+        # initial_weights = np.ones(initial_weights.shape)
+        # initial_weights /= np.sum(initial_weights)
+        # #print(initial_weights)
+
         objective_function = lambda weights: self.kl_divergence(weights, 
                                                                 true_distribution, 
                                                                 simulated_distribution)
@@ -114,8 +138,10 @@ class WEER:
         bounds = [(0, 1) for _ in range(len(initial_weights))]
 
         # Optimization
-        result = minimize(objective_function, initial_weights, method='SLSQP', 
+        result = minimize(objective_function, initial_weights, method='SLSQP',
                           constraints=constraints, bounds=bounds)
+
+        print(result)
 
         if result.success:
             optimized_weights = result.x
@@ -136,13 +162,13 @@ class WEER:
         # make an 1D array to fit the hist values based off of bin count
         histogram = np.zeros((bins))
 
-        # precalculate constant histrange
-        histrange = (np.min(pcoord), np.max(pcoord))
+        # # precalculate constant histrange
+        # histrange = (np.min(pcoord), np.max(pcoord))
 
         # loop each segment in the current iteration
         for seg in range(0, pcoord.shape[0]):
             counts, bins = np.histogram(pcoord[seg], bins=bins,
-                                        range=histrange)
+                                        range=self.histrange)
 
             # multiply counts vector by weight scalar from weight array
             counts = np.multiply(counts, weights[seg])
@@ -153,9 +179,16 @@ class WEER:
 
         # get bin midpoints
         midpoints_x = (bins[:-1] + bins[1:]) / 2
+
+        # set the 0 count bins of lowest prob to lowest non-zero count value
+        # TODO: there def could be a better way to account for this
+        histogram[histogram == 0] = np.min(histogram[histogram != 0])
         
         # normalize hist to kT
         histogram = -np.log(histogram / np.max(histogram))
+
+        # TODO: sometimes after norm to kT there is a zero val still
+        histogram[histogram == 0] = np.min(histogram[histogram != 0])
 
         return midpoints_x, histogram
 
@@ -163,36 +196,77 @@ class WEER:
         '''
         Main public class method for WEER.
         '''
-        print(self.pcoords.shape)
-        print(self.weights.shape)
-        # make simulated dist pdist
-        x, simulated_dist = self.make_pdist(self.pcoords, self.weights)
 
-        # TODO: make sure they both sum to 1
+        # TODO: make sure new and old weights sum to 1
 
         # calc KL divergence from true dist
         #kld = self.kl_divergence(self.weights, self.true_dist[:,1], simulated_dist)
-        #print(simulated_dist[4:])
-        plt.plot(x, simulated_dist)
+        #print(simulated_dist)
+        #plt.plot(x, simulated_dist)
         #plt.plot(self.plot_kde(self.pcoords))
+        #plt.show()
+
+        # test plot to compare to post weight opt
+        # TODO: temp fix here for shape mismatch, need better solution
+        #       need same shape for KLD calc
+        # make simulated dist pdist
+        test_x, test_simulated_dist = self.make_pdist(self.pcoords, self.weights)
+        test_true_dist = self.true_dist[:,1]
+        test_simulated_dist = test_simulated_dist[:-4]
+        test_x = test_x[:-4]
+        plt.plot(test_x, test_true_dist)
+        plt.plot(test_x, test_simulated_dist)
+
+        # # Ensure both distributions sum to 1 (normalized for KLD)
+        # true_dist = true_dist / np.sum(true_dist)
+        # simulated_dist = simulated_dist / np.sum(simulated_dist)
+
+        # plt.plot(x, true_dist)
+        # plt.plot(x, simulated_dist)
+
+        #kld = entropy(self.true_dist[:,1], simulated_dist[4:])
+        kld = self.kl_divergence(self.weights, self.true_dist, self.pcoords)
+        print("Initial KL div: ", kld)
+
+        # TODO: OPT test
+        opt_weights = self.optimize_weights(self.weights, true_dist, self.pcoords)
+
+        # new pdist with updated weights
+        x, new_sim_dist = self.make_pdist(self.pcoords, opt_weights)
+        plt.plot(x, new_sim_dist)
         plt.show()
 
-        #print(self.true_dist[:,1].shape, simulated_dist[4:].shape)
-        #kld = entropy(self.true_dist[:,1], simulated_dist[4:])
-        #print(kld)
+        # KDE test
+        # sim_x, sim_y = self.plot_kde(simulated_dist)
+        # true_x, true_y = self.plot_kde(self.true_dist[:,1])
+        
+        # print(np.sum(sim_y), np.sum(true_y))
+
+        # # Ensure both distributions sum to 1 (normalized for KLD)
+        # true_y = sim_y / np.sum(sim_y)
+        # sim_y = sim_y / np.sum(sim_y)
+
+        # print(np.sum(sim_y), np.sum(true_y))
+
+        # plt.plot(true_x, true_y)
+        # plt.plot(sim_x, sim_y)
+        # plt.show()
 
     def plot_kde(self, data):
         """
         Calc the KDE of the given data.
         TODO: replace the bins with KDE?
         """
+        # set the data shape to be 1D
+        data = data.reshape(-1)
+
         # You can adjust the bandwidth parameter
         kde = KernelDensity(bandwidth=0.6)
         kde.fit(data[:, np.newaxis])
         
         # TODO: update to bin midpoint x values?
         #       need to think about the theory for is this makes sense
-        x_vals = np.linspace(min(data), max(data), 1000)
+        x_vals = np.linspace(self.histrange[0], self.histrange[1], self.bins)
         log_dens = kde.score_samples(x_vals[:, np.newaxis])
         dens = np.exp(log_dens)
         
@@ -204,8 +278,12 @@ if __name__ == "__main__":
     #weights = np.loadtxt('weights.txt')
     #pcoords = np.loadtxt('3000i_pcoord.txt')
     # for this method I also will be better off using the entire pcoord data
-    pcoords = np.loadtxt('3000i_pcoord_full.txt')
-    weights = np.loadtxt('3000i_weight.txt')
+    # TODO: even more data will prob be better, having e.g. n iters of pcoords
+    #       guidelines could be enough to make a properly filled out pdist
+    # pcoords = np.loadtxt('3000i_pcoord_full.txt')
+    # weights = np.loadtxt('3000i_weight.txt')
+    pcoords = np.loadtxt('30i_pcoord_full.txt')
+    weights = np.loadtxt('30i_weight.txt')
 
     import matplotlib.pyplot as plt
     #plt.hist(pcoords, bins=50)
