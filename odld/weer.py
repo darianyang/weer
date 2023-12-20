@@ -25,13 +25,16 @@ class WEER:
         TODO: add a way to only run reweighting every n iterations
               and it would be useful to take data from n iteration back
         '''
-        # pcoord dimension 0 should be the same metric as true_dist
-        if pcoords.ndim == 1:
-            self.pcoords = pcoords
-        # for multiple pcoords, just use the first for comparison to true_dist
-        elif pcoords.ndim >= 2:
-            # TODO: check the shape to make sure this indexing works
-            self.pcoords = pcoords[:,0]
+        # TODO: update this to be comparible with entire pcoord array data for iter
+        #       ndim should always be 2 then or more with more pcoords, error with 1D
+        self.pcoords = pcoords
+        # # pcoord dimension 0 should be the same metric as true_dist
+        # if pcoords.ndim == 1:
+        #     self.pcoords = pcoords
+        # # for multiple pcoords, just use the first for comparison to true_dist
+        # elif pcoords.ndim >= 2:
+        #     # TODO: check the shape to make sure this indexing works
+        #     self.pcoords = pcoords[:,0]
 
         self.weights = weights
         self.true_dist = true_dist
@@ -133,7 +136,7 @@ class WEER:
         # make an 1D array to fit the hist values based off of bin count
         histogram = np.zeros((bins))
 
-        # precalculate histrange
+        # precalculate constant histrange
         histrange = (np.min(pcoord), np.max(pcoord))
 
         # loop each segment in the current iteration
@@ -160,6 +163,8 @@ class WEER:
         '''
         Main public class method for WEER.
         '''
+        print(self.pcoords.shape)
+        print(self.weights.shape)
         # make simulated dist pdist
         x, simulated_dist = self.make_pdist(self.pcoords, self.weights)
 
@@ -167,27 +172,31 @@ class WEER:
 
         # calc KL divergence from true dist
         #kld = self.kl_divergence(self.weights, self.true_dist[:,1], simulated_dist)
-        print(self.true_dist[:,1].shape, simulated_dist[4:].shape)
-        kld = entropy(self.true_dist[:,1], simulated_dist[4:])
+        #print(simulated_dist[4:])
+        plt.plot(x, simulated_dist)
+        #plt.plot(self.plot_kde(self.pcoords))
+        plt.show()
 
-        print(kld)
+        #print(self.true_dist[:,1].shape, simulated_dist[4:].shape)
+        #kld = entropy(self.true_dist[:,1], simulated_dist[4:])
+        #print(kld)
 
-def plot_kde(data):
-    """
-    Calc the KDE of the given data.
-    TODO: replace the bins with KDE?
-    """
-    # You can adjust the bandwidth parameter
-    kde = KernelDensity(bandwidth=0.6)
-    kde.fit(data[:, np.newaxis])
-    
-    # TODO: update to bin midpoint x values?
-    #       need to think about the theory for is this makes sense
-    x_vals = np.linspace(min(data), max(data), 1000)
-    log_dens = kde.score_samples(x_vals[:, np.newaxis])
-    dens = np.exp(log_dens)
-    
-    return x_vals, dens
+    def plot_kde(self, data):
+        """
+        Calc the KDE of the given data.
+        TODO: replace the bins with KDE?
+        """
+        # You can adjust the bandwidth parameter
+        kde = KernelDensity(bandwidth=0.6)
+        kde.fit(data[:, np.newaxis])
+        
+        # TODO: update to bin midpoint x values?
+        #       need to think about the theory for is this makes sense
+        x_vals = np.linspace(min(data), max(data), 1000)
+        log_dens = kde.score_samples(x_vals[:, np.newaxis])
+        dens = np.exp(log_dens)
+        
+        return x_vals, dens
 
 if __name__ == "__main__":
     # test data (1D array of 1D ODLD endpoints)
@@ -203,9 +212,9 @@ if __name__ == "__main__":
     #print(pcoords.reshape(-1))
     #hist, bin_edges = np.histogram(pcoords.reshape(-1), bins=100)
     # TODO: NEXT, make the pdist, use this to compare to true_dist
-    #x, hist = make_pdist(pcoords, weights) # turn into static method?
-    #plt.plot(x, hist)
-    #plt.show()
+    # x, hist = make_pdist(pcoords, weights) # turn into static method?
+    # plt.plot(x, hist)
+    # plt.show()
 
     # TODO: note that I'm comparing the ODLD potential which
     #       is already in same units as kT from WE
