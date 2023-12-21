@@ -13,7 +13,7 @@ h5_list = ["west_test_stdMD_normS.h5", "west_test_stdHK_normS.h5",
 fig, ax = plt.subplots()
 
 for h5 in h5_list:
-    wedap.H5_Plot(h5=h5, data_type="average", plot_mode="line", 
+    wedap.H5_Plot(h5=h5, data_type="average", first_iter=1, plot_mode="line", 
                   data_label=h5, ax=ax).plot()
     # wedap.H5_Plot(h5=h5, data_type="average", first_iter=500, plot_mode="line", 
     #               data_label=h5, ax=ax).plot()
