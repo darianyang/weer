@@ -6,7 +6,9 @@ tau=20
 
 #f = h5py.File('west.h5', 'r')
 #f = h5py.File('atb_bp_eg5_west.h5', 'r')
-f = h5py.File('west_lowS.h5', 'r')
+#f = h5py.File('west_lowS.h5', 'r')
+f = h5py.File('west_test_stdHK_normS.h5', 'r')
+#f = h5py.File('west_test_stdMD_normS.h5', 'r')
 
 walltime = f['summary']['walltime'][:].sum()
 aggtime = f['summary']['n_particles'][:].sum()

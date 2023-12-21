@@ -1,5 +1,6 @@
 
 import numpy as np
+import matplotlib.pyplot as plt
 
 from scipy.stats import entropy
 from scipy.special import rel_entr, kl_div
@@ -43,7 +44,8 @@ class WEER:
         self.bins = bins
         # precalculate constant histrange
         # TODO: should this be for the pcoords or true dist?
-        self.histrange = (np.min(pcoords), np.max(pcoords))
+        #self.histrange = (np.min(pcoords), np.max(pcoords))
+        self.histrange = (np.min(true_dist[:,0]), np.max(true_dist[:,0]))
 
     def bin_data(self, data, bins, weights=None):
         """
@@ -155,6 +157,44 @@ class WEER:
         optimized_weights = result.x
         return optimized_weights
 
+    def smooth_distribution(self, original_distribution, epsilon=1e-3):
+        """
+        Smooths the given probability distribution by adding 
+        small probabilities (epsilon) to missing symbols.
+
+        Parameters
+        ----------
+        original_distribution : array 
+            The original probability distribution.
+        epsilon : float
+            Small constant value.
+
+        Returns
+        -------
+        smoothed_distribution : array 
+            The smoothed probability distribution.
+        """
+        # Extract symbols from the original distribution
+        symbols = np.arange(original_distribution.shape[0])
+
+        # Create a set of all possible symbols
+        all_symbols = np.arange(max(original_distribution.shape[0], self.true_dist.shape[0]))
+
+        # Calculate missing symbols
+        missing_symbols = np.setdiff1d(all_symbols, symbols)
+
+        # Smooth the distribution by adding epsilon to missing symbols
+        smoothed_distribution = np.copy(original_distribution)
+        smoothed_distribution[missing_symbols] += epsilon
+        # also add epsilon to all zero values
+        smoothed_distribution[smoothed_distribution == 0] += epsilon
+
+        # Normalize the distribution to ensure the probabilities sum to 1
+        total_probability = np.sum(smoothed_distribution)
+        smoothed_distribution /= total_probability
+
+        return smoothed_distribution
+
     def make_pdist(self, pcoord, weights, bins=100):
         '''
         Make a 1D pdist in units of kT.
@@ -189,6 +229,12 @@ class WEER:
         # set the 0 count bins of lowest prob to lowest non-zero count value
         # TODO: there def could be a better way to account for this
         histogram[histogram == 0] = np.min(histogram[histogram != 0])
+        # trying data smoothing with epsilon from KLD PDF
+        #epsilon = 10**-3
+        #histogram[histogram == 0] = epsilon
+        #print(histogram)
+        #histogram = self.smooth_distribution(histogram)
+        #print(histogram)
         
         # normalize hist to kT
         histogram = -np.log(histogram / np.max(histogram))
@@ -259,6 +305,12 @@ class WEER:
         # plt.plot(true_x, true_y)
         # plt.plot(sim_x, sim_y)
         # plt.show()
+
+        # ensure no zero values in new weights
+        opt_weights[opt_weights == 0] = np.min(opt_weights[opt_weights != 0])
+        # make sure new weights sum to 1
+        opt_weights /= np.sum(opt_weights)
+
         return opt_weights
 
     def plot_kde(self, data):
@@ -280,6 +332,17 @@ class WEER:
         dens = np.exp(log_dens)
         
         return x_vals, dens
+    
+    def plot_dist(self, pcoords, weights):
+        # make simulated dist pdist
+        test_x, test_simulated_dist = self.make_pdist(pcoords, weights)
+        test_simulated_dist = test_simulated_dist[:-4]
+        test_x = test_x[:-4]
+        plt.plot(test_x, test_simulated_dist)
+
+    def plot_true(self):
+        plt.plot(self.true_dist[:,0], self.true_dist[:,1])
+
 
 if __name__ == "__main__":
     # test data (1D array of 1D ODLD endpoints)
@@ -294,7 +357,6 @@ if __name__ == "__main__":
     # pcoords = np.loadtxt('30i_pcoord_full.txt')
     # weights = np.loadtxt('30i_weight.txt')
 
-    import matplotlib.pyplot as plt
     #plt.hist(pcoords, bins=50)
     #print(pcoords.reshape(-1))
     #hist, bin_edges = np.histogram(pcoords.reshape(-1), bins=100)
@@ -323,8 +385,14 @@ if __name__ == "__main__":
 
     # WEER test
     reweight = WEER(pcoords, weights, true_dist)
-    reweight.run_weer()
+    opt_weights = reweight.run_weer()
+    reweight.plot_true()
+    reweight.plot_dist(reweight.pcoords, reweight.weights)
+    reweight.plot_dist(reweight.pcoords, opt_weights)
 
+    # TODO: epsilon to smooth data and get same points (see KLD PDF)
+
+    plt.show()
 
     # KL divergence test
     #p = np.array([1.0, 2.0, 3.0, 4.0, 5.0])
