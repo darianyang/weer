@@ -2,20 +2,25 @@ import wedap
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.style.use("~/github/wedap/wedap/styles/default.mplstyle")
+
 #h5_list = ["hk1b.h5", "hk10b.h5", "mab10b.h5", "wevo.h5", "lcas.h5"]
 h5_list = ["west_lowS.h5"]
 h5_list = ["west_test.h5", "west_test_stdMD.h5"]
+h5_list = ["west_test_stdMD.h5", "west_test.h5"]
 # h5_list = ["west_test_stdMD_normS.h5", "west_test_stdHK_normS.h5", 
 #            "west_test_50iweerMD_normS.h5", "west_test_10iweerMD_normS.h5", 
 #            "west_test_50iweerMDnoHK_normS.h5"]
 # h5_list = ["west_test_stdMD_normS.h5", "west_test_stdHK_normS.h5", 
 #            "west_test_50iweerMD_normS.h5"]
 
+labels = ["Standard", "WEER"]
+
 fig, ax = plt.subplots()
 
-for h5 in h5_list:
+for label, h5 in zip(labels, h5_list):
     wedap.H5_Plot(h5=h5, data_type="average", first_iter=1, last_iter=500, plot_mode="line", 
-                  data_label=h5, ax=ax).plot()
+                  data_label=label, ax=ax).plot()
     # wedap.H5_Plot(h5=h5, data_type="average", first_iter=500, plot_mode="line", 
     #               data_label=h5, ax=ax).plot()
 
@@ -74,5 +79,5 @@ plt.legend()
 plt.xlabel("ODLD Position")
 
 plt.tight_layout()
-plt.savefig("figures/multi_1d_updated2.png", dpi=300, transparent=True)
+plt.savefig("figures/multi_1d_updated3.png", dpi=300, transparent=True)
 #plt.show()
