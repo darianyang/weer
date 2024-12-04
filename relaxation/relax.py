@@ -1,6 +1,5 @@
 """
-Relxation Calculation from MD Simulations
-- using 3 parameter model free analysis
+Relxation Rate Calculation from MD Simulations
 """
 
 import MDAnalysis as mda
@@ -16,7 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="MDAnalysis.topol
 
 # Load the alanine dipeptide trajectory
 u = mda.Universe("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 
-                 in_memory=True, in_memory_step=1000)
+                 in_memory=True, in_memory_step=100)
 
 # Align trajectory to the first frame
 ref = mda.Universe("alanine-dipeptide.pdb", "alanine-dipeptide.pdb")
@@ -121,7 +120,7 @@ def calculate_acf(vectors, max_lag):
     Calculate the autocorrelation function (ACF) for NH bond vectors using the 
     second-Legendre polynomial.
 
-    Parameters:
+    Parameters
     ----------
     vectors : numpy.ndarray
         A 3D array of shape (n_frames, n_bonds, 3), where each entry represents
@@ -129,7 +128,7 @@ def calculate_acf(vectors, max_lag):
     max_lag : int
         Maximum lag time for which to calculate the autocorrelation function.
 
-    Returns:
+    Returns
     -------
     numpy.ndarray
         A 1D array of size `max_lag` containing the normalized autocorrelation
@@ -160,7 +159,7 @@ def calculate_acf(vectors, max_lag):
 
 
 # input max lag time
-acf = calculate_acf(nh_vectors, 100)
+acf = calculate_acf(nh_vectors, 10)
 print("ACF shape: ", acf.shape)
 # # plot ACF
 # plt.plot(acf)
@@ -172,8 +171,8 @@ def multi_exp_decay(t, *params):
     """
     Multi-exponential decay function.
     
-    Parameters:
-    -----------
+    Parameters
+    ----------
     t : np.ndarray
         Time values for the ACF.
     *params : list
@@ -181,8 +180,8 @@ def multi_exp_decay(t, *params):
         - A1, A2, ..., An (amplitudes)
         - tau1, tau2, ..., taun (correlation times)
         
-    Returns:
-    --------
+    Returns
+    -------
     np.ndarray
         The multi-exponential decay at each time t.
     """
@@ -195,12 +194,11 @@ def multi_exp_decay(t, *params):
     for i in range(n):
         result += A[i] * np.exp(-t / tau[i])
     return result
-
 def fit_acf(acf_values, time_lags, n_exponentials=2):
     """
     Fit ACF data to a multi-exponential decay model with constraints.
 
-    Parameters:
+    Parameters
     ----------
     acf_values : np.ndarray
         ACF values at different time lags.
@@ -209,8 +207,8 @@ def fit_acf(acf_values, time_lags, n_exponentials=2):
     n_exponentials : int
         Number of exponential terms to fit.
 
-    Returns:
-    --------
+    Returns
+    -------
     popt : np.ndarray
         Optimized parameters (amplitudes A_i and timescales tau_i).
     """
@@ -232,7 +230,7 @@ def fit_acf(acf_values, time_lags, n_exponentials=2):
 
         # Enforce the sum of the amplitudes constraint
         amplitudes = popt[:n_exponentials]
-        amplitudes /= np.sum(amplitudes)  # Normalize the amplitudes to sum to 1
+        amplitudes /= np.sum(amplitudes)    # Normalize the amplitudes to sum to 1
         popt[:n_exponentials] = amplitudes  # Update the amplitudes in the fit parameters
 
     except RuntimeError as e:
@@ -242,11 +240,11 @@ def fit_acf(acf_values, time_lags, n_exponentials=2):
     return popt
 
 # Example ACF time lags
-time_lags = np.linspace(0, 1, 100)  # Time lags in ps or ns
+time_lags = np.linspace(0, acf.shape[0], num=acf.shape[0])  # Time lags: start, stop
 acf_values = acf
 
 # Fit the ACF to a multi-exponential decay
-popt = fit_acf(acf_values, time_lags, n_exponentials=3)
+popt = fit_acf(acf_values, time_lags, n_exponentials=5)
 
 # Extract the fitted parameters (amplitudes and timescales)
 amplitudes = popt[::2]  # Amplitudes (A1, A2, ...)
@@ -255,8 +253,9 @@ timescales = popt[1::2]  # Correlation times (tau1, tau2, ...)
 # Plot the data and the fit
 plt.plot(time_lags, acf_values, label="ACF Data")
 plt.plot(time_lags, multi_exp_decay(time_lags, *popt), label="Multi-Exponential Fit", linestyle="--")
-plt.xscale("log")
-plt.xlabel("Time Lag (ps/ns)")
+#plt.xscale("log")
+#plt.yscale("log")
+plt.xlabel("Time Lag")
 plt.ylabel("ACF")
 plt.legend()
 plt.show()
@@ -264,52 +263,3 @@ plt.show()
 # Print fitted amplitudes and timescales
 print("Fitted amplitudes:", amplitudes, "SUM: ", np.sum(amplitudes))
 print("Fitted correlation times:", timescales)
-
-import sys; sys.exit(0)
-
-# Step 3: Fit the ACF to the model-free extended Lipari-Szabo model (3 parameter)
-def exp_decay(t, A, tau):
-    return A * np.exp(-t / tau)
-def extended_lipari_szabo_model(t, S2, tau_e, tau_c):
-    """
-    Model-Free extended Lipari-Szabo model for the ACF fitting.
-    """
-    return S2 * (tau_e / tau_c) * (1 - np.exp(-t / tau_c)) + (1 - S2) * np.exp(-t / tau_e)
-
-# Fit the ACF to extract S^2, tau_e, and tau_c
-times = np.arange(len(acf)) * u.trajectory.dt / 1000  # Convert to ns
-popt, _ = curve_fit(extended_lipari_szabo_model, times, acf, p0=(1.0, 1.0, 10.0))
-
-S2, tau_e, tau_c = popt
-print(f"S^2 = {S2}, tau_e = {tau_e}, tau_c = {tau_c}")
-
-# Step 4: Calculate R1 and R2 using model-free analysis
-def calculate_r1_r2(S2, tau_e, tau_c, omega):
-    """
-    Calculate R1 and R2 using model-free analysis.
-    """
-    R1 = (1 - S2) / tau_e + S2 / tau_c * (1 / (1 + (omega * tau_e)**2))
-    R2 = S2 / tau_c * (1 / (1 + (omega * tau_e)**2))
-    return R1, R2
-
-# Larmor frequencies (in MHz)
-omegas = np.linspace(100, 600, 10) * 2 * np.pi  # Convert MHz to radians per second
-
-# Calculate R1 and R2 for each omega
-r1_values = []
-r2_values = []
-for omega in omegas:
-    R1, R2 = calculate_r1_r2(S2, tau_e, tau_c, omega)
-    r1_values.append(R1)
-    r2_values.append(R2)
-
-# Step 5: Plot the results
-plt.figure(figsize=(10, 6))
-plt.plot(omegas / (2 * np.pi), r1_values, label="R1", color="b")
-plt.plot(omegas / (2 * np.pi), r2_values, label="R2", color="r")
-plt.xlabel("Larmor Frequency (MHz)")
-plt.ylabel("Relaxation Rate (R1, R2)")
-plt.title("R1 and R2 Relaxation Rates for Alanine Dipeptide (Model-Free Analysis)")
-plt.legend()
-plt.show()
-
