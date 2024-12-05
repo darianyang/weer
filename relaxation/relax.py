@@ -6,19 +6,28 @@ import MDAnalysis as mda
 from MDAnalysis.analysis import align
 
 import numpy as np
-from scipy.optimize import curve_fit, minimize
+from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 
 # missing elements warning
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="MDAnalysis.topology.PDBParser")
 
+# TODO: Convert to relaxation calculation class
+###### Set Calculation Parameters ######
+pdb = "alanine-dipeptide.pdb"           # prmtop or pdb file
+traj = "alanine-dipeptide-0-250ns.xtc"  # trajectory file
+traj_step = 10                          # traj load step interval
+max_lag = 100                           # max lag time
+n_exps = 5                              # n exponential functions to use for ACF fitting
+acf_plot = True                         # optionally plot the ACF and fit
+tau_c = 1e-9                            # overall tumbling time (seconds)
+
 # Load the alanine dipeptide trajectory
-u = mda.Universe("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 
-                 in_memory=True, in_memory_step=100)
+u = mda.Universe(pdb, traj, in_memory=True, in_memory_step=traj_step)
 
 # Align trajectory to the first frame
-ref = mda.Universe("alanine-dipeptide.pdb", "alanine-dipeptide.pdb")
+ref = mda.Universe(pdb, pdb)
 aligner = align.AlignTraj(u, ref, select='name CA', in_memory=True).run()
 
 # Step 1: Calculate NH bond vectors for each frame
@@ -159,7 +168,7 @@ def calculate_acf(vectors, max_lag):
 
 
 # input max lag time
-acf = calculate_acf(nh_vectors, 100)
+acf = calculate_acf(nh_vectors, max_lag=max_lag)
 print("ACF shape: ", acf.shape)
 # # plot ACF
 # plt.plot(acf)
@@ -277,19 +286,20 @@ time_lags = np.linspace(0, acf.shape[0], num=acf.shape[0])
 acf_values = acf
 
 # Fit the ACF to a multi-exponential decay
-fit_result = fit_acf_minimize(acf_values, time_lags, n_exponentials=5)
+fit_result = fit_acf_minimize(acf_values, time_lags, n_exponentials=n_exps)
 
 # Extract fitted parameters
 amplitudes = fit_result["amplitudes"]
 timescales = fit_result["correlation_times"]
 
-# # Plot the data and the fit
-# plt.plot(time_lags, acf_values, label="ACF Data")
-# plt.plot(time_lags, multi_exp_decay(time_lags, amplitudes, timescales), label="Multi-Exponential Fit", linestyle="--")
-# plt.xlabel("Time Lag")
-# plt.ylabel("ACF")
-# plt.legend()
-# plt.show()
+# Plot the data and the fit
+if acf_plot:
+    plt.plot(time_lags, acf_values, label="ACF Data")
+    plt.plot(time_lags, multi_exp_decay(time_lags, amplitudes, timescales), label="Multi-Exponential Fit", linestyle="--")
+    plt.xlabel("Time Lag")
+    plt.ylabel("ACF")
+    plt.legend()
+    plt.show()
 
 # Print fitted amplitudes and timescales
 print("Fitted amplitudes:", amplitudes, "SUM: ", np.sum(amplitudes))
@@ -396,9 +406,8 @@ def compute_relaxation_parameters(omega_H, omega_N, tau_c, amplitudes, correlati
     return R1, R2, NOE
 
 # Example usage
-tau_c = 1e-9  # Overall tumbling time (seconds)
-omega_H = 600.13 * 2 * np.pi * 1e6  # Proton frequency (rad/s)
-omega_N = omega_H / 10.0  # ~Nitrogen frequency (rad/s)
+omega_H = 600.13 * 2 * np.pi * 1e6      # Proton frequency (rad/s)
+omega_N = omega_H / 10.0                # ~Nitrogen frequency (rad/s)
 
 R1, R2, NOE = compute_relaxation_parameters(omega_H, omega_N, tau_c, amplitudes, timescales)
 
@@ -406,4 +415,4 @@ print(f"R1: {R1:.4f} s^-1 | T1: {1/R1:.4f} s")
 print(f"R2: {R2:.4f} s^-1 | T2: {1/R2:.4f} s")
 print(f"NOE: {NOE:.4f}")
 
-# TODO: MF2 and MF3 analysis for S2 OPs and tau_internal?
+# TODO: MF2 analysis for S2 OPs and tau_internal?
