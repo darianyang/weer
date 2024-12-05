@@ -402,8 +402,8 @@ omega_N = omega_H / 10.0  # ~Nitrogen frequency (rad/s)
 
 R1, R2, NOE = compute_relaxation_parameters(omega_H, omega_N, tau_c, amplitudes, timescales)
 
-print(f"R1: {R1} s^-1")
-print(f"R2: {R2} s^-1")
-print(f"NOE: {NOE}")
+print(f"R1: {R1:.4f} s^-1 | T1: {1/R1:.4f} s")
+print(f"R2: {R2:.4f} s^-1 | T2: {1/R2:.4f} s")
+print(f"NOE: {NOE:.4f}")
 
 # TODO: MF2 and MF3 analysis for S2 OPs and tau_internal?
