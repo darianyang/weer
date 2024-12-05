@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="MDAnalysis.topol
 
 # Load the alanine dipeptide trajectory
 u = mda.Universe("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 
-                 in_memory=True, in_memory_step=10)
+                 in_memory=True, in_memory_step=100)
 
 # Align trajectory to the first frame
 ref = mda.Universe("alanine-dipeptide.pdb", "alanine-dipeptide.pdb")
@@ -284,12 +284,12 @@ amplitudes = fit_result["amplitudes"]
 timescales = fit_result["correlation_times"]
 
 # # Plot the data and the fit
-plt.plot(time_lags, acf_values, label="ACF Data")
-plt.plot(time_lags, multi_exp_decay(time_lags, amplitudes, timescales), label="Multi-Exponential Fit", linestyle="--")
-plt.xlabel("Time Lag")
-plt.ylabel("ACF")
-plt.legend()
-plt.show()
+# plt.plot(time_lags, acf_values, label="ACF Data")
+# plt.plot(time_lags, multi_exp_decay(time_lags, amplitudes, timescales), label="Multi-Exponential Fit", linestyle="--")
+# plt.xlabel("Time Lag")
+# plt.ylabel("ACF")
+# plt.legend()
+# plt.show()
 
 # Print fitted amplitudes and timescales
 print("Fitted amplitudes:", amplitudes, "SUM: ", np.sum(amplitudes))
@@ -341,16 +341,16 @@ def spectral_density(omega, amplitudes, correlation_times, tau_c):
 # Step 5: Compute R1, R2, hetNOE using standard expressions
 # Constants
 mu_0 = 4 * np.pi * 1e-7     # Permeability of free space (N·A^-2)
-hbar = 1.0545718e-34        # Reduced Planck's constant (J·s)
+hbar = 1.0545718e-34        # Reduced Planck's constant (J·s) (h/2pi)
 gamma_H = 267.513e6         # Gyromagnetic ratio of 1H (rad·s^-1·T^-1)
 gamma_N = -27.116e6         # Gyromagnetic ratio of 15N (rad·s^-1·T^-1)
 r_NH = 1.02e-10             # N-H bond length (meters)
 Delta_sigma = 0             # CSA value (ppm)
 
 # Derived parameters
-d_oo = (mu_0 / (4 * np.pi))**2 * gamma_H**2 * gamma_N**2 * hbar**2
+d_oo = (1 / 20) * (mu_0 / (4 * np.pi))**2 * hbar**2 * gamma_H**2 * gamma_N**2
 d_oo *= r_NH**-6  # Scale by bond length to the power of -6
-c_oo = 1 / 15  # Constant from the equation
+c_oo = (1 / 15) * Delta_sigma**2
 
 # Compute R1, R2, and NOE
 def compute_relaxation_parameters(omega_H, omega_N, tau_c, amplitudes, correlation_times):
@@ -383,22 +383,22 @@ def compute_relaxation_parameters(omega_H, omega_N, tau_c, amplitudes, correlati
     J_0 = spectral_density(0, amplitudes, correlation_times, tau_c)
 
     # R1 calculation
-    R1 = d_oo * (3 * J_omega_N + J_omega_H_minus_N + 6 * J_omega_H_plus_N) + c_oo * J_omega_N
+    R1 = d_oo * (3 * J_omega_N + J_omega_H_minus_N + 6 * J_omega_H_plus_N) + (c_oo * omega_N**2 * J_omega_N)
     #print("BREAK: ", R1, J_omega_H)
 
     # R2 calculation
-    R2 = (d_oo / 2) * (4 * J_0 + 3 * J_omega_N + J_omega_H_minus_N + 6 * J_omega_H_plus_N + 6 * J_omega_H) + \
-         (c_oo / 6) * (4 * J_0 + 3 * J_omega_N)
+    R2 = (d_oo / 2) * (4 * J_0 + 3 * J_omega_N + J_omega_H_minus_N + 6 * J_omega_H + 6 * J_omega_H_plus_N) + \
+         (c_oo * omega_N**2 / 6) * (4 * J_0 + 3 * J_omega_N)
 
     # NOE calculation
-    NOE = 1 + (gamma_H / gamma_N) * d_oo * (6 * J_omega_H_plus_N - J_omega_H_minus_N)
+    NOE = 1 + (gamma_H / gamma_N) * d_oo * (1 / R1) * (6 * J_omega_H_plus_N - J_omega_H_minus_N)
 
     return R1, R2, NOE
 
 # Example usage
 tau_c = 1e-9  # Overall tumbling time (seconds)
 omega_H = 600.13 * 2 * np.pi * 1e6  # Proton frequency (rad/s)
-omega_N = omega_H / 10.0  # Nitrogen frequency (rad/s)
+omega_N = omega_H / 10.0  # ~Nitrogen frequency (rad/s)
 
 R1, R2, NOE = compute_relaxation_parameters(omega_H, omega_N, tau_c, amplitudes, timescales)
 

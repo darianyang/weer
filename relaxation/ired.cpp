@@ -12,5 +12,4 @@ matrix ired name matired order 2
 diagmatrix matired vecs 1 out ired.vec name ired.vec
 
 # Calculate R1 and R2 relaxation rates and NOE
-#ired relax out ired_r1_r2.dat omega 600.13 rNH 1.02
 ired relax NHdist 1.02 freq 600.13 tstep 10 tcorr 5000.0 out ired.out noefile ired.noe order 2 modes ired.vec
