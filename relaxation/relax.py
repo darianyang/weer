@@ -15,7 +15,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="MDAnalysis.topol
 
 # Load the alanine dipeptide trajectory
 u = mda.Universe("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 
-                 in_memory=True, in_memory_step=100)
+                 in_memory=True, in_memory_step=10)
 
 # Align trajectory to the first frame
 ref = mda.Universe("alanine-dipeptide.pdb", "alanine-dipeptide.pdb")
@@ -159,7 +159,7 @@ def calculate_acf(vectors, max_lag):
 
 
 # input max lag time
-acf = calculate_acf(nh_vectors, 10)
+acf = calculate_acf(nh_vectors, 100)
 print("ACF shape: ", acf.shape)
 # # plot ACF
 # plt.plot(acf)
@@ -277,19 +277,19 @@ time_lags = np.linspace(0, acf.shape[0], num=acf.shape[0])
 acf_values = acf
 
 # Fit the ACF to a multi-exponential decay
-fit_result = fit_acf_minimize(acf_values, time_lags, n_exponentials=3)
+fit_result = fit_acf_minimize(acf_values, time_lags, n_exponentials=5)
 
 # Extract fitted parameters
 amplitudes = fit_result["amplitudes"]
 timescales = fit_result["correlation_times"]
 
 # # Plot the data and the fit
-# plt.plot(time_lags, acf_values, label="ACF Data")
-# plt.plot(time_lags, multi_exp_decay(time_lags, amplitudes, timescales), label="Multi-Exponential Fit", linestyle="--")
-# plt.xlabel("Time Lag")
-# plt.ylabel("ACF")
-# plt.legend()
-# plt.show()
+plt.plot(time_lags, acf_values, label="ACF Data")
+plt.plot(time_lags, multi_exp_decay(time_lags, amplitudes, timescales), label="Multi-Exponential Fit", linestyle="--")
+plt.xlabel("Time Lag")
+plt.ylabel("ACF")
+plt.legend()
+plt.show()
 
 # Print fitted amplitudes and timescales
 print("Fitted amplitudes:", amplitudes, "SUM: ", np.sum(amplitudes))
@@ -330,13 +330,13 @@ def spectral_density(omega, amplitudes, correlation_times, tau_c):
     )
     return J[0]
 
-# Example: Compute the spectral density with tumbling
-omega = 600.13 * 2 * np.pi * 1e6  # Proton frequency (rad/s)
-tau_c = 10e-9  # Overall tumbling time (seconds)
+# # Example: Compute the spectral density with tumbling
+# omega = 600.13 * 2 * np.pi * 1e6  # Proton frequency (rad/s)
+# tau_c = 1e-9  # Overall tumbling time (seconds)
 
-# Compute the spectral density
-J = spectral_density(omega, amplitudes, timescales, tau_c)
-print("J:", J)
+# # Compute the spectral density
+# J = spectral_density(omega, amplitudes, timescales, tau_c)
+# print("J:", J)
 
 # Step 5: Compute R1, R2, hetNOE using standard expressions
 # Constants
@@ -396,7 +396,7 @@ def compute_relaxation_parameters(omega_H, omega_N, tau_c, amplitudes, correlati
     return R1, R2, NOE
 
 # Example usage
-tau_c = 10e-9  # Overall tumbling time (seconds)
+tau_c = 1e-9  # Overall tumbling time (seconds)
 omega_H = 600.13 * 2 * np.pi * 1e6  # Proton frequency (rad/s)
 omega_N = omega_H / 10.0  # Nitrogen frequency (rad/s)
 
@@ -405,3 +405,5 @@ R1, R2, NOE = compute_relaxation_parameters(omega_H, omega_N, tau_c, amplitudes,
 print(f"R1: {R1} s^-1")
 print(f"R2: {R2} s^-1")
 print(f"NOE: {NOE}")
+
+# TODO: MF2 and MF3 analysis for S2 OPs and tau_internal?
