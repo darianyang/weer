@@ -169,6 +169,7 @@ print("ACF shape: ", acf.shape)
 # Step 3: Fit C_I(t) to a multi-exponential decay function
 
 # Multi-exponential decay function
+# TODO: add Ao offset
 def multi_exp_decay(t, A, tau):
     """
     Multi-exponential decay function.
@@ -257,6 +258,7 @@ def fit_acf_minimize(acf_values, time_lags, n_exponentials=2):
         constraints=constraints,
         bounds=bounds,
         method="SLSQP",
+        # print convergence messages
         options={"disp": True}
     )
 
@@ -270,25 +272,136 @@ def fit_acf_minimize(acf_values, time_lags, n_exponentials=2):
 
     return {"amplitudes": A, "correlation_times": tau, "result": result}
 
-# Example ACF time lags
-time_lags = np.linspace(0, acf.shape[0], num=acf.shape[0])  # Time lags: start, stop
+# Example ACF time lags: start, stop, num
+time_lags = np.linspace(0, acf.shape[0], num=acf.shape[0])
 acf_values = acf
 
 # Fit the ACF to a multi-exponential decay
-fit_result = fit_acf_minimize(acf_values, time_lags, n_exponentials=2)
+fit_result = fit_acf_minimize(acf_values, time_lags, n_exponentials=3)
 
 # Extract fitted parameters
 amplitudes = fit_result["amplitudes"]
 timescales = fit_result["correlation_times"]
 
-# Plot the data and the fit
-plt.plot(time_lags, acf_values, label="ACF Data")
-plt.plot(time_lags, multi_exp_decay(time_lags, amplitudes, timescales), label="Multi-Exponential Fit", linestyle="--")
-plt.xlabel("Time Lag")
-plt.ylabel("ACF")
-plt.legend()
-plt.show()
+# # Plot the data and the fit
+# plt.plot(time_lags, acf_values, label="ACF Data")
+# plt.plot(time_lags, multi_exp_decay(time_lags, amplitudes, timescales), label="Multi-Exponential Fit", linestyle="--")
+# plt.xlabel("Time Lag")
+# plt.ylabel("ACF")
+# plt.legend()
+# plt.show()
 
 # Print fitted amplitudes and timescales
 print("Fitted amplitudes:", amplitudes, "SUM: ", np.sum(amplitudes))
 print("Fitted correlation times:", timescales)
+
+# Step 4: Spectral Density Function - Analytical FT of C(t), where C(t)=C_O(t)C_I(T)
+def spectral_density(omega, amplitudes, correlation_times, tau_c):
+    """
+    Calculate the spectral density function J(omega) with an overall tumbling time tau_c.
+
+    Parameters
+    ----------
+    omega : np.ndarray or float
+        Angular frequency (rad/s) or an array of angular frequencies.
+    amplitudes : np.ndarray
+        Amplitudes of the exponential components (A_i).
+    correlation_times : np.ndarray
+        Correlation times of the exponential components (tau_i).
+    tau_c : float
+        Molecular tumbling time (global correlation time).
+
+    Returns
+    -------
+    np.ndarray
+        Spectral density values J(omega) at the specified angular frequencies.
+    """
+    # Compute effective correlation times
+    tau_eff = (tau_c * correlation_times) / (tau_c + correlation_times)
+    
+    # Tumbling term (first term in the equation)
+    # TODO: include the offset Ao term?
+    J = (2 * tau_c) / (1 + (omega * tau_c)**2)
+    
+    # Add internal contributions
+    J += np.sum(
+        (2 * amplitudes * tau_eff)[:, None] / (1 + (omega * tau_eff[:, None])**2),
+        axis=0
+    )
+    return J[0]
+
+# Example: Compute the spectral density with tumbling
+omega = 600.13 * 2 * np.pi * 1e6  # Proton frequency (rad/s)
+tau_c = 10e-9  # Overall tumbling time (seconds)
+
+# Compute the spectral density
+J = spectral_density(omega, amplitudes, timescales, tau_c)
+print("J:", J)
+
+# Step 5: Compute R1, R2, hetNOE using standard expressions
+# Constants
+mu_0 = 4 * np.pi * 1e-7     # Permeability of free space (N·A^-2)
+hbar = 1.0545718e-34        # Reduced Planck's constant (J·s)
+gamma_H = 267.513e6         # Gyromagnetic ratio of 1H (rad·s^-1·T^-1)
+gamma_N = -27.116e6         # Gyromagnetic ratio of 15N (rad·s^-1·T^-1)
+r_NH = 1.02e-10             # N-H bond length (meters)
+Delta_sigma = 0             # CSA value (ppm)
+
+# Derived parameters
+d_oo = (mu_0 / (4 * np.pi))**2 * gamma_H**2 * gamma_N**2 * hbar**2
+d_oo *= r_NH**-6  # Scale by bond length to the power of -6
+c_oo = 1 / 15  # Constant from the equation
+
+# Compute R1, R2, and NOE
+def compute_relaxation_parameters(omega_H, omega_N, tau_c, amplitudes, correlation_times):
+    """
+    Compute relaxation parameters R1, R2, and NOE.
+
+    Parameters
+    ----------
+    omega_H : float
+        Angular frequency of proton (rad/s).
+    omega_N : float
+        Angular frequency of nitrogen (rad/s).
+    tau_c : float
+        Overall tumbling correlation time.
+    amplitudes : list
+        Amplitudes of the correlation function.
+    correlation_times : list
+        Correlation times of the correlation function.
+
+    Returns
+    -------
+    tuple
+        R1, R2, and NOE values.
+    """
+    # Spectral density values
+    J_omega_H = spectral_density(omega_H, amplitudes, correlation_times, tau_c)
+    J_omega_N = spectral_density(omega_N, amplitudes, correlation_times, tau_c)
+    J_omega_H_minus_N = spectral_density(omega_H - omega_N, amplitudes, correlation_times, tau_c)
+    J_omega_H_plus_N = spectral_density(omega_H + omega_N, amplitudes, correlation_times, tau_c)
+    J_0 = spectral_density(0, amplitudes, correlation_times, tau_c)
+
+    # R1 calculation
+    R1 = d_oo * (3 * J_omega_N + J_omega_H_minus_N + 6 * J_omega_H_plus_N) + c_oo * J_omega_N
+    #print("BREAK: ", R1, J_omega_H)
+
+    # R2 calculation
+    R2 = (d_oo / 2) * (4 * J_0 + 3 * J_omega_N + J_omega_H_minus_N + 6 * J_omega_H_plus_N + 6 * J_omega_H) + \
+         (c_oo / 6) * (4 * J_0 + 3 * J_omega_N)
+
+    # NOE calculation
+    NOE = 1 + (gamma_H / gamma_N) * d_oo * (6 * J_omega_H_plus_N - J_omega_H_minus_N)
+
+    return R1, R2, NOE
+
+# Example usage
+tau_c = 10e-9  # Overall tumbling time (seconds)
+omega_H = 600.13 * 2 * np.pi * 1e6  # Proton frequency (rad/s)
+omega_N = omega_H / 10.0  # Nitrogen frequency (rad/s)
+
+R1, R2, NOE = compute_relaxation_parameters(omega_H, omega_N, tau_c, amplitudes, timescales)
+
+print(f"R1: {R1} s^-1")
+print(f"R2: {R2} s^-1")
+print(f"NOE: {NOE}")
