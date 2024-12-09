@@ -372,6 +372,8 @@ class NH_Relaxation:
             (2 * amplitudes * tau_eff)[:, None] / (1 + (omega * tau_eff[:, None])**2),
             axis=0
         )
+        
+        # convert return from list to int value
         return J[0]
 
     # Step 5: Compute R1, R2, hetNOE using standard expressions
@@ -443,17 +445,19 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Run the NH_Relaxation calculation
-    relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 100, acf_plot=True, n_exps=5)
+    relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 10, acf_plot=True, n_exps=5)
     R1, R2, NOE = relaxation.run()
 
     # End the timer
     end_time = time.time()
 
     # Print the results
-    print(f"R1: {R1:.4f} s^-1 | T1: {1/R1:.4f} s")
-    print(f"R2: {R2:.4f} s^-1 | T2: {1/R2:.4f} s")
-    print(f"NOE: {NOE:.4f}")
+    print(f"R1: {R1:.6f} s^-1 | T1: {1/R1} s")
+    print(f"R2: {R2:.6f} s^-1 | T2: {1/R2} s")
+    print(f"NOE: {NOE:.8f}")
 
     # Print the elapsed time
     elapsed_time = end_time - start_time
     #print(f"Execution Time: {elapsed_time:.2f} seconds")
+
+    # TODO: confirm that this works for simultions with multiple residues
