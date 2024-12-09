@@ -7,6 +7,8 @@ from scipy.optimize import minimize
 import matplotlib.pyplot as plt
 from functools import partial
 
+import time
+
 # missing elements warning
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="MDAnalysis.topology.PDBParser")
@@ -172,7 +174,7 @@ class NH_Relaxation:
         return correlations
 
     def calculate_acf_fft(self, vectors):
-        """
+        """ TODO: output shape not good
         Compute ACF using a fully vectorized FFT implementation.
 
         Parameters
@@ -187,7 +189,9 @@ class NH_Relaxation:
         """
         # Normalize vectors
         unit_vectors = vectors / np.linalg.norm(vectors, axis=2, keepdims=True)
+        # Compute dot products for all vectors
         dot_products = np.einsum("ijk,ijk->ij", unit_vectors, unit_vectors)
+        # Apply the second-Legendre polynomial P2(x) = 0.5 * (3x^2 - 1)
         p2_values = 0.5 * (3 * dot_products**2 - 1)
 
         # Compute FFT for all bonds simultaneously
@@ -204,11 +208,14 @@ class NH_Relaxation:
         acf_raw = np.fft.ifft(ps_bonds, axis=0).real[:n_frames]
 
         # Normalize each bond's ACF to start at 1
-        acf_raw /= acf_raw[0, :]
+        acf_raw /= acf_raw[0]
 
         # Take the mean over all bonds and truncate to max_lag
         acf = np.nanmean(acf_raw[:self.max_lag, :], axis=1)
 
+        acf /= self.max_lag - np.arange(self.max_lag)
+
+        # TODO: bad shape, and weird that rate calc works even with e.g. acf*0
         return acf
 
     # Fit C_I(t) to a multi-exponential decay function
@@ -258,7 +265,9 @@ class NH_Relaxation:
         tau = params[self.n_exps:]
         # Calculate the multi-exponential decay
         fit = self.multi_exp_decay(t, A, tau)
-        return np.sum((acf_values - fit)**2)
+        residuals = acf_values - fit
+        #print(f"Residuals: {residuals}")
+        return np.sum(residuals**2)
 
     # Fit function with constraints
     def fit_acf_minimize(self, acf_values, time_lags=None):
@@ -285,7 +294,7 @@ class NH_Relaxation:
 
         # Initial guess for parameters: equal amplitudes and random time constants
         initial_amplitudes = np.ones(self.n_exps) / self.n_exps
-        initial_taus = np.linspace(1, 10, self.n_exps)  # Initial guess for correlation times
+        initial_taus = np.linspace(0.1, 10, self.n_exps)  # Initial guess for correlation times
         initial_guess = np.concatenate([initial_amplitudes, initial_taus])
 
         # Constraints: 
@@ -409,21 +418,42 @@ class NH_Relaxation:
         """
         # calc NH bond vectors
         nh_vectors = self.compute_nh_vectors()
+        
+        #start_time = time.time()
         # calc ACF of norm NH bond vectors
         acf_values = self.calculate_acf(nh_vectors)
         #acf_values = self.calculate_acf_fft(nh_vectors)
+        #end_time = time.time()
+        #elapsed_time = end_time - start_time
+        #print(f"Execution Time: {elapsed_time:.2f} seconds")
+        #print(acf_values.shape)
+
         # fit ACF with multiple exponentials
+        #A, tau, self.result = self.fit_acf_minimize(np.zeros(100))
         A, tau, self.result = self.fit_acf_minimize(acf_values)
+        
         # calc R1, R2, and NOE using J(w) from ACF fitting results
         r1, r2, noe = self.compute_relaxation_parameters(A, tau)
         return r1, r2, noe
 
-    # TODO: MF2 analysis for S2 OPs and tau_internal?
+    # TODO: methods for MF2 analysis for S2 OPs and tau_internal?
 
 if __name__ == "__main__":
+    # Start the timer
+    start_time = time.time()
 
-    R1, R2, NOE = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 100, acf_plot=True).run()
+    # Run the NH_Relaxation calculation
+    relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 100, acf_plot=True, n_exps=5)
+    R1, R2, NOE = relaxation.run()
 
+    # End the timer
+    end_time = time.time()
+
+    # Print the results
     print(f"R1: {R1:.4f} s^-1 | T1: {1/R1:.4f} s")
     print(f"R2: {R2:.4f} s^-1 | T2: {1/R2:.4f} s")
     print(f"NOE: {NOE:.4f}")
+
+    # Print the elapsed time
+    elapsed_time = end_time - start_time
+    #print(f"Execution Time: {elapsed_time:.2f} seconds")
