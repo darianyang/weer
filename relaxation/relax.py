@@ -4,6 +4,7 @@ from MDAnalysis.analysis import align
 
 import numpy as np
 #from scipy.optimize import minimize
+from scipy.optimize import curve_fit
 from lmfit import Parameters, minimize
 import matplotlib.pyplot as plt
 #from functools import partial
@@ -36,7 +37,7 @@ class NH_Relaxation:
     omega_H = 600.13 * 2 * np.pi * 1e6      # Proton frequency (rad/s)
     omega_N = omega_H / 10.0                # ~Nitrogen frequency (rad/s)
 
-    def __init__(self, pdb, traj, traj_step=10, max_lag=100, n_exps=5, acf_plot=False, tau_c=1e-9):
+    def __init__(self, pdb, traj, traj_step=10, max_lag=100, n_exps=5, acf_plot=False, tau_c=None):
         """
         Initialize the RelaxationCalculator with simulation and analysis parameters.
 
@@ -55,7 +56,8 @@ class NH_Relaxation:
         acf_plot : bool, optional
             Whether to plot the ACF and its fit (default is False).
         tau_c : float, optional
-            Overall tumbling time in seconds (default is 1e-9).
+            Overall tumbling time in seconds (default is None).
+            Can input a value or otherwise will calculate it from simulation.
         """
         self.pdb = pdb
         self.traj = traj
@@ -175,7 +177,7 @@ class NH_Relaxation:
         return correlations
 
     def calculate_acf_fft(self, vectors):
-        """ TODO: output shape not good
+        """ TODO: output data not good
         Compute ACF using a fully vectorized FFT implementation.
 
         Parameters
@@ -216,8 +218,47 @@ class NH_Relaxation:
 
         acf /= self.max_lag - np.arange(self.max_lag)
 
-        # TODO: bad shape, and weird that rate calc works even with e.g. acf*0
+        # TODO: incorrect data out
         return acf
+    
+    # Method to estimate tau_c from the ACF
+    def estimate_tau_c(self, acf_values):
+        """ # TODO: update the fitting, currently doesn't deviate far from p0
+        Estimate the rotational correlation time (tau_c) from the ACF by fitting it to a 
+        single exponential decay function.
+
+        Parameters
+        ----------
+        acf_values : np.ndarray
+            The ACF values to fit.
+        
+        Returns
+        -------
+        float
+            Estimated rotational correlation time (tau_c).
+        """
+        # Estimate tau_c by fitting the ACF to a single exponential decay
+        # Use a simple exponential decay function: A * exp(-t/tau_c)
+        def exp_decay(t, A, tau_c):
+            return A * np.exp(-t / tau_c)
+        
+        # Generate time lags
+        #time_lags = np.arange(self.max_lag)
+        time_lags = np.linspace(0, acf_values.shape[0], num=acf_values.shape[0])
+        
+        # Fit the ACF to an exponential decay model
+        popt, _ = curve_fit(exp_decay, time_lags, acf_values, p0=(1.0, 1e-9))
+        
+        # The second parameter is the estimated tau_c
+        tau_c_estimate = popt[1]
+
+        # plot the single exponential fit to the ACF
+        plt.plot(time_lags, acf_values)
+        plt.plot(time_lags, exp_decay(time_lags, acf_values, tau_c_estimate), linestyle="--")
+        plt.show()
+
+        return tau_c_estimate
+
     # Multi-exponential decay function
     # TODO: add Ao offset
     def multi_exp_decay(self, t, A, tau):
@@ -515,6 +556,11 @@ class NH_Relaxation:
         #print(f"Execution Time: {elapsed_time:.2f} seconds")
         #print(acf_values.shape)
 
+        # get tau_c if not provided
+        if self.tau_c is None:
+            self.tau_c = self.estimate_tau_c(acf_values)
+            print("tau_c: ", self.tau_c)
+
         # fit ACF with multiple exponentials
         #A, tau, self.result = self.fit_acf_minimize(acf_values)
         A, tau, self.result = self.fit_acf_lmfit_minimize(acf_values)
@@ -530,7 +576,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Run the NH_Relaxation calculation
-    relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 10, acf_plot=True, n_exps=3)
+    relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 100, acf_plot=True, n_exps=5)
     R1, R2, NOE = relaxation.run()
 
     # End the timer
