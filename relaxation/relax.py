@@ -3,9 +3,10 @@ import MDAnalysis as mda
 from MDAnalysis.analysis import align
 
 import numpy as np
-from scipy.optimize import minimize
+#from scipy.optimize import minimize
+from lmfit import Parameters, minimize
 import matplotlib.pyplot as plt
-from functools import partial
+#from functools import partial
 
 import time
 
@@ -217,8 +218,6 @@ class NH_Relaxation:
 
         # TODO: bad shape, and weird that rate calc works even with e.g. acf*0
         return acf
-
-    # Fit C_I(t) to a multi-exponential decay function
     # Multi-exponential decay function
     # TODO: add Ao offset
     def multi_exp_decay(self, t, A, tau):
@@ -241,104 +240,190 @@ class NH_Relaxation:
         """
         return np.sum(A[:, None] * np.exp(-t / tau[:, None]), axis=0)
 
-    # Objective function to minimize (sum of squared residuals)
-    def objective(self, params, t, acf_values):
-        """
-        Objective function for fitting.
+    # Fit C_I(t) to a multi-exponential decay function
+    # # Objective function to minimize (sum of squared residuals)
+    # def objective(self, params, t, acf_values):
+    #     """
+    #     Objective function for fitting.
         
+    #     Parameters
+    #     ----------
+    #     params : np.ndarray
+    #         Flattened array of amplitudes and correlation times.
+    #     t : np.ndarray
+    #         Time lags.
+    #     acf_values : np.ndarray
+    #         ACF values to fit.
+
+    #     Returns
+    #     -------
+    #     float
+    #         Sum of squared residuals between model and data.
+    #     """
+    #     # Split parameters into amplitudes and taus
+    #     A = params[:self.n_exps]
+    #     tau = params[self.n_exps:]
+    #     # Calculate the multi-exponential decay
+    #     fit = self.multi_exp_decay(t, A, tau)
+    #     residuals = acf_values - fit
+    #     #print(f"Residuals: {residuals}")
+    #     return np.sum(residuals**2)
+
+    # # Fit function with constraints
+    # def fit_acf_minimize(self, acf_values, time_lags=None):
+    #     """
+    #     Fit ACF data to a multi-exponential decay model using scipy.optimize.minimize.
+
+    #     Parameters
+    #     ----------
+    #     acf_values : np.ndarray
+    #         ACF values at different time lags.
+    #     time_lags : np.ndarray
+    #         Time lags corresponding to the ACF values. Default None.
+    #         Will guess time_lags array when None provided based on acf_values shape.
+
+    #     Returns
+    #     -------
+    #     #dict
+    #     #    Result dictionary containing optimized parameters, amplitudes, and correlation times.
+    #     A, tau, result
+    #     """
+    #     # guess time_lags array when None provided
+    #     if time_lags is None:
+    #         time_lags = np.linspace(0, acf_values.shape[0], num=acf_values.shape[0])
+
+    #     # Initial guess for parameters: equal amplitudes and linear time constants
+    #     initial_amplitudes = np.ones(self.n_exps) / self.n_exps
+    #     initial_taus = np.linspace(0.1, 10, self.n_exps)  # Initial guess for correlation times
+    #     initial_guess = np.concatenate([initial_amplitudes, initial_taus])
+
+    #     # Constraints: 
+    #     # 1. Sum of amplitudes = 1
+    #     # 2. Amplitudes and taus must be positive
+    #     constraints = [
+    #         {"type": "eq", "fun": lambda params: np.sum(params[:self.n_exps]) - 1},  # A1 + A2 + ... + An = 1
+    #     ]
+    #     bounds = [(0, None)] * (2 * self.n_exps)  # All parameters must be positive
+
+    #     # Perform optimization
+    #     result = minimize(
+    #         partial(self.objective, t=time_lags, acf_values=acf_values),
+    #         initial_guess,
+    #         #args=(time_lags, acf_values, self.n_exps),
+    #         constraints=constraints,
+    #         bounds=bounds,
+    #         method="SLSQP",
+    #         # print convergence messages
+    #         options={"disp": True}
+    #     )
+
+    #     if not result.success:
+    #         raise RuntimeError(f"Optimization failed: {result.message}")
+
+    #     # Extract optimized parameters
+    #     optimized_params = result.x
+    #     A = optimized_params[:self.n_exps]
+    #     tau = optimized_params[self.n_exps:]
+
+    #     # Optionally plot the data and the fit (TODO: update to OOP plot)
+    #     if self.acf_plot:
+    #         plt.plot(time_lags, acf_values, label="ACF Data")
+    #         plt.plot(time_lags, self.multi_exp_decay(time_lags, A, tau), label="Multi-Exponential Fit", linestyle="--")
+    #         plt.xlabel("Time Lag")
+    #         plt.ylabel("ACF")
+    #         plt.legend()
+    #         plt.show()
+
+    #     # Print fitted amplitudes and timescales
+    #     print("Fitted amplitudes:", A, "SUM: ", np.sum(A))
+    #     print("Fitted correlation times:", tau)
+
+    #     #return {"amplitudes": A, "correlation_times": tau, "result": result}
+    #     return A, tau, result
+
+    # ###### updated use with lmfit
+    def residual(self, params, t, acf_values):
+        """
+        Residual function for multi-exponential decay fitting.
+
         Parameters
         ----------
-        params : np.ndarray
-            Flattened array of amplitudes and correlation times.
+        params : lmfit.Parameters
+            Parameters object containing 'A' and 'tau' values.
         t : np.ndarray
             Time lags.
         acf_values : np.ndarray
-            ACF values to fit.
+            Autocorrelation function (ACF) values.
 
         Returns
         -------
-        float
-            Sum of squared residuals between model and data.
+        np.ndarray
+            Residuals between the data and the multi-exponential model.
         """
-        # Split parameters into amplitudes and taus
-        A = params[:self.n_exps]
-        tau = params[self.n_exps:]
-        # Calculate the multi-exponential decay
-        fit = self.multi_exp_decay(t, A, tau)
-        residuals = acf_values - fit
-        #print(f"Residuals: {residuals}")
-        return np.sum(residuals**2)
+        # Extract parameters
+        A = np.array([params[f"A{i}"].value for i in range(self.n_exps)])
+        tau = np.array([params[f"tau{i}"].value for i in range(self.n_exps)])
 
-    # Fit function with constraints
-    def fit_acf_minimize(self, acf_values, time_lags=None):
+        # Evaluate the multi-exponential decay function
+        model = self.multi_exp_decay(t, A, tau)
+
+        # Residuals
+        return acf_values - model
+
+    def fit_acf_lmfit_minimize(self, acf_values, time_lags=None):
         """
-        Fit ACF data to a multi-exponential decay model using scipy.optimize.minimize.
+        Fit ACF data to a multi-exponential decay model using lmfit.minimize.
 
         Parameters
         ----------
         acf_values : np.ndarray
             ACF values at different time lags.
-        time_lags : np.ndarray
+        time_lags : np.ndarray, optional
             Time lags corresponding to the ACF values. Default None.
-            Will guess time_lags array when None provided based on acf_values shape.
+            If None, a time_lags array will be generated.
 
         Returns
         -------
-        #dict
-        #    Result dictionary containing optimized parameters, amplitudes, and correlation times.
-        A, tau, result
+        tuple
+            - A (np.ndarray): Fitted amplitudes.
+            - tau (np.ndarray): Fitted correlation times.
+            - result (lmfit.MinimizerResult): Fitting result.
         """
-        # guess time_lags array when None provided
         if time_lags is None:
             time_lags = np.linspace(0, acf_values.shape[0], num=acf_values.shape[0])
 
-        # Initial guess for parameters: equal amplitudes and random time constants
-        initial_amplitudes = np.ones(self.n_exps) / self.n_exps
-        initial_taus = np.linspace(0.1, 10, self.n_exps)  # Initial guess for correlation times
-        initial_guess = np.concatenate([initial_amplitudes, initial_taus])
+        # Initialize Parameters
+        params = Parameters()
+        for i in range(self.n_exps):
+            params.add(f"A{i}", value=1 / self.n_exps, min=0, max=1)  # Amplitudes
+            params.add(f"tau{i}", value=0.5 * (i + 1), min=0.01)  # Correlation times
 
-        # Constraints: 
-        # 1. Sum of amplitudes = 1
-        # 2. Amplitudes and taus must be positive
-        constraints = [
-            {"type": "eq", "fun": lambda params: np.sum(params[:self.n_exps]) - 1},  # A1 + A2 + ... + An = 1
-        ]
-        bounds = [(0, None)] * (2 * self.n_exps)  # All parameters must be positive
+        # Constraint: Sum of amplitudes = 1
+        params.add('sum_A', expr='+'.join([f"A{i}" for i in range(self.n_exps)]), value=1)
 
-        # Perform optimization
+        # Perform the fit
         result = minimize(
-            partial(self.objective, t=time_lags, acf_values=acf_values),
-            initial_guess,
-            #args=(time_lags, acf_values, self.n_exps),
-            constraints=constraints,
-            bounds=bounds,
-            method="SLSQP",
-            # print convergence messages
-            options={"disp": True}
+            self.residual,
+            params,
+            args=(time_lags, acf_values),
+            method="leastsq",
         )
 
-        if not result.success:
-            raise RuntimeError(f"Optimization failed: {result.message}")
+        # Extract fitted amplitudes and correlation times
+        A = np.array([result.params[f"A{i}"].value for i in range(self.n_exps)])
+        tau = np.array([result.params[f"tau{i}"].value for i in range(self.n_exps)])
 
-        # Extract optimized parameters
-        optimized_params = result.x
-        A = optimized_params[:self.n_exps]
-        tau = optimized_params[self.n_exps:]
-
-        # Optionally plot the data and the fit (TODO: update to OOP plot)
+        # Optionally plot the ACF and the fit
         if self.acf_plot:
+            fitted_acf = self.multi_exp_decay(time_lags, A, tau)
             plt.plot(time_lags, acf_values, label="ACF Data")
-            plt.plot(time_lags, self.multi_exp_decay(time_lags, A, tau), label="Multi-Exponential Fit", linestyle="--")
+            plt.plot(time_lags, fitted_acf, label="Multi-Exponential Fit", linestyle="--")
             plt.xlabel("Time Lag")
             plt.ylabel("ACF")
             plt.legend()
             plt.show()
 
-        # Print fitted amplitudes and timescales
-        print("Fitted amplitudes:", A, "SUM: ", np.sum(A))
-        print("Fitted correlation times:", tau)
-
-        #return {"amplitudes": A, "correlation_times": tau, "result": result}
+        # Return results
         return A, tau, result
 
     # Step 4: Spectral Density Function - Analytical FT of C(t), where C(t)=C_O(t)C_I(T)
@@ -431,8 +516,8 @@ class NH_Relaxation:
         #print(acf_values.shape)
 
         # fit ACF with multiple exponentials
-        #A, tau, self.result = self.fit_acf_minimize(np.zeros(100))
-        A, tau, self.result = self.fit_acf_minimize(acf_values)
+        #A, tau, self.result = self.fit_acf_minimize(acf_values)
+        A, tau, self.result = self.fit_acf_lmfit_minimize(acf_values)
         
         # calc R1, R2, and NOE using J(w) from ACF fitting results
         r1, r2, noe = self.compute_relaxation_parameters(A, tau)
@@ -445,7 +530,7 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Run the NH_Relaxation calculation
-    relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 10, acf_plot=True, n_exps=5)
+    relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 10, acf_plot=True, n_exps=3)
     R1, R2, NOE = relaxation.run()
 
     # End the timer
