@@ -118,6 +118,8 @@ class NH_Relaxation:
         n_frames = len(self.u.trajectory)
         n_pairs = len(residues)
 
+        print(residues, n_frames, n_pairs)
+
         # Pre-allocate an array for NH bond vectors
         nh_vectors = np.zeros((n_frames, n_pairs, 3), dtype=np.float32)
         
@@ -155,9 +157,10 @@ class NH_Relaxation:
         """
         # Normalize the NH bond vectors to unit vectors
         unit_vectors = vectors / np.linalg.norm(vectors, axis=2, keepdims=True)
+        #print("unit vector shape", unit_vectors.shape)
 
         # Initialize the array to store the ACF for each lag
-        correlations = np.zeros(self.max_lag, dtype=np.float64)
+        correlations = np.zeros((self.max_lag, unit_vectors.shape[1]), dtype=np.float64)
 
         # Loop over lag times
         for lag in range(self.max_lag):
@@ -170,15 +173,17 @@ class NH_Relaxation:
             
             # Apply the second-Legendre polynomial P2(x) = 0.5 * (3x^2 - 1)
             p2_values = 0.5 * (3 * dot_products**2 - 1)
+            #print("P2 Shape: ", p2_values.shape)
 
-            # Compute the mean over all bonds and all time points
-            correlations[lag] = np.nanmean(p2_values)
+            # Compute the mean over all time points for each NH bond vector
+            correlations[lag, :] = np.nanmean(p2_values, axis=0)
 
+        #print("Correlations Shape: ", correlations.shape)
         return correlations
 
     def calculate_acf_fft(self, vectors):
-        """ TODO: output data not good
-        Compute ACF using a fully vectorized FFT implementation.
+        """
+        Compute ACF using a fully vectorized FFT implementation for each NH bond vector.
 
         Parameters
         ----------
@@ -188,38 +193,141 @@ class NH_Relaxation:
         Returns
         -------
         np.ndarray
-            The averaged ACF over all bonds.
+            The ACF for each NH bond vector with shape (max_lag, n_bonds).
         """
         # Normalize vectors
         unit_vectors = vectors / np.linalg.norm(vectors, axis=2, keepdims=True)
-        # Compute dot products for all vectors
+
+        n_frames = unit_vectors.shape[0]
+        n_bonds = unit_vectors.shape[1]
+
+        # Compute dot products for the entire trajectory
         dot_products = np.einsum("ijk,ijk->ij", unit_vectors, unit_vectors)
+
         # Apply the second-Legendre polynomial P2(x) = 0.5 * (3x^2 - 1)
         p2_values = 0.5 * (3 * dot_products**2 - 1)
+        print("P2 Shape: ", p2_values.shape)
+        # plt.plot(p2_values)
+        # plt.show()
 
-        # Compute FFT for all bonds simultaneously
-        n_frames, n_bonds = p2_values.shape
-        # zero-padding to prevent aliasing effects in FFT calc
-        fft_size = 2 * n_frames
-        # FFT of the second-order Legendre polynomial values
-        fft_data = np.fft.fft(p2_values, n=fft_size, axis=0)
+        ### testing attempt on one set of NH bond vector P2 values
+        # TODO: confirm that the FFT works correctly and update this code
+        x = p2_values[:,0]
+
+        from scipy.fftpack import fft, ifft
+
+        xp = (x - np.average(x))/np.std(x)
+        n, = xp.shape
+        xp = np.r_[xp[:n//2], np.zeros_like(xp), xp[n//2:]]
+        f = fft(xp)
+        p = np.absolute(f)**2
+        pi = ifft(p)
+        acf = np.real(pi)[:n//2]/(np.arange(n//2)[::-1]+n//2)
+        acf = acf[:self.max_lag]
+        print("acf shape: ", acf.shape)
+        
+        #plt.plot(acf)
+        #plt.show()
+        #import sys; sys.exit(0)
+
+        # Initialize an array to store the ACF for each bond
+        #acf = np.zeros((self.max_lag, n_bonds))
+
+        # compute FFT of the P2 values for each bond vector (2x to prevent FT artifacts)
+        #fft_p2 = np.fft.fft(p2_values, n=2*n_frames, axis=0)
+
+        #np.testing.assert_allclose(fft_p2[:,0], fft_p2[:,1], rtol=1e-5)
+        # plt.plot(fft_p2[:,0])
+        # plt.plot(fft_p2[:,1])
+        # plt.xscale('log')
+        # plt.yscale('log')
+        # plt.show()
+
         # compute power spectrum of each bond, multiply FFT output with complex conj
-        ps_bonds = fft_data * np.conjugate(fft_data)
+        # ps_bonds = fft_p2 * np.conjugate(fft_p2)
+        # print("PS Shape: ", ps_bonds.shape)
+        #np.testing.assert_allclose(ps_bonds[:,0], ps_bonds[:,1], rtol=1e-5)
+        # plt.plot(ps_bonds[:,0])
+        # plt.plot(ps_bonds[:,1])
+        # plt.xscale('log')
+        # plt.yscale('log')
+        # plt.show()
+
+        # TODO: up to the power spectrum, the NH bond values are unique
+        #       then, the ACF values are nearly the same for each bond
         # inverse FFT to transform power spectrum back to time domain
         # gives ACF for each bond as a function of time lag
         # only take real part of the IFFT output and truncate upto n_frames (traj length)
-        acf_raw = np.fft.ifft(ps_bonds, axis=0).real[:n_frames]
+        #acf_raw = np.fft.ifft(ps_bonds, axis=0).real[:n_frames]
+        # np.testing.assert_allclose(acf_raw[:,0], acf_raw[:,1], rtol=1e-5)
+        # plt.plot(acf_raw[:,0])
+        # plt.plot(acf_raw[:,1])
+        # plt.xscale('log')
+        # plt.yscale('log')
+        # plt.show()
 
-        # Normalize each bond's ACF to start at 1
-        acf_raw /= acf_raw[0]
+        # Compute the inverse FFT of the product of the FFTs
+        # acf_full = np.fft.ifft(fft_p2 * np.conjugate(fft_p2), axis=0).real[:n_frames]
+        # plt.plot(acf_full[:,0])
+        # plt.plot(acf_full[:,1])
+        # plt.xscale('log')
+        # plt.yscale('log')
+        # plt.show()
+        
+        # Normalize the ACF
+        # normalization_factors = np.arange(n_frames, 0, -1)
+        # acf_full[:n_frames] /= normalization_factors[:, None]
+        
+        # # Truncate to max_lag and take the real part
+        # acf = acf_full[:self.max_lag].real
 
-        # Take the mean over all bonds and truncate to max_lag
-        acf = np.nanmean(acf_raw[:self.max_lag, :], axis=1)
-
-        acf /= self.max_lag - np.arange(self.max_lag)
-
-        # TODO: incorrect data out
         return acf
+
+
+    # def calculate_acf_fft(self, vectors):
+    #     """ TODO: output data not good
+    #     Compute ACF using a fully vectorized FFT implementation.
+
+    #     Parameters
+    #     ----------
+    #     vectors : np.ndarray
+    #         A 3D array of shape (n_frames, n_bonds, 3).
+
+    #     Returns
+    #     -------
+    #     np.ndarray
+    #         The averaged ACF over all bonds.
+    #     """
+    #     # Normalize vectors
+    #     unit_vectors = vectors / np.linalg.norm(vectors, axis=2, keepdims=True)
+    #     # Compute dot products for all vectors
+    #     dot_products = np.einsum("ijk,ijk->ij", unit_vectors, unit_vectors)
+    #     # Apply the second-Legendre polynomial P2(x) = 0.5 * (3x^2 - 1)
+    #     p2_values = 0.5 * (3 * dot_products**2 - 1)
+
+    #     # Compute FFT for all bonds simultaneously
+    #     n_frames, n_bonds = p2_values.shape
+    #     # zero-padding to prevent aliasing effects in FFT calc
+    #     fft_size = 2 * n_frames
+    #     # FFT of the second-order Legendre polynomial values
+    #     fft_data = np.fft.fft(p2_values, n=fft_size, axis=0)
+    #     # compute power spectrum of each bond, multiply FFT output with complex conj
+    #     ps_bonds = fft_data * np.conjugate(fft_data)
+    #     # inverse FFT to transform power spectrum back to time domain
+    #     # gives ACF for each bond as a function of time lag
+    #     # only take real part of the IFFT output and truncate upto n_frames (traj length)
+    #     acf_raw = np.fft.ifft(ps_bonds, axis=0).real[:n_frames]
+
+    #     # Normalize each bond's ACF to start at 1
+    #     acf_raw /= acf_raw[0]
+
+    #     # Take the mean over all bonds and truncate to max_lag
+    #     acf = np.nanmean(acf_raw[:self.max_lag, :], axis=1)
+
+    #     #acf /= self.max_lag - np.arange(self.max_lag)
+
+    #     # TODO: incorrect data out
+    #     return acf
     
     # Method to estimate tau_c from the ACF
     def estimate_tau_c(self, acf_values):
@@ -252,10 +360,11 @@ class NH_Relaxation:
         # The second parameter is the estimated tau_c
         tau_c_estimate = popt[1]
 
-        # plot the single exponential fit to the ACF
-        plt.plot(time_lags, acf_values)
-        plt.plot(time_lags, exp_decay(time_lags, acf_values, tau_c_estimate), linestyle="--")
-        plt.show()
+        # optionally plot the single exponential fit to the ACF
+        if self.acf_plot:
+            plt.plot(time_lags, acf_values)
+            plt.plot(time_lags, exp_decay(time_lags, acf_values, tau_c_estimate), linestyle="--")
+            plt.show()
 
         return tau_c_estimate
 
@@ -546,11 +655,20 @@ class NH_Relaxation:
         """
         # calc NH bond vectors
         nh_vectors = self.compute_nh_vectors()
+        #print("vector shape", nh_vectors.shape)
         
         #start_time = time.time()
         # calc ACF of norm NH bond vectors
         acf_values = self.calculate_acf(nh_vectors)
-        #acf_values = self.calculate_acf_fft(nh_vectors)
+        #acf_values2 = self.calculate_acf_fft(nh_vectors)
+        
+        # plt.plot(acf_values, label="ACF std")
+        # plt.plot(acf_values2, linestyle="--", label="ACF fft")
+        # plt.legend()
+        # plt.show()
+
+        #np.testing.assert_allclose(acf_values, acf_values2, rtol=1e-5)
+
         #end_time = time.time()
         #elapsed_time = end_time - start_time
         #print(f"Execution Time: {elapsed_time:.2f} seconds")
@@ -576,7 +694,8 @@ if __name__ == "__main__":
     start_time = time.time()
 
     # Run the NH_Relaxation calculation
-    relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 100, acf_plot=True, n_exps=5)
+    relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 
+                               100, acf_plot=False, n_exps=5, tau_c=1e-9)
     R1, R2, NOE = relaxation.run()
 
     # End the timer
