@@ -2,7 +2,7 @@ import MDAnalysis as mda
 from MDAnalysis.analysis import align
 
 import numpy as np
-from scipy.optimize import minimize, curve_fit, least_squares
+from scipy.optimize import minimize, curve_fit
 #from lmfit import Parameters, minimize
 import matplotlib.pyplot as plt
 from functools import partial
@@ -617,14 +617,16 @@ class NH_Relaxation:
     def run(self):
         """
         Main public method for calculating R1, R2, and NOE values from input MD simulation.
+
+        Returns
+        -------
+        tuple
+            R1, R2, and NOE values. Where each value is a numpy array of relaxation rates.
+            Each rate corresponds to a specific NH bond vector.
         """
         # calc NH bond vectors
-        #nh_vectors = self.compute_nh_vectors(start=0, stop=500)
-        #nh_vectors = self.compute_nh_vectors(start=2000, stop=2500)
         nh_vectors = self.compute_nh_vectors(self.traj_start, self.traj_stop)
-        #print("vector shape", nh_vectors.shape)
         
-        #start_time = time.time()
         # calc ACF of norm NH bond vectors
         acf_values = self.calculate_acf(nh_vectors)
         #acf_values2 = self.calculate_acf_fft(nh_vectors)
@@ -636,17 +638,12 @@ class NH_Relaxation:
 
         #np.testing.assert_allclose(acf_values, acf_values2, rtol=1e-5)
 
-        #end_time = time.time()
-        #elapsed_time = end_time - start_time
-        #print(f"Execution Time: {elapsed_time:.2f} seconds")
-        #print(acf_values.shape)
-
         # get tau_c if not provided
-        # TODO: update the estmate tau_c method for multiple ACFs, maybe global fitting?
+        # TODO: update the estmate tau_c method, and check units
         if self.tau_c is None:
             self.tau_c = self.estimate_tau_c(acf_values)
             self.tau_c *= 10**-10 # temp conversion for larger contributions from ACF (TODO)
-            print("tau_c: ", self.tau_c)
+            #print("tau_c: ", self.tau_c)
 
         # Pre-allocate arrays to store R1, R2, and NOE values for each NH bond vector
         n_bonds = acf_values.shape[1]
