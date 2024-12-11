@@ -24,7 +24,7 @@ class NH_Relaxation:
     gamma_H = 267.513e6         # Gyromagnetic ratio of 1H (rad·s^-1·T^-1)
     gamma_N = -27.116e6         # Gyromagnetic ratio of 15N (rad·s^-1·T^-1)
     r_NH = 1.02e-10             # N-H bond length (meters)
-    Delta_sigma = 0             # CSA value (ppm)
+    Delta_sigma = -170          # CSA value (ppm)
 
     # Derived parameters
     d_oo = (1 / 20) * (mu_0 / (4 * np.pi))**2 * hbar**2 * gamma_H**2 * gamma_N**2
