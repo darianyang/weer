@@ -35,7 +35,8 @@ class NH_Relaxation:
     omega_H = 600.13 * 2 * np.pi * 1e6      # Proton frequency (rad/s)
     omega_N = omega_H / 10.0                # ~Nitrogen frequency (rad/s)
 
-    def __init__(self, pdb, traj, traj_step=10, max_lag=100, n_exps=5, acf_plot=False, tau_c=None):
+    def __init__(self, pdb, traj, traj_start=None, traj_stop=None, traj_step=10, 
+                 max_lag=100, n_exps=5, acf_plot=False, tau_c=None):
         """
         Initialize the RelaxationCalculator with simulation and analysis parameters.
 
@@ -45,6 +46,10 @@ class NH_Relaxation:
             Path to the PDB or topology file.
         traj : str
             Path to the trajectory file.
+        traj_start : int, optional
+            The starting frame index for the trajectory (default is None).
+        traj_stop : int, optional
+            The stopping frame index for the trajectory (default is None).
         traj_step : int, optional
             Step interval for loading the trajectory (default is 10).
         max_lag : int, optional
@@ -59,6 +64,8 @@ class NH_Relaxation:
         """
         self.pdb = pdb
         self.traj = traj
+        self.traj_start = traj_start
+        self.traj_stop = traj_stop
         self.traj_step = traj_step
         self.max_lag = max_lag
         self.n_exps = n_exps
@@ -66,14 +73,6 @@ class NH_Relaxation:
         self.tau_c = tau_c
 
         self.u = self.load_align_traj()
-
-    def __repr__(self):
-        """
-        Printable representation. 
-        """
-        return (f"RelaxationCalculator(pdb={self.pdb!r}, traj={self.traj!r}, "
-                f"traj_step={self.traj_step}, max_lag={self.max_lag}, "
-                f"n_exps={self.n_exps}, acf_plot={self.acf_plot}, tau_c={self.tau_c})")
 
     def load_align_traj(self):
         """
@@ -173,6 +172,7 @@ class NH_Relaxation:
         #print("Correlations Shape: ", correlations.shape)
         return correlations
 
+    # TODO: currently not working, should provide some speedup if it works
     def calculate_acf_fft(self, vectors):
         """
         Compute ACF using a fully vectorized FFT implementation for each NH bond vector.
@@ -276,8 +276,7 @@ class NH_Relaxation:
         return acf
     
     # Method to estimate tau_c from the ACF
-    # TODO: update the fitting, currently doesn't deviate far from p0
-    #       also, update to handle multi dim acf_values
+    # TODO: could update to give better initial guess, and check units
     def estimate_tau_c(self, acf_values):
         """
         Estimate the rotational correlation time (tau_c) from the ACF by fitting it to a 
@@ -293,7 +292,8 @@ class NH_Relaxation:
         float
             Estimated rotational correlation time (tau_c).
         """
-        # Define the exponential decay function without amplitude A
+        # Define the exponential decay function
+        # Global tumbling: C_O(t) = exp(-t/tau_c)
         def exp_decay(t, tau_c):
             return np.exp(-t / tau_c)
         
@@ -323,43 +323,6 @@ class NH_Relaxation:
             plt.show()
 
         return tau_c_estimate
-    # def estimate_tau_c(self, acf_values):
-    #     """
-    #     Estimate the rotational correlation time (tau_c) from the ACF by fitting it to a 
-    #     single exponential decay function.
-
-    #     Parameters
-    #     ----------
-    #     acf_values : np.ndarray
-    #         The ACF values to fit.
-        
-    #     Returns
-    #     -------
-    #     float
-    #         Estimated rotational correlation time (tau_c).
-    #     """
-    #     # Estimate tau_c by fitting the ACF to a single exponential decay
-    #     # Use a simple exponential decay function: A * exp(-t/tau_c)
-    #     def exp_decay(t, A, tau_c):
-    #         return A * np.exp(-t / tau_c)
-        
-    #     # Generate time lags
-    #     #time_lags = np.arange(self.max_lag)
-    #     time_lags = np.linspace(0, acf_values.shape[0], num=acf_values.shape[0])
-        
-    #     # Fit the ACF to an exponential decay model
-    #     popt, _ = curve_fit(exp_decay, time_lags, acf_values, p0=(1.0, 1e-9))
-        
-    #     # The second parameter is the estimated tau_c
-    #     tau_c_estimate = popt[1]
-
-    #     # optionally plot the single exponential fit to the ACF
-    #     if self.acf_plot:
-    #         plt.plot(time_lags, acf_values)
-    #         plt.plot(time_lags, exp_decay(time_lags, acf_values, tau_c_estimate), linestyle="--")
-    #         plt.show()
-
-    #     return tau_c_estimate
 
     # Multi-exponential decay function
     # TODO: add Ao offset
@@ -658,7 +621,7 @@ class NH_Relaxation:
         # calc NH bond vectors
         #nh_vectors = self.compute_nh_vectors(start=0, stop=500)
         #nh_vectors = self.compute_nh_vectors(start=2000, stop=2500)
-        nh_vectors = self.compute_nh_vectors()
+        nh_vectors = self.compute_nh_vectors(self.traj_start, self.traj_stop)
         #print("vector shape", nh_vectors.shape)
         
         #start_time = time.time()
@@ -714,24 +677,12 @@ class NH_Relaxation:
     # TODO: methods for MF2 analysis for S2 OPs and tau_internal?
 
 if __name__ == "__main__":
-    # Start the timer
-    start_time = time.time()
-
     # Run the NH_Relaxation calculation
     relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 
-                               100, acf_plot=False, n_exps=5, tau_c=None)
+                               traj_step=100, acf_plot=False, n_exps=5, tau_c=None)
     R1, R2, NOE = relaxation.run()
-
-    # End the timer
-    end_time = time.time()
 
     # Print the results
     print(f"R1: {R1} s^-1 | T1: {1/R1} s")
     print(f"R2: {R2} s^-1 | T2: {1/R2} s")
     print(f"NOE: {NOE}")
-
-    # Print the elapsed time
-    elapsed_time = end_time - start_time
-    #print(f"Execution Time: {elapsed_time:.2f} seconds")
-
-    # TODO: confirm that this works for simultions with multiple residues
