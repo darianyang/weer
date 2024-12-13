@@ -43,7 +43,7 @@ def make_md_data():
     for i in range(0, 250, 50):
         traj = f"traj_{i}_{i+50}ns.xtc"
         relaxation = relax.NH_Relaxation("alanine-dipeptide.pdb", traj, 
-                                        traj_step=1, acf_plot=False, n_exps=5, tau_c=None)
+                                        traj_step=10, acf_plot=False, n_exps=5, tau_c=None)
         R1, R2, NOE = relaxation.run()
         if i == 0:
             relax_data = np.array([R1, R2, NOE])
@@ -54,7 +54,7 @@ def make_md_data():
 # # make data
 # make_nmr_data()
 # make_exp_err_data()
-# make_md_data()
+#make_md_data()
 
 rex = 'ired.npy'
 rmd = 'trajs.npy'
@@ -62,12 +62,12 @@ eex = 'exp_err.npy'
 
 rw = absurder.ABSURDer(rex, rmd, eex)
 
-rw.plot_comparison(0)
+#rw.plot_comparison(0)
 
-# rw.reweight(0)
+rw.reweight(0)
 
 # for i in range(3):
-#     rw.plot_phix2r( i )
+#     rw.plot_phix2r(i)
 
-# opt_theta = 100
-# rw.plot_comparison( 0, opt_theta )
+opt_theta = 100
+rw.plot_comparison(0, opt_theta)
