@@ -318,7 +318,7 @@ class NH_Relaxation:
             plt.figure()
             for i in range(acf_values.shape[1]):
                 plt.plot(time_lags, acf_values[:, i], label=f'ACF {i}')
-                plt.plot(time_lags, exp_decay(time_lags, tau_c_estimate), linestyle="--", label=f'Fit {i}')
+            plt.plot(time_lags, exp_decay(time_lags, tau_c_estimate), linestyle="--", label=f'Fit {i}')
             plt.title("tau_c Estimate from ACF")
             plt.legend()
             plt.show()
@@ -326,17 +326,18 @@ class NH_Relaxation:
         return tau_c_estimate
 
     # Multi-exponential decay function
-    # TODO: add Ao offset
-    def multi_exp_decay(self, t, A, tau):
+    def multi_exp_decay(self, t, A0, A, tau):
         """
-        Multi-exponential decay function.
+        Multi-exponential decay function with an offset.
         
         Parameters
         ----------
         t : np.ndarray
             Time values for the ACF.
+        A0 : float
+            Offset constant (A_0 in the equation).
         A : np.ndarray
-            Amplitudes of each exponential component (must sum to 1).
+            Amplitudes of each exponential component (along with A0, must sum to 1).
         tau : np.ndarray
             Correlation times of each exponential component.
 
@@ -345,7 +346,9 @@ class NH_Relaxation:
         np.ndarray
             The multi-exponential decay values.
         """
-        return np.sum(A[:, None] * np.exp(-t / tau[:, None]), axis=0)
+        #print("A0: ", A0, "A: ", A, "tau: ", tau)
+        return A0 + np.sum(A[:, None] * np.exp(-t / tau[:, None]), axis=0)
+
 
     # Fit C_I(t) to a multi-exponential decay function
     # Objective function to minimize (sum of squared residuals)
@@ -368,10 +371,11 @@ class NH_Relaxation:
             Sum of squared residuals between model and data.
         """
         # Split parameters into amplitudes and taus
-        A = params[:self.n_exps]
-        tau = params[self.n_exps:]
+        A = params[:self.n_exps + 1]
+        tau = params[self.n_exps + 1:]
+        #print("A: ", A, "tau: ", tau)
         # Calculate the multi-exponential decay
-        fit = self.multi_exp_decay(t, A, tau)
+        fit = self.multi_exp_decay(t, A[0], A[1:], tau)
         residuals = acf_values - fit
         #print(f"Residuals: {residuals}")
         return np.sum(residuals**2)
@@ -400,7 +404,8 @@ class NH_Relaxation:
             time_lags = np.linspace(0, acf_values.shape[0], num=acf_values.shape[0])
 
         # Initial guess for parameters: equal amplitudes and linear time constants
-        initial_amplitudes = np.ones(self.n_exps) / self.n_exps
+        initial_amplitudes = np.ones(self.n_exps + 1) / (self.n_exps + 1)
+        #print("Initial Amplitudes: ", initial_amplitudes)
         
         initial_taus = np.linspace(0.1, 10, self.n_exps)  # Initial guess for correlation times
         #initial_taus = np.linspace(1, 10, self.n_exps)
@@ -412,14 +417,15 @@ class NH_Relaxation:
         #initial_taus = np.linspace(0.1 * self.tau_c, 10 * self.tau_c, self.n_exps)
 
         initial_guess = np.concatenate([initial_amplitudes, initial_taus])
+        #print("Initial Guess: ", initial_guess)
 
         # Constraints: 
         # 1. Sum of amplitudes = 1
         # 2. Amplitudes and taus must be positive
         constraints = [
-            {"type": "eq", "fun": lambda params: np.sum(params[:self.n_exps]) - 1},  # A1 + A2 + ... + An = 1
+            {"type": "eq", "fun": lambda params: np.sum(params[:self.n_exps + 1]) - 1},  # (A0) + A1 + A2 + ... + An = 1
         ]
-        bounds = [(0, None)] * (2 * self.n_exps)  # All parameters must be positive
+        bounds = [(0, None)] * ((2 * self.n_exps) + 1)  # All parameters must be positive
 
         # Perform optimization
         result = minimize(
@@ -438,13 +444,13 @@ class NH_Relaxation:
 
         # Extract optimized parameters
         optimized_params = result.x
-        A = optimized_params[:self.n_exps]
-        tau = optimized_params[self.n_exps:]
+        A = optimized_params[:self.n_exps + 1]
+        tau = optimized_params[self.n_exps + 1:]
 
         # Optionally plot the data and the fit (TODO: update to OOP plot)
         if self.acf_plot:
             plt.plot(time_lags, acf_values, label="ACF Data")
-            plt.plot(time_lags, self.multi_exp_decay(time_lags, A, tau), label="Multi-Exponential Fit", linestyle="--")
+            plt.plot(time_lags, self.multi_exp_decay(time_lags, A[0], A[1:], tau), label="Multi-Exponential Fit", linestyle="--")
             plt.xlabel("Time Lag")
             plt.ylabel("ACF")
             plt.legend()
@@ -543,7 +549,7 @@ class NH_Relaxation:
     #     return A, tau, result
 
     # Step 4: Spectral Density Function - Analytical FT of C(t), where C(t)=C_O(t)C_I(T)
-    def spectral_density(self, omega, amplitudes, correlation_times):
+    def spectral_density(self, omega, A, tau):
         """
         Calculate the spectral density function J(omega) with an overall tumbling time tau_c.
 
@@ -551,9 +557,9 @@ class NH_Relaxation:
         ----------
         omega : np.ndarray or float
             Angular frequency (rad/s) or an array of angular frequencies.
-        amplitudes : np.ndarray
+        A : np.ndarray
             Amplitudes of the exponential components (A_i).
-        correlation_times : np.ndarray
+        tau : np.ndarray
             Correlation times of the exponential components (tau_i).
 
         Returns
@@ -562,15 +568,14 @@ class NH_Relaxation:
             Spectral density values J(omega) at the specified angular frequencies.
         """
         # Compute effective correlation times
-        tau_eff = (self.tau_c * correlation_times) / (self.tau_c + correlation_times)
+        tau_eff = (self.tau_c * tau) / (self.tau_c + tau)
         
         # Tumbling term (first term in the equation)
-        # TODO: include the offset Ao term?
-        J = (2 * self.tau_c) / (1 + (omega * self.tau_c)**2)
+        J = (A[0] * 2 * self.tau_c) / (1 + (omega * self.tau_c)**2)
         
         # Add internal contributions
         J += np.sum(
-            (2 * amplitudes * tau_eff)[:, None] / (1 + (omega * tau_eff[:, None])**2),
+            (2 * A[1:] * tau_eff)[:, None] / (1 + (omega * tau_eff[:, None])**2),
             axis=0
         )
         
@@ -678,16 +683,16 @@ class NH_Relaxation:
 
 if __name__ == "__main__":
     # Run the NH_Relaxation calculation
-    # relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
-    #                            "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
-    #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=None)
-    relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-                               "t4l/t4l-1ps/segment_001.xtc", 
-                               traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
+    relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
+                               "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
+                               traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9)
+    # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
+    #                            "t4l/t4l-1ps/segment_001.xtc", 
+    #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
     R1, R2, NOE = relaxation.run()
 
     # Print the results
-    n_vectors = 5
+    n_vectors = None
     print(f"\ntau_c: {relaxation.tau_c} s\n")
     print(f"R1: {R1[:n_vectors]} s^-1 \nT1: {1/R1[:n_vectors]} s\n")
     print(f"R2: {R2[:n_vectors]} s^-1 \nT2: {1/R2[:n_vectors]} s\n")
