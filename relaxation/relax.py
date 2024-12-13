@@ -24,7 +24,8 @@ class NH_Relaxation:
     gamma_H = 267.513e6         # Gyromagnetic ratio of 1H (rad·s^-1·T^-1)
     gamma_N = -27.116e6         # Gyromagnetic ratio of 15N (rad·s^-1·T^-1)
     r_NH = 1.02e-10             # N-H bond length (meters)
-    Delta_sigma = -170          # CSA value (ppm)
+    Delta_sigma = -170 * 1e-6   # CSA value (ppm) -170 ppm --> dimensionless units
+    #Delta_sigma = 0             # CSA value (ppm)
 
     # Derived parameters
     d_oo = (1 / 20) * (mu_0 / (4 * np.pi))**2 * hbar**2 * gamma_H**2 * gamma_N**2
@@ -114,6 +115,7 @@ class NH_Relaxation:
         # Select the atoms involved in NH bonds
         selection = self.u.select_atoms('name N or name H')
 
+        # TODO: precast array
         # Initialize a list to store NH bond vectors
         nh_vectors = []
 
@@ -319,6 +321,7 @@ class NH_Relaxation:
             for i in range(acf_values.shape[1]):
                 plt.plot(time_lags, acf_values[:, i], label=f'ACF {i}')
                 plt.plot(time_lags, exp_decay(time_lags, tau_c_estimate), linestyle="--", label=f'Fit {i}')
+            plt.title("tau_c Estimate from ACF")
             plt.legend()
             plt.show()
 
@@ -669,6 +672,8 @@ class NH_Relaxation:
             r2_values[i] = r2
             noe_values[i] = noe
 
+            # TODO: move plotting function here to show all NH bond vector fits?
+
         return r1_values, r2_values, noe_values
 
     # TODO: methods for MF2 analysis for S2 OPs and tau_internal?
@@ -676,10 +681,11 @@ class NH_Relaxation:
 if __name__ == "__main__":
     # Run the NH_Relaxation calculation
     relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 
-                               traj_step=100, acf_plot=False, n_exps=5, tau_c=None)
+                               traj_step=10, acf_plot=False, n_exps=5, tau_c=None)
     R1, R2, NOE = relaxation.run()
 
     # Print the results
+    print(f"tau_c: {relaxation.tau_c} s")
     print(f"R1: {R1} s^-1 | T1: {1/R1} s")
     print(f"R2: {R2} s^-1 | T2: {1/R2} s")
     print(f"NOE: {NOE}")
