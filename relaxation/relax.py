@@ -115,18 +115,16 @@ class NH_Relaxation:
         # Select the atoms involved in NH bonds
         selection = self.u.select_atoms('name N or name H')
 
-        # TODO: precast array
-        # Initialize a list to store NH bond vectors
-        nh_vectors = []
+        # Determine the number of frames and NH pairs
+        n_frames = len(self.u.trajectory[start:stop:step])
+        n_pairs = len(selection) // 2
 
-        # Iterate over the trajectory frames
-        for ts in self.u.trajectory[start:stop:step]:
-            # Calculate NH bond vectors for the current frame
-            vectors = selection.positions[1::2] - selection.positions[::2]
-            nh_vectors.append(vectors)
+        # Pre-cast a numpy array to store NH bond vectors
+        nh_vectors = np.zeros((n_frames, n_pairs, 3))
 
-        # Convert the list to a numpy array
-        nh_vectors = np.array(nh_vectors)
+        # Iterate over the trajectory frames and calculate NH bond vectors
+        for i, ts in enumerate(self.u.trajectory[start:stop:step]):
+            nh_vectors[i] = selection.positions[1::2] - selection.positions[::2]
 
         return nh_vectors
 
@@ -680,7 +678,8 @@ class NH_Relaxation:
 
 if __name__ == "__main__":
     # Run the NH_Relaxation calculation
-    relaxation = NH_Relaxation("alanine-dipeptide.pdb", "alanine-dipeptide-0-250ns.xtc", 
+    relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
+                               "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
                                traj_step=10, acf_plot=False, n_exps=5, tau_c=None)
     R1, R2, NOE = relaxation.run()
 
