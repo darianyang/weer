@@ -37,7 +37,7 @@ class NH_Relaxation:
     omega_N = omega_H / 10.0                # ~Nitrogen frequency (rad/s)
 
     def __init__(self, pdb, traj, traj_start=None, traj_stop=None, traj_step=10, 
-                 max_lag=100, n_exps=5, acf_plot=False, tau_c=None):
+                 max_lag=None, n_exps=5, acf_plot=False, tau_c=None):
         """
         Initialize the RelaxationCalculator with simulation and analysis parameters.
 
@@ -54,7 +54,7 @@ class NH_Relaxation:
         traj_step : int, optional
             Step interval for loading the trajectory (default is 10).
         max_lag : int, optional
-            Maximum lag time for ACF computation (default is 100).
+            Maximum lag time for ACF computation (default is None, uses entire traj).
         n_exps : int, optional
             Number of exponential functions for ACF fitting (default is 5).
         acf_plot : bool, optional
@@ -149,6 +149,12 @@ class NH_Relaxation:
         # Normalize the NH bond vectors to unit vectors
         unit_vectors = vectors / np.linalg.norm(vectors, axis=2, keepdims=True)
         #print("unit vector shape", unit_vectors.shape)
+
+        # initialize max_lag if not provided
+        if self.max_lag is None:
+            # Use the entire trajectory length for the ACF (n_frames)
+            # limit by default to first 30% of the trajectory? (TODO)
+            self.max_lag = int(unit_vectors.shape[0] * 0.3)
 
         # Initialize the array to store the ACF for each lag
         correlations = np.zeros((self.max_lag, unit_vectors.shape[1]), dtype=np.float64)
@@ -277,6 +283,7 @@ class NH_Relaxation:
     
     # Method to estimate tau_c from the ACF
     # TODO: could update to give better initial guess, and check units
+    #       there is prob also a more accurate or correct way to do this (maybe with MF)
     def estimate_tau_c(self, acf_values):
         """
         Estimate the rotational correlation time (tau_c) from the ACF by fitting it to a 
@@ -407,14 +414,11 @@ class NH_Relaxation:
         initial_amplitudes = np.ones(self.n_exps + 1) / (self.n_exps + 1)
         #print("Initial Amplitudes: ", initial_amplitudes)
         
-        initial_taus = np.linspace(0.1, 10, self.n_exps)  # Initial guess for correlation times
-        #initial_taus = np.linspace(1, 10, self.n_exps)
-        # Example: estimate the decay rate of the ACF
-        # acf_decay_rate = -np.log(acf_values[1] / acf_values[0])
-        # initial_taus = np.linspace(0.1 * acf_decay_rate, 10 * acf_decay_rate, self.n_exps)
-        #initial_taus = np.logspace(1e-10, 1, self.n_exps)
-        # Create a range of initial guesses around tau_c
-        #initial_taus = np.linspace(0.1 * self.tau_c, 10 * self.tau_c, self.n_exps)
+        # Initial guess for correlation times
+        #initial_taus = np.linspace(0.1, 10, self.n_exps)
+        # Create a range of initial guesses around tau_c to have similar timescales
+        # this is important when calculating J(w) and tau_eff later
+        initial_taus = np.linspace(0.1 * self.tau_c, 10 * self.tau_c, self.n_exps)
 
         initial_guess = np.concatenate([initial_amplitudes, initial_taus])
         #print("Initial Guess: ", initial_guess)
@@ -457,8 +461,8 @@ class NH_Relaxation:
             plt.show()
 
         # Print fitted amplitudes and timescales
-        #print("Fitted amplitudes:", A, "SUM: ", np.sum(A))
-        #print("Fitted correlation times:", tau)
+        # print("\nFitted amplitudes:", A, "SUM: ", np.sum(A))
+        # print("Fitted correlation times:", tau)
 
         #return {"amplitudes": A, "correlation_times": tau, "result": result}
         return A, tau, result
@@ -483,11 +487,11 @@ class NH_Relaxation:
     #         Residuals between the data and the multi-exponential model.
     #     """
     #     # Extract parameters
-    #     A = np.array([params[f"A{i}"].value for i in range(self.n_exps)])
+    #     A = np.array([params[f"A{i}"].value for i in range(self.n_exps + 1)])
     #     tau = np.array([params[f"tau{i}"].value for i in range(self.n_exps)])
 
     #     # Evaluate the multi-exponential decay function
-    #     model = self.multi_exp_decay(t, A, tau)
+    #     model = self.multi_exp_decay(t, A[0], A[1:], tau)
 
     #     # Residuals
     #     return acf_values - model
@@ -517,11 +521,13 @@ class NH_Relaxation:
     #     # Initialize Parameters
     #     params = Parameters()
     #     for i in range(self.n_exps):
-    #         params.add(f"A{i}", value=1 / self.n_exps, min=0, max=1)  # Amplitudes
-    #         params.add(f"tau{i}", value=0.5 * (i + 1), min=0.01)  # Correlation times
+    #         params.add(f"A{i}", value=1 / (self.n_exps + 1), min=0, max=1)    # Amplitudes
+    #         params.add(f"tau{i}", value=self.tau_c, min=0)                    # Correlation times
+    #     # Offset amplitude
+    #     params.add(f"A{self.n_exps + 1}", value=1 / (self.n_exps + 1), min=0, max=1)
 
     #     # Constraint: Sum of amplitudes = 1
-    #     params.add('sum_A', expr='+'.join([f"A{i}" for i in range(self.n_exps)]), value=1)
+    #     params.add('sum_A', expr='+'.join([f"A{i}" for i in range(self.n_exps + 1)]), value=1)
 
     #     # Perform the fit
     #     result = minimize(
@@ -569,7 +575,8 @@ class NH_Relaxation:
         """
         # Compute effective correlation times
         tau_eff = (self.tau_c * tau) / (self.tau_c + tau)
-        
+        #print("tau_eff: ", tau_eff)
+
         # Tumbling term (first term in the equation)
         J = (A[0] * 2 * self.tau_c) / (1 + (omega * self.tau_c)**2)
         
@@ -685,7 +692,7 @@ if __name__ == "__main__":
     # Run the NH_Relaxation calculation
     relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
                                "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
-                               traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9)
+                               traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
     # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
     #                            "t4l/t4l-1ps/segment_001.xtc", 
     #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
