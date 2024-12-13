@@ -678,13 +678,17 @@ class NH_Relaxation:
 
 if __name__ == "__main__":
     # Run the NH_Relaxation calculation
-    relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
-                               "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
-                               traj_step=10, acf_plot=False, n_exps=5, tau_c=None)
+    # relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
+    #                            "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
+    #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=None)
+    relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
+                               "t4l/t4l-1ps/segment_001.xtc", 
+                               traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
     R1, R2, NOE = relaxation.run()
 
     # Print the results
-    print(f"tau_c: {relaxation.tau_c} s")
-    print(f"R1: {R1} s^-1 | T1: {1/R1} s")
-    print(f"R2: {R2} s^-1 | T2: {1/R2} s")
-    print(f"NOE: {NOE}")
+    n_vectors = 5
+    print(f"\ntau_c: {relaxation.tau_c} s\n")
+    print(f"R1: {R1[:n_vectors]} s^-1 \nT1: {1/R1[:n_vectors]} s\n")
+    print(f"R2: {R2[:n_vectors]} s^-1 \nT2: {1/R2[:n_vectors]} s\n")
+    print(f"NOE: {NOE[:n_vectors]}\n")
