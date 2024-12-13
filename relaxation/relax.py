@@ -204,35 +204,39 @@ class NH_Relaxation:
 
         # Apply the second-Legendre polynomial P2(x) = 0.5 * (3x^2 - 1)
         p2_values = 0.5 * (3 * dot_products**2 - 1)
-        print("P2 Shape: ", p2_values.shape)
-        # plt.plot(p2_values)
-        # plt.show()
+        #print("P2 Shape: ", p2_values.shape)
+        plt.plot(p2_values)
+        plt.yscale('log')
+        plt.show()
 
         ### testing attempt on one set of NH bond vector P2 values
         # TODO: confirm that the FFT works correctly and update this code
-        x = p2_values[:,0]
+        # x = unit_vectors[:,0]
 
-        from scipy.fftpack import fft, ifft
+        # from scipy.fftpack import fft, ifft
 
-        xp = (x - np.average(x))/np.std(x)
-        n, = xp.shape
-        xp = np.r_[xp[:n//2], np.zeros_like(xp), xp[n//2:]]
-        f = fft(xp)
-        p = np.absolute(f)**2
-        pi = ifft(p)
-        acf = np.real(pi)[:n//2]/(np.arange(n//2)[::-1]+n//2)
-        acf = acf[:self.max_lag]
-        print("acf shape: ", acf.shape)
+        # xp = (x - np.average(x))/np.std(x)
+        # n, = xp.shape
+        # xp = np.r_[xp[:n//2], np.zeros_like(xp), xp[n//2:]]
+        # f = fft(xp)
+        # p = np.absolute(f)**2
+        # pi = ifft(p)
+        # acf = np.real(pi)[:n//2]/(np.arange(n//2)[::-1]+n//2)
+        # acf = acf[:self.max_lag]
+        # print("acf shape: ", acf.shape)
         
         #plt.plot(acf)
         #plt.show()
         #import sys; sys.exit(0)
 
         # Initialize an array to store the ACF for each bond
-        #acf = np.zeros((self.max_lag, n_bonds))
+        acf = np.zeros((self.max_lag, n_bonds))
+
+        # compute FFT of the values for each bond vector (2x to prevent FT artifacts)
+        fft_uv = np.fft.fft(unit_vectors, n=2*n_frames, axis=0)
 
         # compute FFT of the P2 values for each bond vector (2x to prevent FT artifacts)
-        #fft_p2 = np.fft.fft(p2_values, n=2*n_frames, axis=0)
+        fft_p2 = np.fft.fft(p2_values, n=2*n_frames, axis=0)
 
         #np.testing.assert_allclose(fft_p2[:,0], fft_p2[:,1], rtol=1e-5)
         # plt.plot(fft_p2[:,0])
@@ -265,13 +269,15 @@ class NH_Relaxation:
         # plt.show()
 
         # Compute the inverse FFT of the product of the FFTs
-        # acf_full = np.fft.ifft(fft_p2 * np.conjugate(fft_p2), axis=0).real[:n_frames]
-        # plt.plot(acf_full[:,0])
-        # plt.plot(acf_full[:,1])
-        # plt.xscale('log')
-        # plt.yscale('log')
-        # plt.show()
-        
+        acf_full = np.fft.ifft(fft_p2 * np.conjugate(fft_p2), axis=0).real[:n_frames]
+        #acf_full = np.fft.ifft(fft_uv * np.conjugate(fft_uv), axis=0).real[:n_frames]
+        print("ACF Full Shape: ", acf_full.shape)
+        plt.plot(acf_full[:,0])
+        plt.plot(acf_full[:,1])
+        plt.xscale('log')
+        plt.yscale('log')
+        plt.show()
+
         # Normalize the ACF
         # normalization_factors = np.arange(n_frames, 0, -1)
         # acf_full[:n_frames] /= normalization_factors[:, None]
@@ -648,6 +654,7 @@ class NH_Relaxation:
         # plt.plot(acf_values2, linestyle="--", label="ACF fft")
         # plt.legend()
         # plt.show()
+        # import sys; sys.exit(0)
 
         #np.testing.assert_allclose(acf_values, acf_values2, rtol=1e-5)
 
