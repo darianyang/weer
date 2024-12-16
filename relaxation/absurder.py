@@ -628,10 +628,11 @@ class ABSURDer:
             # insax.set_xticks([0,0.5,1])
             # insax.tick_params(labelsize = 14)
 
-        ax.set_xlabel( r'$R^{NMR}$' + rate_label + ' [s$^{-1}$]' )
+        ax.set_xlabel( r'$R^{REF}$' + rate_label + ' [s$^{-1}$]' )
         ax.set_ylabel( r'$R^{SIM}$' + rate_label + ' [s$^{-1}$]' )
-        ax.set_xlim( (0, self.rex[r].max() + 5) )
-        ax.set_ylim( (0, self.rex[r].max() + 5) )
+        edge = 2.5
+        ax.set_xlim( (self.rex[r].min() - edge, self.rex[r].max() + edge) )
+        ax.set_ylim( (self.rex[r].min() - edge, self.rex[r].max() + edge) )
         ax.legend( loc = 4 )
         plt.tight_layout()
 
