@@ -57,25 +57,55 @@ def load_and_check_array(array):
     print(data.shape)
     return data
 
+def run_reweight(theta=100):
+    """
+    Run reweighting on the data.
+    """
+    rex = 't4l/ref-traj.npy'
+    rmd = 't4l/trajs.npy'
+    eex = 't4l/exp_err.npy'
+
+    #load_and_check_array(rex)
+
+    rw = absurder.ABSURDer(rex, rmd, eex, thetas=np.array([theta]))
+
+    #rw.plot_comparison(1)
+
+    #np.savetxt("w0.txt", rw.w0)
+    rw.reweight(1)
+    np.savetxt(f"w_opt_{theta}.txt", rw.res[theta])
+
+    # for i in range(3):
+    #     rw.plot_phix2r(i)
+
+    #opt_theta = 100
+    #rw.plot_comparison(1, opt_theta, outfig='t4l/r2_compare')
+
+def plot_weights():
+    """
+    Plot the weights for each theta.
+    """
+    for theta in [100, 1000, 10000]:
+        #run_reweight(theta)
+        w_opt = np.loadtxt(f"w_opt_{theta}.txt")
+        plt.plot(w_opt, label=f'theta={theta}')
+        # print the traj index with the highest weight
+        print(f"theta={theta} \t segment of highest weight =", np.argmax(w_opt))
+        plt.legend()
+    plt.ylim(-0.1, 0.5)
+    plt.xlabel("Trajectory Segment")
+    plt.ylabel("Weight")
+    plt.tight_layout()
+    #plt.show()
+    plt.savefig("weight_opt.pdf")
+
 # make data
 #make_nmr_data()
 #make_md_data()
 #make_exp_err_data()
 
-rex = 't4l/ref-traj.npy'
-rmd = 't4l/trajs.npy'
-eex = 't4l/exp_err.npy'
+# run rw
+#run_reweight()
 
-#load_and_check_array(rex)
-
-rw = absurder.ABSURDer(rex, rmd, eex)
-
-rw.plot_comparison(1)
-
-rw.reweight(1)
-
-# for i in range(3):
-#     rw.plot_phix2r(i)
-
-opt_theta = 100
-rw.plot_comparison(1, opt_theta)
+# plot weights
+plot_weights()
