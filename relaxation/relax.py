@@ -4,6 +4,7 @@ from MDAnalysis.analysis import align
 import numpy as np
 from scipy.optimize import minimize, curve_fit
 #from lmfit import Parameters, minimize
+import lmfit
 import matplotlib.pyplot as plt
 from functools import partial
 
@@ -526,18 +527,20 @@ class NH_Relaxation:
             time_lags = np.linspace(0, acf_values.shape[0], num=acf_values.shape[0])
 
         # Initialize Parameters
-        params = Parameters()
+        params = lmfit.Parameters()
         for i in range(self.n_exps):
             params.add(f"A{i}", value=1 / (self.n_exps + 1), min=0, max=1)    # Amplitudes
             params.add(f"tau{i}", value=self.tau_c, min=0)                    # Correlation times
         # Offset amplitude
-        params.add(f"A{self.n_exps + 1}", value=1 / (self.n_exps + 1), min=0, max=1)
+        params.add(f"A{self.n_exps}", value=1 / (self.n_exps + 1), min=0, max=1)
+
+        #print("Initial Params: ", params)
 
         # Constraint: Sum of amplitudes = 1
         params.add('sum_A', expr='+'.join([f"A{i}" for i in range(self.n_exps + 1)]), value=1)
 
         # Perform the fit
-        result = minimize(
+        result = lmfit.minimize(
             self.residual,
             params,
             args=(time_lags, acf_values),
@@ -545,12 +548,14 @@ class NH_Relaxation:
         )
 
         # Extract fitted amplitudes and correlation times
-        A = np.array([result.params[f"A{i}"].value for i in range(self.n_exps)])
+        A = np.array([result.params[f"A{i}"].value for i in range(self.n_exps + 1)])
         tau = np.array([result.params[f"tau{i}"].value for i in range(self.n_exps)])
+        # print("Fitted Amplitudes: ", A)
+        # print("Fitted Correlation Times: ", tau)
 
         # Optionally plot the ACF and the fit
         if self.acf_plot:
-            fitted_acf = self.multi_exp_decay(time_lags, A, tau)
+            fitted_acf = self.multi_exp_decay(time_lags, A[0], A[1:], tau)
             plt.plot(time_lags, acf_values, label="ACF Data")
             plt.plot(time_lags, fitted_acf, label="Multi-Exponential Fit", linestyle="--")
             plt.xlabel("Time Lag")
@@ -698,12 +703,12 @@ class NH_Relaxation:
 
 if __name__ == "__main__":
     # Run the NH_Relaxation calculation
-    # relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
-    #                            "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
-    #                            traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
-    relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-                               "t4l/t4l-1ps/segment_001.xtc", 
-                               traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
+    relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
+                               "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
+                               traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
+    # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
+    #                            "t4l/t4l-1ps/segment_001.xtc", 
+    #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
     R1, R2, NOE = relaxation.run()
 
     # Print the results
