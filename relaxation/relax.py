@@ -703,12 +703,12 @@ class NH_Relaxation:
 
 if __name__ == "__main__":
     # Run the NH_Relaxation calculation
-    relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
-                               "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
-                               traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
-    # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-    #                            "t4l/t4l-1ps/segment_001.xtc", 
-    #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
+    # relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
+    #                            "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
+    #                            traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
+    relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
+                               "t4l/t4l-1ps/segment_001.xtc", 
+                               traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
     R1, R2, NOE = relaxation.run()
 
     # Print the results
@@ -717,3 +717,19 @@ if __name__ == "__main__":
     print(f"R1: {R1[:n_vectors]} s^-1 \nT1: {1/R1[:n_vectors]} s\n")
     print(f"R2: {R2[:n_vectors]} s^-1 \nT2: {1/R2[:n_vectors]} s\n")
     print(f"NOE: {NOE[:n_vectors]}\n")
+
+    fig, ax = plt.subplots(ncols=3, figsize=(12, 5))
+    ax[0].plot(R1, label="R1")
+    ax[0].set_title("R1 Relaxation Rates")
+    ax[0].set_xlabel("NH Bond Vector")
+    ax[0].set_ylabel("R1 (s^-1)")
+    ax[1].plot(R2, label="R2")
+    ax[1].set_title("R2 Relaxation Rates")
+    ax[1].set_xlabel("NH Bond Vector")
+    ax[1].set_ylabel("R2 (s^-1)")
+    ax[2].plot(NOE, label="NOE")
+    ax[2].set_title("NOE Values")
+    ax[2].set_xlabel("NH Bond Vector")
+    ax[2].set_ylabel("NOE")
+    plt.tight_layout()
+    plt.show()
