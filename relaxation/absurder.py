@@ -616,17 +616,17 @@ class ABSURDer:
             ax.scatter( self.rex[r], rrw[r],      color = 'tab:red', marker = 'o', s = 70, alpha = 0.8, \
                        label = f'AbsurdER, {theta_label}{opt_theta}, {chi_label}{chi:.2f}', edgecolor = 'k' )
 
-            insax = ax.inset_axes([0.05,0.6,0.4,0.38])
+            # insax = ax.inset_axes([0.05,0.6,0.4,0.38])
 
-            insax.plot( self.phi, self.chi, 'o-', c = 'tab:grey', markersize = 4, mec = 'k')
-            insax.scatter( self.phi[opt_id], self.chi[opt_id], marker = 'X', c = 'tab:red', zorder = 10, s = 90, edgecolor = 'k' )
-            insax.set_xlabel(r'$\phi_{eff}$', fontsize = 14)
-            insax.set_ylabel(r'$\chi^2_R$', fontsize = 14)
-            insax.yaxis.tick_right()
-            insax.yaxis.set_label_position("right")
+            # insax.plot( self.phi, self.chi, 'o-', c = 'tab:grey', markersize = 4, mec = 'k')
+            # insax.scatter( self.phi[opt_id], self.chi[opt_id], marker = 'X', c = 'tab:red', zorder = 10, s = 90, edgecolor = 'k' )
+            # insax.set_xlabel(r'$\phi_{eff}$', fontsize = 14)
+            # insax.set_ylabel(r'$\chi^2_R$', fontsize = 14)
+            # insax.yaxis.tick_right()
+            # insax.yaxis.set_label_position("right")
 
-            insax.set_xticks([0,0.5,1])
-            insax.tick_params(labelsize = 14)
+            # insax.set_xticks([0,0.5,1])
+            # insax.tick_params(labelsize = 14)
 
         ax.set_xlabel( r'$R^{NMR}$' + rate_label + ' [s$^{-1}$]' )
         ax.set_ylabel( r'$R^{SIM}$' + rate_label + ' [s$^{-1}$]' )
