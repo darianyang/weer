@@ -71,7 +71,7 @@ def split_trajectory(u, output_dir, segment_ns=10, step_size=1):
     
     # Determine the number of segments
     num_segments = total_frames // frames_per_segment
-    print(f"Splitting trajectory into {num_segments} segments of {segment_ns} ns each with step size {step_size} ps.")
+    print(f"Splitting trajectory with {total_frames} total frames into {num_segments} segments of {segment_ns} ns each with step size {step_size} ps.")
 
     for i in range(num_segments):
         # Define start and stop frames
@@ -109,15 +109,15 @@ def reduce_trajectory(u, output_xtc, step_size=10):
 
 # Example usage
 input_pdb = "sim1_dry.pdb" 
-input_xtc = "sim1_imaged.xtc"  
-output_dir = "t4l-10ps-imaged"
+input_xtc = "sim1_imaged2.xtc"  
+output_dir = "t4l-10ps-imaged2"
 
 # load universe
 u = load_u(input_pdb, input_xtc, step_size=10)
 
 # split the trajectory into 10 ps segments
-split_trajectory(u, output_dir)
+split_trajectory(u, output_dir, step_size=1, segment_ns=1)
 
 # Reduce the trajectory by a factor of 100 (for ref data)
-output_xtc_reduced = "sim1-100ps-imaged.xtc"
-reduce_trajectory(u, output_xtc_reduced, step_size=10)
+# output_xtc_reduced = "sim1-100ps-imaged2.xtc"
+# reduce_trajectory(u, output_xtc_reduced, step_size=10)

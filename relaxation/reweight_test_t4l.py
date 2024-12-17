@@ -16,11 +16,12 @@ def make_nmr_data():
     This will be the reference data for reweighting.
     """
     # desired shape: n_rates x n_vectors x 1 single traj
-    traj = f"t4l/sim1-100ps-imaged.xtc"
+    traj = f"t4l/sim1-100ps-imaged2.xtc"
     relaxation = relax.NH_Relaxation("t4l/sim1_dry.pdb", traj, 
                                     traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9)
     R1, R2, NOE = relaxation.run()
-    relax_data = np.array([R1, R2, NOE])
+    # TODO: manually manipulating R2 to be 90% of the original value ?
+    relax_data = np.array([R1, R2*0.9, NOE])
     np.save('t4l/ref-traj.npy', relax_data)
 
 def make_md_data():
@@ -29,7 +30,7 @@ def make_md_data():
     """
     # desired shape: n_rates x n_vectors x n_trajs (blocks)
     for i in tqdm(range(1, 107)):
-        traj = f"t4l/t4l-10ps-imaged/segment_{i:03d}.xtc"
+        traj = f"t4l/t4l-10ps-imaged2/segment_{i:03d}.xtc"
         relaxation = relax.NH_Relaxation("t4l/sim1_dry.pdb", traj, 
                                         traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
         R1, R2, NOE = relaxation.run()
@@ -57,7 +58,7 @@ def load_and_check_array(array):
     print(data.shape)
     return data
 
-def run_reweight(theta=100):
+def run_reweight(theta=10, plot=False):
     """
     Run reweighting on the data.
     """
@@ -78,21 +79,23 @@ def run_reweight(theta=100):
     # for i in range(3):
     #     rw.plot_phix2r(i)
 
-    opt_theta = 100
-    rw.plot_comparison(1, opt_theta, outfig='t4l/r2_compare')
+    if plot:
+        opt_theta = 10
+        rw.plot_comparison(1, opt_theta, outfig='t4l/r2_compare2')
 
-def plot_weights():
+def plot_weights(run_rw=False):
     """
     Plot the weights for each theta.
     """
-    for theta in [100, 1000, 10000]:
-        #run_reweight(theta)
+    for theta in [10, 100, 1000]:
+        if run_rw:
+            run_reweight(theta)
         w_opt = np.loadtxt(f"w_opt_{theta}.txt")
         plt.plot(w_opt, label=f'theta={theta}')
         # print the traj index with the highest weight
         print(f"theta={theta} \t segments of highest/lowest weight = {np.argmax(w_opt)} / {np.argmin(w_opt)}")
         plt.legend()
-    plt.ylim(-0.1, 0.3)
+    plt.ylim(-0.1, 0.5)
     plt.xlabel("Trajectory Segment")
     plt.ylabel("Weight")
     plt.tight_layout()
@@ -101,11 +104,12 @@ def plot_weights():
 
 # make data
 #make_nmr_data()
-#make_md_data()
+# make_md_data()
 #make_exp_err_data()
 
-# run rw
-#run_reweight()
-
 # plot weights
-plot_weights()
+#plot_weights(run_rw=True)
+plot_weights(run_rw=False)
+
+# run rw to make separate plot of chi^2
+#run_reweight(plot=True)
