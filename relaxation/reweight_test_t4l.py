@@ -90,9 +90,9 @@ def plot_weights():
         w_opt = np.loadtxt(f"w_opt_{theta}.txt")
         plt.plot(w_opt, label=f'theta={theta}')
         # print the traj index with the highest weight
-        print(f"theta={theta} \t segment of highest weight =", np.argmax(w_opt))
+        print(f"theta={theta} \t segments of highest/lowest weight = {np.argmax(w_opt)} / {np.argmin(w_opt)}")
         plt.legend()
-    plt.ylim(-0.1, 0.5)
+    plt.ylim(-0.1, 0.3)
     plt.xlabel("Trajectory Segment")
     plt.ylabel("Weight")
     plt.tight_layout()
@@ -105,7 +105,7 @@ def plot_weights():
 #make_exp_err_data()
 
 # run rw
-run_reweight()
+#run_reweight()
 
 # plot weights
-#plot_weights()
+plot_weights()

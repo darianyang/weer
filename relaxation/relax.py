@@ -709,12 +709,12 @@ if __name__ == "__main__":
     # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
     #                            "t4l/t4l-1ps/segment_001.xtc", max_lag=None,
     #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
-    relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-                               "t4l/t4l-10ps/segment_001.xtc", max_lag=None,
-                               traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
     # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-    #                            "t4l/sim1-100ps.xtc", max_lag=100,
-    #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9)
+    #                            "t4l/t4l-10ps-imaged/segment_001.xtc", max_lag=None,
+    #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
+    relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
+                               "t4l/sim1-100ps-imaged.xtc",
+                               traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9)
     R1, R2, NOE = relaxation.run()
 
     # Print the results
@@ -739,4 +739,4 @@ if __name__ == "__main__":
     ax[2].set_ylabel("NOE")
     plt.tight_layout()
     plt.show()
-    fig.savefig("t4l_relax_test.pdf")
+    fig.savefig("t4l_relax_ref.pdf")
