@@ -16,7 +16,7 @@ def make_nmr_data():
     This will be the reference data for reweighting.
     """
     # desired shape: n_rates x n_vectors x 1 single traj
-    traj = f"t4l/sim1-100ps.xtc"
+    traj = f"t4l/sim1-100ps-imaged.xtc"
     relaxation = relax.NH_Relaxation("t4l/sim1_dry.pdb", traj, 
                                     traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9)
     R1, R2, NOE = relaxation.run()
@@ -29,7 +29,7 @@ def make_md_data():
     """
     # desired shape: n_rates x n_vectors x n_trajs (blocks)
     for i in tqdm(range(1, 107)):
-        traj = f"t4l/t4l-10ps/segment_{i:03d}.xtc"
+        traj = f"t4l/t4l-10ps-imaged/segment_{i:03d}.xtc"
         relaxation = relax.NH_Relaxation("t4l/sim1_dry.pdb", traj, 
                                         traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
         R1, R2, NOE = relaxation.run()
@@ -78,8 +78,8 @@ def run_reweight(theta=100):
     # for i in range(3):
     #     rw.plot_phix2r(i)
 
-    #opt_theta = 100
-    #rw.plot_comparison(1, opt_theta, outfig='t4l/r2_compare')
+    opt_theta = 100
+    rw.plot_comparison(1, opt_theta, outfig='t4l/r2_compare')
 
 def plot_weights():
     """
@@ -105,7 +105,7 @@ def plot_weights():
 #make_exp_err_data()
 
 # run rw
-#run_reweight()
+run_reweight()
 
 # plot weights
-plot_weights()
+#plot_weights()
