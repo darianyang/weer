@@ -88,7 +88,7 @@ class NH_Relaxation:
         # Load the alanine dipeptide trajectory
         u = mda.Universe(self.pdb, self.traj, in_memory=True, in_memory_step=self.traj_step)
 
-        # Align trajectory to the first frame
+        # Align trajectory to the reference frame / pdb
         ref = mda.Universe(self.pdb, self.pdb)
         align.AlignTraj(u, ref, select='name CA', in_memory=True).run()
 
