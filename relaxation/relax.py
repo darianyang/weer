@@ -150,7 +150,14 @@ class NH_Relaxation:
             function for each lag time.
         """
         # Normalize the NH bond vectors to unit vectors
+        # TODO: here, we normalize over the norm or length of the NH bond vectors
+        #       but note that the bond lengths are fixed in the simulation (SHAKE)
+        #       so the norm is not fully accurate, need some adjustment to correct this
         unit_vectors = vectors / np.linalg.norm(vectors, axis=2, keepdims=True)
+        #unit_vectors = vectors / (np.linalg.norm(vectors, axis=2, keepdims=True) + 0.02) # testing bond length correction factor
+        # print("Vectors: ", vectors)
+        # print("Bond Length: ", np.linalg.norm(vectors, axis=2, keepdims=True))
+        # print("Unit Vectors: ", unit_vectors)
         #print("unit vector shape", unit_vectors.shape)
 
         # initialize max_lag if not provided
@@ -450,7 +457,7 @@ class NH_Relaxation:
             bounds=bounds,
             method="SLSQP",
             # print convergence messages
-            #options={"disp": True}
+            options={"disp": True}
         )
 
         if not result.success:
@@ -505,7 +512,6 @@ class NH_Relaxation:
 
         # Residuals
         return acf_values - model
-
     def fit_acf_lmfit_minimize(self, acf_values, time_lags=None):
         """
         Fit ACF data to a multi-exponential decay model using lmfit.minimize.
@@ -641,6 +647,37 @@ class NH_Relaxation:
 
         return R1, R2, NOE
 
+    def plot_results(self, R1, R2, NOE):
+        """
+        Plot the R1, R2, and NOE values for each NH bond vector.
+
+        Parameters
+        ----------
+        R1 : np.ndarray
+            R1 relaxation rates.
+        R2 : np.ndarray
+            R2 relaxation rates.
+        NOE : np.ndarray
+            NOE values.
+        """
+        fig, ax = plt.subplots(ncols=3, figsize=(12, 5))
+        ax[0].plot(R1, label="R1")
+        ax[0].set_title("R1 Relaxation Rates")
+        ax[0].set_xlabel("NH Bond Vector")
+        ax[0].set_ylabel("R1 (s^-1)")
+        ax[1].plot(R2, label="R2")
+        ax[1].set_title("R2 Relaxation Rates")
+        ax[1].set_xlabel("NH Bond Vector")
+        ax[1].set_ylabel("R2 (s^-1)")
+        ax[2].plot(NOE, label="NOE")
+        ax[2].set_title("NOE Values")
+        ax[2].set_xlabel("NH Bond Vector")
+        ax[2].set_ylabel("NOE")
+        plt.tight_layout()
+        plt.show()
+        #fig.savefig("t4l_relax_ref.pdf")
+        #fig.savefig("t4l_relax_seg1.pdf")
+
     def run(self):
         """
         Main public method for calculating R1, R2, and NOE values from input MD simulation.
@@ -705,15 +742,15 @@ class NH_Relaxation:
 
 if __name__ == "__main__":
     # Run the NH_Relaxation calculation
-    # relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
-    #                            "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
-    #                            traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
+    relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
+                               "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
+                               traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
     # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
     #                            "t4l/t4l-1ps/segment_001.xtc", max_lag=None,
     #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
-    relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-                               "t4l/t4l-10ps-imaged2/segment_001.xtc", max_lag=None,
-                               traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
+    # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
+    #                            "t4l/t4l-10ps-imaged2/segment_001.xtc", max_lag=None,
+    #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
     # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
     #                            "t4l/sim1-100ps-imaged.xtc",
     #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9)
@@ -726,20 +763,5 @@ if __name__ == "__main__":
     print(f"R2: {R2[:n_vectors]} s^-1 \nT2: {1/R2[:n_vectors]} s\n")
     print(f"NOE: {NOE[:n_vectors]}\n")
 
-    fig, ax = plt.subplots(ncols=3, figsize=(12, 5))
-    ax[0].plot(R1, label="R1")
-    ax[0].set_title("R1 Relaxation Rates")
-    ax[0].set_xlabel("NH Bond Vector")
-    ax[0].set_ylabel("R1 (s^-1)")
-    ax[1].plot(R2, label="R2")
-    ax[1].set_title("R2 Relaxation Rates")
-    ax[1].set_xlabel("NH Bond Vector")
-    ax[1].set_ylabel("R2 (s^-1)")
-    ax[2].plot(NOE, label="NOE")
-    ax[2].set_title("NOE Values")
-    ax[2].set_xlabel("NH Bond Vector")
-    ax[2].set_ylabel("NOE")
-    plt.tight_layout()
-    plt.show()
-    #fig.savefig("t4l_relax_ref.pdf")
-    #fig.savefig("t4l_relax_seg1.pdf")
+    # plot the results
+    #relaxation.plot_results(R1, R2, NOE)
