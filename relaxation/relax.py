@@ -2,7 +2,7 @@ import MDAnalysis as mda
 from MDAnalysis.analysis import align
 
 import numpy as np
-from scipy.optimize import minimize, curve_fit
+from scipy.optimize import minimize, curve_fit, differential_evolution
 #from lmfit import Parameters, minimize
 import lmfit
 import matplotlib.pyplot as plt
@@ -372,7 +372,6 @@ class NH_Relaxation:
         #print("A0: ", A0, "A: ", A, "tau: ", tau)
         return A0 + np.sum(A[:, None] * np.exp(-t / tau[:, None]), axis=0)
 
-
     # Fit C_I(t) to a multi-exponential decay function
     # Objective function to minimize (sum of squared residuals)
     def objective(self, params, t, acf_values):
@@ -457,7 +456,13 @@ class NH_Relaxation:
             bounds=bounds,
             method="SLSQP",
             # print convergence messages
-            options={"disp": True}
+            #options={"disp": True}
+            options={
+                "disp": True,     # Display convergence messages
+                'maxiter': 1000,  # Increase max iterations
+                'ftol': 1e-8,     # Tolerance for termination
+                'gtol': 1e-8      # Tolerance for gradients
+            }
         )
 
         if not result.success:
@@ -482,6 +487,75 @@ class NH_Relaxation:
         # print("Fitted correlation times:", tau)
 
         #return {"amplitudes": A, "correlation_times": tau, "result": result}
+        return A, tau, result
+    
+    # testing with differential evolution instead of minimize
+    def fit_acf_differential_evolution(self, acf_values, time_lags=None):
+        """
+        Fit ACF data to a multi-exponential decay model using differential evolution.
+
+        Parameters
+        ----------
+        acf_values : np.ndarray
+            ACF values at different time lags.
+        time_lags : np.ndarray
+            Time lags corresponding to the ACF values. Default None.
+            Will guess time_lags array when None provided based on acf_values shape.
+
+        Returns
+        -------
+        A, tau, result
+        """
+        # Guess time_lags array when None provided
+        if time_lags is None:
+            time_lags = np.linspace(0, acf_values.shape[0], num=acf_values.shape[0])
+
+        # Define bounds for parameters
+        amplitude_bounds = [(0, 1)] * (self.n_exps + 1)  # Amplitudes must be in [0, 1]
+        tau_bounds = [(0.1 * self.tau_c, 10 * self.tau_c)] * self.n_exps  # Correlation times are positive
+        #tau_bounds = [(0.1, 10)] * self.n_exps  # Correlation times are positive
+        bounds = amplitude_bounds + tau_bounds
+
+        # Constraint: sum of amplitudes = 1
+        def constraint(params):
+            A = params[:self.n_exps + 1]
+            return np.abs(np.sum(A) - 1)
+
+        # Wrapper for the objective function with a constraint
+        def constrained_objective(params, t, acf_values):
+            penalty = 1e6 * constraint(params) if constraint(params) > 1e-5 else 0  # Penalize invalid solutions
+            return self.objective(params, t, acf_values) + penalty
+
+        # Perform optimization
+        result = differential_evolution(
+            func=partial(constrained_objective, t=time_lags, acf_values=acf_values),
+            bounds=bounds,
+            strategy="best1bin",
+            maxiter=1000,  # Maximum number of iterations
+            popsize=15,    # Population size
+            #tol=1e-8,      # Convergence tolerance
+            mutation=(0.5, 1),  # Mutation factor range
+            recombination=0.7,  # Recombination rate
+            disp=True      # Display progress
+        )
+
+        if not result.success:
+            raise RuntimeError(f"Optimization failed: {result.message}")
+
+        # Extract optimized parameters
+        optimized_params = result.x
+        A = optimized_params[:self.n_exps + 1]
+        tau = optimized_params[self.n_exps + 1:]
+
+        # Optionally plot the data and the fit
+        if self.acf_plot:
+            plt.plot(time_lags, acf_values, label="ACF Data")
+            plt.plot(time_lags, self.multi_exp_decay(time_lags, A[0], A[1:], tau), label="Multi-Exponential Fit", linestyle="--")
+            plt.xlabel("Time Lag")
+            plt.ylabel("ACF")
+            plt.legend()
+            plt.show()
+
         return A, tau, result
 
     # another version which uses lmfit
@@ -723,7 +797,8 @@ class NH_Relaxation:
             #print(nh_acf)
             
             # Fit ACF with multiple exponentials
-            A, tau, self.result = self.fit_acf_minimize(nh_acf)
+            #A, tau, self.result = self.fit_acf_minimize(nh_acf)
+            A, tau, self.result = self.fit_acf_differential_evolution(nh_acf)
             #A, tau, self.result = self.fit_acf_lmfit_minimize(nh_acf)
             
             # Calculate R1, R2, and NOE using J(w) from ACF fitting results
