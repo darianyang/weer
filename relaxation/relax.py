@@ -33,12 +33,8 @@ class NH_Relaxation:
     d_oo *= r_NH**-6  # Scale by bond length to the power of -6
     c_oo = (1 / 15) * Delta_sigma**2
 
-    # Nuclei frequencies
-    omega_H = 600.13 * 2 * np.pi * 1e6      # Proton frequency (rad/s)
-    omega_N = omega_H / 10.0                # ~Nitrogen frequency (rad/s)
-
     def __init__(self, pdb, traj, traj_start=None, traj_stop=None, traj_step=10, 
-                 max_lag=None, n_exps=5, acf_plot=False, tau_c=None):
+                 max_lag=None, n_exps=5, acf_plot=False, tau_c=None, b0=600):
         """
         Initialize the RelaxationCalculator with simulation and analysis parameters.
 
@@ -63,6 +59,8 @@ class NH_Relaxation:
         tau_c : float, optional
             Overall tumbling time in seconds (default is None).
             Can input a value or otherwise will calculate it from simulation.
+        b0 : float, optional
+            Magnetic field strength in MHz (1H) (default is 600).
         """
         self.pdb = pdb
         self.traj = traj
@@ -73,6 +71,10 @@ class NH_Relaxation:
         self.n_exps = n_exps
         self.acf_plot = acf_plot
         self.tau_c = tau_c
+
+        # Nuclei frequencies
+        self.omega_H = b0 * 2 * np.pi * 1e6         # Proton frequency (rad/s)
+        self.omega_N = self.omega_H / 10.0           # ~Nitrogen frequency (rad/s)
 
         self.u = self.load_align_traj()
 
@@ -711,7 +713,7 @@ if __name__ == "__main__":
     #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
     relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
                                "t4l/t4l-10ps-imaged2/segment_001.xtc", max_lag=None,
-                               traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
+                               traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
     # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
     #                            "t4l/sim1-100ps-imaged.xtc",
     #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9)
@@ -740,4 +742,4 @@ if __name__ == "__main__":
     plt.tight_layout()
     plt.show()
     #fig.savefig("t4l_relax_ref.pdf")
-    fig.savefig("t4l_relax_seg1.pdf")
+    #fig.savefig("t4l_relax_seg1.pdf")
