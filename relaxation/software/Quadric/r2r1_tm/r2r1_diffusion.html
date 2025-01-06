@@ -1,0 +1,56 @@
+<HTML>
+<HEAD>
+    <TITLE>r2r1_diffusion</TITLE>
+</HEAD>
+<BODY>
+<H1>R2R1_DIFFUSION</H1>
+The program <I>r2r1_diffusion</I> uses the approach of Tjandra, et al. [J.
+Am. Chem. Soc. 117:12562-12566 (1995)] to determine the diffusion tensors
+for spherical, and axially-symmetric motional models from experimental nitrogen-15
+spin relaxation data. Analysis of a fully anisotropic diffusion tensor has
+not yet been implemented. The program <A HREF="quadric.html">quadric_diffusion</A>
+can be used to evaluate an anisotropic diffusion tensor in the limit of
+small anisotropy.<BR>
+<BR>
+<B>Usage:</B>	r2r1_diffusion control_file<BR>
+<DL>
+  <DT>The <B>control_file</B> contains the following information:
+  <DD>#_of_entries (in the r2r1_file)	spectrometer_field (MHz)	#_of_simulations
+  <DD>D_isotropic	Dpar/Dper	theta	phi
+  <DD>axial_ratio_low axial_ratio_high #steps
+  <DD>r2r1_file_name
+  <DD>input_pdb_file_name
+  <DD>output_pdb_file_name (for axially symmetric model)
+</DL>
+D_isotropic, Dpar/Dper, theta and phi are initial estimates of the elements
+and orientations of the diffusion tensor. D_isotropic is the only required
+entry; Dpar/Dper, theta and phi can be set to 1.00, 0.0, and 0.0 respectively.
+Ratio_hi and Ratio_low set limits on Dpar/Dper for grid search. Nsteps is the number of 
+steps of grid searching to perform.
+<BR>
+<BR>
+The <B>r2r1_file</B> contains  the R2/R1 ratios, in which R2 and R1 are
+the spin-spin and spin-lattice relaxation rate constants for 15N or 13C
+spins.  The r2r1_file contains one line for each residue to be analyzed.
+Each line contains the following fields:
+<DL>
+  <DD>residue_number	r2/r1_ratio	r2/r1_uncertainty
+</DL>
+For both the control_file and r2r1_file, lines starting with &quot;#&quot;
+are ignored. The residue number in the r2r1_file must match the residue
+number in the input_pdb_file.<BR>
+<BR>
+For each model (spherical, and axially-symmetric diffusion), the diffusion
+tensor and Euler angles are output. The chi-square and F statistics are
+calculated for comparing models. The program also returns the predicted
+effective diffusion constant for each residue and the squared residual from
+the fitting process. For diagnostic purposes, spherical harmonic functions
+of the NH bond vector (in the diffusion reference frame) are also output.<BR>
+<BR>
+For axially symmetric diffusion model, the structure in the input_pdb_file
+is rotated to the diffusion frame. To be meaningful, prior to analysis,
+the center of mass of the molecular structure should be translated to coordinate
+origin by using the program <A HREF="pdbinertia.html">pdbinertia</A>. <BR>
+<BR>
+</BODY>
+</HTML>

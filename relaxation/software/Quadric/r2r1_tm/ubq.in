@@ -1,0 +1,8 @@
+# sample control file for ubiquitin
+55      600.13  0
+4.0453e+7       1.00   0   0 
+0.8 1.2 10
+ubq.r2r1.input
+1ubq.trans.pdb
+1ubq.rot.test.pdb
+

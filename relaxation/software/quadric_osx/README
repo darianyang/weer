@@ -1,0 +1,38 @@
+# README    quadric_diffusion
+
+Assuming that you have the blas and lapack libraries
+installed, you can just run 'make' to compile
+the programs. 
+
+All .html files should be placed in the same directory
+(or you should fix the links)
+
+The test input files are as follows:
+
+ubq.in           ! control file for quadric_diffusion
+ubq.tm.input     ! input tm file (obtained from 'r2r1_tm'
+1ubq.prot.pdb    ! ubiquitin crystal structure
+1ubq.trans.pdb   ! ubiquitin structure, translated to
+                 ! center of mass using 'pdbinertia'
+
+ubq.output       ! quadric_diffusion results
+1ubq.axial.pdb   ! output structure rotated to
+                 ! axially symmetric principal axes
+1ubq.anis.pdb    ! output structure rotated to
+                 ! anisotropic principal axes
+
+input file for r2r1_tm program
+ubq.r2r1.in        ! r2r1_tm control file
+ubq.r2r1.input     ! input R2/R1 file 
+ubq.tm.input       ! output from r2r1_tm
+
+To test the quadric_diffusion program, run
+
+quadric_diffusion ubq.in >ubq.quadric.test.out
+
+To test the r2r1_tm program, run
+
+r2r1_tm <ubq.r2r1.in >ubq.r2r1.test.out
+
+When in doubt, read the .html documentation
+

@@ -1,0 +1,8 @@
+# sample control file for ubiquitin
+0.8 1.2 10
+1 'N' 
+ubq.tm.input
+1ubq.trans.pdb
+1ubq.axial.test.pdb
+1ubq.anis.test.pdb
+

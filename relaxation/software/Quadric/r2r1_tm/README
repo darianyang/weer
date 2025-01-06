@@ -1,0 +1,27 @@
+# README    r2r1
+
+Assuming that you have the blas and lapack libraries
+installed, you can just run 'make' to compile
+the programs. 
+
+All .html files should be placed in the same directory
+(or you should fix the links)
+
+The test input files are as follows:
+
+ubq.in           ! control file for r2r_diffusion
+ubq.r2r1.input   ! input R2/R1 file 
+1ubq.prot.pdb    ! ubiquitin crystal structure
+1ubq.trans.pdb   ! ubiquitin structure, translated to
+                 ! center of mass using 'pdbinertia'
+
+ubq.output       ! r2r1_diffusion results
+1ubq.rot.pdb   ! output structure rotated to
+                 ! axially symmetric principal axes
+
+To test the r2r1 program, run
+
+r2r1_diffusion ubq.in >ubq.r2r1.test.out
+
+When in doubt, read the .html documentation
+

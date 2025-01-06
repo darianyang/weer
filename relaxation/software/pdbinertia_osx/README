@@ -1,0 +1,20 @@
+# README    pdbinertia
+
+Assuming that you have the blas and lapack libraries
+installed, you can just run 'make' to compile
+the programs. 
+
+The test input files are as follows:
+
+1ubq.prot.pdb    ! ubiquitin crystal structure
+
+ubq.inertia.output       ! pdbinertia results
+1ubq.prot.inertia.pdb    ! output structure rotated to
+                         ! inertia tensor principal axes
+
+To test the pdbinertia program, run
+
+pdbinertia -r 1ubq.prot.pdb 1ubq.prot.test.pdb  >ubq.test.out
+
+When in doubt, read the .html documentation
+

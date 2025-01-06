@@ -1,0 +1,38 @@
+<HTML>
+<HEAD>
+    <TITLE>r2r1_tm</TITLE>
+</HEAD>
+<BODY>
+<H1>R2R1_TM</H1>
+The program <I>r2r1_tm</I> calculates a local effective correlation time
+from the R2/R1 ratio, in which R2 and R1 are the spin-spin and spin-lattice
+relaxation rate constants for nitrogen-15 or carbon-13 spins. The local
+correlation times are used as input for the <A HREF="quadric.html">quadric_diffusion</A>
+program.<BR>
+<BR>
+<B>Usage:</B>	r2r1_tm [-1] &gt; tm_file<BR>
+<BR>
+The program prompts for the following information:
+<BLOCKQUOTE>nucleus_type (15N or 13C)<BR>
+XH_bond_length (Ang.) X_CSA (ppm) [enter a blank line to accept defaults]<BR>
+proton_spectrometer_field for R1 (MHz)<BR>
+proton_spectrometer_field for R2 (MHz)<BR>
+initial_tm_estimate (ns)<BR>
+number_of_entries (in the r2r1_file)<BR>
+r2r1_file_name</BLOCKQUOTE>
+The input r2r1_file contains one line for each residue to be analyzed. Each
+line contains the following fields:
+<BLOCKQUOTE>residue_number	r2/r1_ratio	r2/r1_uncertainty</BLOCKQUOTE>
+The input residue numbers should correspond to residue numbers in a pdb
+file for the molecule. Lines beginning with &quot;#&quot; are ignored in
+the r2r1_file. If the -1 flag is included on the command line, then
+the input r2r1_file is not read and the user is prompted to enter a single 
+r2/r1_ratio and uncertainty. The functionality with the -1 flag is essentially 
+the same as using the 'tmest' program of earlier releases.<BR>
+<BR>
+The output tm_file contains one line for each residue analyzed. Each line
+contains the following fields:
+<BLOCKQUOTE>residue_number	tm	tm_uncertainty</BLOCKQUOTE>
+<BR>
+</BODY>
+</HTML>

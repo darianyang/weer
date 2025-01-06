@@ -1,0 +1,32 @@
+<HTML>
+<HEAD>
+    <TITLE>pdbinertia</TITLE>
+</HEAD>
+<BODY>
+<H1>PDBINERTIA</H1>
+The program <I>pdbinertia</I> calculates the principal moments of inertia
+for the atoms in a standard pdb file. By default the program writes the
+moments of inertia to standard output. Optionally, the program can output
+a new pdb file in which the molecule is translated so that its center of
+mass is located at the origin and rotated so that the moments of inertia
+are aligned with the Cartesian axes. At present, the program only reads
+lines starting with the 'ATOM' keyword and only recognizes the atoms H,
+C, N, O, P, S.<BR>
+<BR>
+<B>Usage:</B> pdbinertia [-rt] infile.pdb [outfile.pdb]
+<DL>
+  <DT><B>-r</B>
+  <DD>Output a translated and rotated pdb file. The output file name must
+be provided. The -r flag implies the -t flag. 
+  <DT><BR>
+  <DT><B>-t</B>
+  <DD>Output a translated pdb file. The output file name must be provided.
+  <DT><BR>
+  <DT><B>infile.pdb</B>
+  <DD>Name of the pdb file 
+  <DT><BR>
+  <DT><B>outfile.pdb</B>
+  <DD>Name of the file to be output if the -r or -t flags are specified.
+</DL>
+</BODY>
+</HTML>
