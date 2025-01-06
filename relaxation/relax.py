@@ -436,10 +436,11 @@ class NH_Relaxation:
 
         # Initial guess for parameters: equal amplitudes and linear time constants
         initial_amplitudes = np.ones(self.n_exps + 1) / (self.n_exps + 1)
-        #print("Initial Amplitudes: ", initial_amplitudes)
+        print("Initial Amplitudes: ", initial_amplitudes)
         
         # Initial guess for correlation times
         initial_taus = np.linspace(0.1, 1, self.n_exps)
+        #initial_taus = np.ones(self.n_exps) / self.n_exps
         # Create a range of initial guesses around tau_c to have similar timescales
         # this is important when calculating J(w) and tau_eff later
         #initial_taus = np.linspace(0.1 * self.tau_c, 10 * self.tau_c, self.n_exps)
@@ -505,7 +506,8 @@ class NH_Relaxation:
         # print("Fitted correlation times:", tau)
 
         #return {"amplitudes": A, "correlation_times": tau, "result": result}
-        return A, tau, result
+        # TODO: I'm testing a re-scaling of the tau values after fitting in a more numerically stable range
+        return A, tau*1e-9, result
     
     # testing with differential evolution instead of minimize
     def fit_acf_differential_evolution(self, acf_values, time_lags=None):
@@ -835,26 +837,26 @@ class NH_Relaxation:
 
 if __name__ == "__main__":
     # Run the NH_Relaxation calculation
-    relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
-                               "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
-                               traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
+    # relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
+    #                            "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
+    #                            traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
     # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
     #                            "t4l/t4l-1ps/segment_001.xtc", max_lag=None,
     #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
-    # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-    #                            "t4l/t4l-10ps-imaged2/segment_001.xtc", max_lag=None,
-    #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
+    relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
+                               "t4l/t4l-10ps-imaged2/segment_001.xtc", max_lag=None,
+                               traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
     # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
     #                            "t4l/sim1-100ps-imaged.xtc",
     #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9)
     R1, R2, NOE = relaxation.run()
 
     # Print the results
-    n_vectors = None
+    n_vectors = 5
     print(f"\ntau_c: {relaxation.tau_c} s\n")
     print(f"R1: {R1[:n_vectors]} s^-1 \nT1: {1/R1[:n_vectors]} s\n")
     print(f"R2: {R2[:n_vectors]} s^-1 \nT2: {1/R2[:n_vectors]} s\n")
     print(f"NOE: {NOE[:n_vectors]}\n")
 
     # plot the results
-    #relaxation.plot_results(R1, R2, NOE)
+    relaxation.plot_results(R1, R2, NOE)
