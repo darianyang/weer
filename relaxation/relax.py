@@ -369,7 +369,7 @@ class NH_Relaxation:
         np.ndarray
             The multi-exponential decay values.
         """
-        #print("A0: ", A0, "A: ", A, "tau: ", tau)
+        #print("\n\nA0: ", A0, "\nA: ", A, "\ntau: ", tau, "\ntime: ", t)
         return A0 + np.sum(A[:, None] * np.exp(-t / tau[:, None]), axis=0)
 
     # Fit C_I(t) to a multi-exponential decay function
@@ -399,7 +399,15 @@ class NH_Relaxation:
         # Calculate the multi-exponential decay
         fit = self.multi_exp_decay(t, A[0], A[1:], tau)
         residuals = acf_values - fit
+        # test log scale residuals (TODO)
+        #residuals = np.log(acf_values) - np.log(fit)
         #print(f"Residuals: {residuals}")
+
+        # TODO: Regularization to avoid small or clustered tau values
+        #reg = 1e-4 * np.sum(1 / tau)  # Penalize very small tau
+        #reg += 1e-4 * np.sum(np.diff(np.sort(tau))**2)  # Penalize clustered tau
+        #reg += 1e-4 * np.sum(np.diff(np.sort(A))**2)  # Penalize clustered A
+        #return np.sum(residuals**2) + reg
         return np.sum(residuals**2)
         #return residuals
 
@@ -431,10 +439,13 @@ class NH_Relaxation:
         #print("Initial Amplitudes: ", initial_amplitudes)
         
         # Initial guess for correlation times
-        #initial_taus = np.linspace(0.1, 10, self.n_exps)
+        initial_taus = np.linspace(0.1, 1, self.n_exps)
         # Create a range of initial guesses around tau_c to have similar timescales
         # this is important when calculating J(w) and tau_eff later
-        initial_taus = np.linspace(0.1 * self.tau_c, 10 * self.tau_c, self.n_exps)
+        #initial_taus = np.linspace(0.1 * self.tau_c, 10 * self.tau_c, self.n_exps)
+        #initial_taus = np.logspace(np.log10(0.1 * self.tau_c), np.log10(10 * self.tau_c), self.n_exps)
+        #initial_taus = [self.tau_c] * self.n_exps
+        print("Initial Taus: ", initial_taus)
 
         initial_guess = np.concatenate([initial_amplitudes, initial_taus])
         #print("Initial Guess: ", initial_guess)
@@ -455,13 +466,12 @@ class NH_Relaxation:
             constraints=constraints,
             bounds=bounds,
             method="SLSQP",
-            # print convergence messages
-            #options={"disp": True}
             options={
-                "disp": True,     # Display convergence messages
+                #"disp": True,     # Display convergence messages
                 'maxiter': 1000,  # Increase max iterations
                 'ftol': 1e-8,     # Tolerance for termination
-                'gtol': 1e-8      # Tolerance for gradients
+                #'gtol': 1e-8      # Tolerance for gradients
+                #'eps' : 1e-4,  # Step size for numerical approx of jacobian
             }
         )
 
@@ -471,12 +481,20 @@ class NH_Relaxation:
         # Extract optimized parameters
         optimized_params = result.x
         A = optimized_params[:self.n_exps + 1]
+        print("A:", A)
         tau = optimized_params[self.n_exps + 1:]
+        print("tau: ", tau)
 
         # Optionally plot the data and the fit (TODO: update to OOP plot)
         if self.acf_plot:
             plt.plot(time_lags, acf_values, label="ACF Data")
             plt.plot(time_lags, self.multi_exp_decay(time_lags, A[0], A[1:], tau), label="Multi-Exponential Fit", linestyle="--")
+            
+            # test_lags = np.array([1, 2, 5, 10, 50, 100])
+            # test_decay = self.multi_exp_decay(test_lags, A[0], A[1:], tau)
+            # print("test decay: ", test_decay)
+            # plt.plot(test_lags, test_decay, label="Multi-Exponential Fit", linestyle="--")
+
             plt.xlabel("Time Lag")
             plt.ylabel("ACF")
             plt.legend()
@@ -781,7 +799,7 @@ class NH_Relaxation:
         # TODO: update the estmate tau_c method, and check units
         if self.tau_c is None:
             self.tau_c = self.estimate_tau_c(acf_values)
-            self.tau_c *= 10**-10 # temp conversion for larger contributions from ACF (TODO)
+            #self.tau_c *= 10**-10 # temp conversion for larger contributions from ACF (TODO)
             #print("tau_c: ", self.tau_c)
 
         # Pre-allocate arrays to store R1, R2, and NOE values for each NH bond vector
@@ -797,8 +815,8 @@ class NH_Relaxation:
             #print(nh_acf)
             
             # Fit ACF with multiple exponentials
-            #A, tau, self.result = self.fit_acf_minimize(nh_acf)
-            A, tau, self.result = self.fit_acf_differential_evolution(nh_acf)
+            A, tau, self.result = self.fit_acf_minimize(nh_acf)
+            #A, tau, self.result = self.fit_acf_differential_evolution(nh_acf)
             #A, tau, self.result = self.fit_acf_lmfit_minimize(nh_acf)
             
             # Calculate R1, R2, and NOE using J(w) from ACF fitting results
