@@ -116,7 +116,8 @@ class NH_Relaxation:
             Each entry corresponds to a bond vector for a specific frame and pair.
         """
         # Select the atoms involved in NH bonds
-        selection = self.u.select_atoms('name N or name H')
+        # no prolines or the first N-terminal residue nitrogen
+        selection = self.u.select_atoms('(name N or name H) and not resname PRO and not resnum 1')
 
         # Determine the number of frames and NH pairs
         n_frames = len(self.u.trajectory[start:stop:step])
@@ -130,13 +131,16 @@ class NH_Relaxation:
             nh_vectors[i] = selection.positions[1::2] - selection.positions[::2]
 
         # list of the residue index for each NH pair
-        self.residue_indices = np.array([atom.resid for atom in selection.atoms if atom.name == 'N'])
-        print("Residue Indices: ", len(self.residue_indices), self.residue_indices)
+        self.residue_indices = np.array([atom.resid for atom in selection.atoms if atom.name == 'H'])
+        print("Residue Indices: ", self.residue_indices.shape, self.residue_indices, [i for i in selection.atoms])
         print("NH Vectors Shape: ", nh_vectors.shape)
-        n_nitrogen = len([atom for atom in selection if atom.name == 'N'])
-        n_hydrogen = len([atom for atom in selection if atom.name == 'H'])
-        print(f"Number of Nitrogen atoms: {n_nitrogen}")
-        print(f"Number of Hydrogen atoms: {n_hydrogen}")
+
+        # n_nitrogen = len([atom for atom in selection if atom.name == 'N'])
+        # n_hydrogen = len([atom for atom in selection if atom.name == 'H'])
+        # print(f"Number of Nitrogen atoms: {n_nitrogen}")
+        # print(f"Number of Hydrogen atoms: {n_hydrogen}")
+
+        #print(f"NH vectors: {nh_vectors[0,:,0]}")
 
         return nh_vectors
 
@@ -767,14 +771,15 @@ class NH_Relaxation:
         """
         if ax is None:
             fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
-        ax[0].plot(R1)
-        #ax[0].scatter(self.residue_indices, R1, s=4)
+        ax[0].plot(self.residue_indices, R1, label="MD")
         #ax[0].set_title("R1 Relaxation Rates")
         ax[0].set_ylabel("$R_1$ ($s^{-1}$)")
-        ax[1].plot(R2)
+        ax[0].set_ylim(0, 2.5)
+        ax[1].plot(self.residue_indices, R2)
         #ax[1].set_title("R2 Relaxation Rates")
         ax[1].set_ylabel("$R_2$ ($s^{-1}$)")
-        ax[2].plot(NOE)
+        ax[1].set_ylim(0, 20)
+        ax[2].plot(self.residue_indices, NOE)
         ax[2].set_xlabel("Residue Index")
         ax[2].set_ylim(0, 1)
         ax[2].set_ylabel("$^{15}N$-{$^1H$}-NOE")
@@ -795,7 +800,8 @@ class NH_Relaxation:
         data = np.loadtxt(filename, delimiter="\t")
         for ax_i, data_i in enumerate([1, 3, 5]):
             ax[ax_i].errorbar(data[:,0], data[:,data_i], yerr=data[:,data_i + 1], 
-                              fmt='o', label=filename[:6], markersize=3)
+                              fmt='o', markersize=3, label="NMR", 
+                              color='k', zorder=0)
 
     def run(self):
         """
@@ -887,5 +893,7 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
     relaxation.plot_results(R1, R2, NOE, ax)
     relaxation.plot_nmr_parameters("data-NH/500MHz-R1R2NOE.dat", ax)
+    # add a legend
+    ax[0].legend(frameon=False, bbox_to_anchor=(1.05, 1), loc='upper left')
     plt.tight_layout()
     plt.show()
