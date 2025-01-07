@@ -65,7 +65,7 @@ class RelaxPlot:
         Format the plot.
         """
         # set the x-axis label
-        self.ax[2].set_xlabel('Field Strength (MHz)')
+        self.ax[2].set_xlabel('T4L Residue Number')
         # set the y-axis labels
         self.ax[0].set_ylabel('$R_1$ ($s^{-1}$)')
         self.ax[1].set_ylabel('$R_2$ ($s^{-1}$)')
@@ -110,4 +110,5 @@ if __name__ == '__main__':
 
     # format and show the plot
     plt.tight_layout()
+    plt.savefig("exp-relax.pdf")
     plt.show()
