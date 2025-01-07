@@ -126,8 +126,17 @@ class NH_Relaxation:
         nh_vectors = np.zeros((n_frames, n_pairs, 3))
 
         # Iterate over the trajectory frames and calculate NH bond vectors
-        for i, ts in enumerate(self.u.trajectory[start:stop:step]):
+        for i, _ in enumerate(self.u.trajectory[start:stop:step]):
             nh_vectors[i] = selection.positions[1::2] - selection.positions[::2]
+
+        # list of the residue index for each NH pair
+        self.residue_indices = np.array([atom.resid for atom in selection.atoms if atom.name == 'N'])
+        print("Residue Indices: ", len(self.residue_indices), self.residue_indices)
+        print("NH Vectors Shape: ", nh_vectors.shape)
+        n_nitrogen = len([atom for atom in selection if atom.name == 'N'])
+        n_hydrogen = len([atom for atom in selection if atom.name == 'H'])
+        print(f"Number of Nitrogen atoms: {n_nitrogen}")
+        print(f"Number of Hydrogen atoms: {n_hydrogen}")
 
         return nh_vectors
 
@@ -436,7 +445,7 @@ class NH_Relaxation:
 
         # Initial guess for parameters: equal amplitudes and linear time constants
         initial_amplitudes = np.ones(self.n_exps + 1) / (self.n_exps + 1)
-        print("Initial Amplitudes: ", initial_amplitudes)
+        #print("Initial Amplitudes: ", initial_amplitudes)
         
         # Initial guess for correlation times
         initial_taus = np.linspace(0.1, 1, self.n_exps)
@@ -446,7 +455,7 @@ class NH_Relaxation:
         #initial_taus = np.linspace(0.1 * self.tau_c, 10 * self.tau_c, self.n_exps)
         #initial_taus = np.logspace(np.log10(0.1 * self.tau_c), np.log10(10 * self.tau_c), self.n_exps)
         #initial_taus = [self.tau_c] * self.n_exps
-        print("Initial Taus: ", initial_taus)
+        #print("Initial Taus: ", initial_taus)
 
         initial_guess = np.concatenate([initial_amplitudes, initial_taus])
         #print("Initial Guess: ", initial_guess)
@@ -482,9 +491,9 @@ class NH_Relaxation:
         # Extract optimized parameters
         optimized_params = result.x
         A = optimized_params[:self.n_exps + 1]
-        print("A:", A)
+        #print("A:", A)
         tau = optimized_params[self.n_exps + 1:]
-        print("tau: ", tau)
+        #print("tau: ", tau)
 
         # Optionally plot the data and the fit (TODO: update to OOP plot)
         if self.acf_plot:
@@ -741,7 +750,7 @@ class NH_Relaxation:
 
         return R1, R2, NOE
 
-    def plot_results(self, R1, R2, NOE):
+    def plot_results(self, R1, R2, NOE, ax=None):
         """
         Plot the R1, R2, and NOE values for each NH bond vector.
 
@@ -753,24 +762,40 @@ class NH_Relaxation:
             R2 relaxation rates.
         NOE : np.ndarray
             NOE values.
+        ax : matplotlib.Axes, optional
+            Axes object to plot the results. Default None.
         """
-        fig, ax = plt.subplots(ncols=3, figsize=(12, 5))
-        ax[0].plot(R1, label="R1")
-        ax[0].set_title("R1 Relaxation Rates")
-        ax[0].set_xlabel("NH Bond Vector")
-        ax[0].set_ylabel("R1 (s^-1)")
-        ax[1].plot(R2, label="R2")
-        ax[1].set_title("R2 Relaxation Rates")
-        ax[1].set_xlabel("NH Bond Vector")
-        ax[1].set_ylabel("R2 (s^-1)")
-        ax[2].plot(NOE, label="NOE")
-        ax[2].set_title("NOE Values")
-        ax[2].set_xlabel("NH Bond Vector")
-        ax[2].set_ylabel("NOE")
-        plt.tight_layout()
-        plt.show()
-        #fig.savefig("t4l_relax_ref.pdf")
-        #fig.savefig("t4l_relax_seg1.pdf")
+        if ax is None:
+            fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
+        ax[0].plot(R1)
+        #ax[0].scatter(self.residue_indices, R1, s=4)
+        #ax[0].set_title("R1 Relaxation Rates")
+        ax[0].set_ylabel("$R_1$ ($s^{-1}$)")
+        ax[1].plot(R2)
+        #ax[1].set_title("R2 Relaxation Rates")
+        ax[1].set_ylabel("$R_2$ ($s^{-1}$)")
+        ax[2].plot(NOE)
+        ax[2].set_xlabel("Residue Index")
+        ax[2].set_ylim(0, 1)
+        ax[2].set_ylabel("$^{15}N$-{$^1H$}-NOE")
+
+    def plot_nmr_parameters(self, filename, ax=None):
+        """
+        Plot NMR parameters from a file.
+
+        Parameters
+        ----------
+        filename : str
+            Path to the file containing NMR parameters.
+        ax : matplotlib.Axes, optional
+            Axes object to plot the results. Default None.
+        """
+        if ax is None:
+            fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
+        data = np.loadtxt(filename, delimiter="\t")
+        for ax_i, data_i in enumerate([1, 3, 5]):
+            ax[ax_i].errorbar(data[:,0], data[:,data_i], yerr=data[:,data_i + 1], 
+                              fmt='o', label=filename[:6], markersize=3)
 
     def run(self):
         """
@@ -859,4 +884,8 @@ if __name__ == "__main__":
     print(f"NOE: {NOE[:n_vectors]}\n")
 
     # plot the results
-    relaxation.plot_results(R1, R2, NOE)
+    fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
+    relaxation.plot_results(R1, R2, NOE, ax)
+    relaxation.plot_nmr_parameters("data-NH/500MHz-R1R2NOE.dat", ax)
+    plt.tight_layout()
+    plt.show()
