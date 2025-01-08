@@ -73,7 +73,7 @@ class NH_Relaxation:
         self.tau_c = tau_c
 
         # Nuclei frequencies
-        self.omega_H = b0 * 2 * np.pi * 1e6         # Proton frequency (rad/s)
+        self.omega_H = b0 * 2 * np.pi * 1e6          # Proton frequency (rad/s)
         self.omega_N = self.omega_H / 10.0           # ~Nitrogen frequency (rad/s)
 
         self.u = self.load_align_traj()
@@ -132,8 +132,8 @@ class NH_Relaxation:
 
         # list of the residue index for each NH pair
         self.residue_indices = np.array([atom.resid for atom in selection.atoms if atom.name == 'H'])
-        print("Residue Indices: ", self.residue_indices.shape, self.residue_indices, [i for i in selection.atoms])
-        print("NH Vectors Shape: ", nh_vectors.shape)
+        # print("Residue Indices: ", self.residue_indices.shape, self.residue_indices, [i for i in selection.atoms])
+        # print("NH Vectors Shape: ", nh_vectors.shape)
 
         # n_nitrogen = len([atom for atom in selection if atom.name == 'N'])
         # n_hydrogen = len([atom for atom in selection if atom.name == 'H'])
@@ -443,9 +443,17 @@ class NH_Relaxation:
         #    Result dictionary containing optimized parameters, amplitudes, and correlation times.
         A, tau, result
         """
+        # TODO: technically should be able to use e-9 in numerator of exp
+        #       and can use the true timescale in the fitting, earlier too
+        #       then the t_i values should naturally be on smaller scales closer to tau_c
+
         # guess time_lags array when None provided
         if time_lags is None:
+            # TODO: each time lag is 1 frame, testing out some rescaling here
             time_lags = np.linspace(0, acf_values.shape[0], num=acf_values.shape[0])
+            #time_lags = np.linspace(0, acf_values.shape[0], num=acf_values.shape[0]) * 10e-12
+            #time_lags = np.logspace(0, acf_values.shape[0], num=acf_values.shape[0]) * 1e-9
+        #print("Time Lags: ", time_lags)
 
         # Initial guess for parameters: equal amplitudes and linear time constants
         initial_amplitudes = np.ones(self.n_exps + 1) / (self.n_exps + 1)
@@ -453,7 +461,9 @@ class NH_Relaxation:
         
         # Initial guess for correlation times
         initial_taus = np.linspace(0.1, 1, self.n_exps)
+        #initial_taus = np.linspace(0.1, 1, self.n_exps) * 10e-12
         #initial_taus = np.ones(self.n_exps) / self.n_exps
+
         # Create a range of initial guesses around tau_c to have similar timescales
         # this is important when calculating J(w) and tau_eff later
         #initial_taus = np.linspace(0.1 * self.tau_c, 10 * self.tau_c, self.n_exps)
@@ -480,13 +490,13 @@ class NH_Relaxation:
             constraints=constraints,
             bounds=bounds,
             method="SLSQP",
-            options={
-                #"disp": True,     # Display convergence messages
-                'maxiter': 1000,  # Increase max iterations
-                'ftol': 1e-8,     # Tolerance for termination
-                #'gtol': 1e-8      # Tolerance for gradients
-                #'eps' : 1e-4,  # Step size for numerical approx of jacobian
-            }
+            # options={
+            #     #"disp": True,     # Display convergence messages
+            #     'maxiter': 1000,  # Increase max iterations
+            #     'ftol': 1e-8,     # Tolerance for termination
+            #     #'gtol': 1e-8      # Tolerance for gradients
+            #     #'eps' : 1e-4,  # Step size for numerical approx of jacobian
+            # }
         )
 
         if not result.success:
@@ -520,7 +530,7 @@ class NH_Relaxation:
 
         #return {"amplitudes": A, "correlation_times": tau, "result": result}
         # TODO: I'm testing a re-scaling of the tau values after fitting in a more numerically stable range
-        return A, tau*1e-9, result
+        return A, tau*self.tau_c, result
     
     # testing with differential evolution instead of minimize
     def fit_acf_differential_evolution(self, acf_values, time_lags=None):
@@ -702,7 +712,9 @@ class NH_Relaxation:
         """
         # Compute effective correlation times
         tau_eff = (self.tau_c * tau) / (self.tau_c + tau)
+        #tau_eff = ( self.tau_c * (tau * self.tau_c) / ((self.tau_c + tau) * self.tau_c) )
         #print("tau_eff: ", tau_eff)
+        #tau_eff *= 1e9  # TODO: convert back from rescaling?
 
         # Tumbling term (first term in the equation)
         J = (A[0] * 2 * self.tau_c) / (1 + (omega * self.tau_c)**2)
@@ -867,27 +879,29 @@ class NH_Relaxation:
     # TODO: methods for MF2 analysis for S2 OPs and tau_internal?
 
 if __name__ == "__main__":
-    # Run the NH_Relaxation calculation
+    # # Run the NH_Relaxation calculation with alanine-dipeptide
     # relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
-    #                            "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
-    #                            traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
-    # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-    #                            "t4l/t4l-1ps/segment_001.xtc", max_lag=None,
-    #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
+    #                         "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
+    #                         traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
+    # R1, R2, NOE = relaxation.run()
+
+    # # Print the results
+    # n_vectors = None
+    # print(f"\ntau_c: {relaxation.tau_c} s\n")
+    # print(f"R1: {R1[:n_vectors]} s^-1 \nT1: {1/R1[:n_vectors]} s\n")
+    # print(f"R2: {R2[:n_vectors]} s^-1 \nT2: {1/R2[:n_vectors]} s\n")
+    # print(f"NOE: {NOE[:n_vectors]}\n")
+
+    ######
+
+    # T4L example
     relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-                               "t4l/t4l-10ps-imaged2/segment_001.xtc", max_lag=None,
+                               "t4l/t4l-10ps-imaged2/segment_001.xtc", max_lag=100,
                                traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
     # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-    #                            "t4l/sim1-100ps-imaged.xtc",
-    #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9)
+    #                            "t4l/t4l-1ps/segment_001.xtc",
+    #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
     R1, R2, NOE = relaxation.run()
-
-    # Print the results
-    n_vectors = 5
-    print(f"\ntau_c: {relaxation.tau_c} s\n")
-    print(f"R1: {R1[:n_vectors]} s^-1 \nT1: {1/R1[:n_vectors]} s\n")
-    print(f"R2: {R2[:n_vectors]} s^-1 \nT2: {1/R2[:n_vectors]} s\n")
-    print(f"NOE: {NOE[:n_vectors]}\n")
 
     # plot the results
     fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
