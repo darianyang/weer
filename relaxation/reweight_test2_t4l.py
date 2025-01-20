@@ -28,7 +28,7 @@ class NH_Reweight:
         """
         self.field = field
 
-    def extract_nmr_data(self, nmr_file="data-NH/500MHz-R1R2NOE.dat"):
+    def extract_nmr_data(self, nmr_file="data-NH/600MHz-R1R2NOE.dat"):
         """
         Reference data and errors for reweighting.
 
@@ -74,6 +74,8 @@ class NH_Reweight:
         md_data_save : str, optional
             Path to save the MD relaxation data.
         """
+        if not hasattr(self, 'exp_residues'):
+            self.extract_nmr_data()
         # shape: n_rates x n_vectors x n_trajs (blocks)
         # here using 107 blocks of 10ns each from MD simulation
         for i in tqdm(range(1, 107)):
@@ -82,6 +84,8 @@ class NH_Reweight:
                                             traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
             R1, R2, NOE = relaxation.run()
             # filter the relaxation data to only include the residues in the experimental data
+            # TODO: there is the (wrong) case where exp data is avail which MD data is not
+            #       so the filtering should be done on the exp data too
             filtered_indices = [i for i, resid in enumerate(relaxation.residue_indices) 
                                 if resid in self.exp_residues]
 
@@ -100,11 +104,11 @@ class NH_Reweight:
         np.save(md_data_save, relax_data)
         return relax_data
 
-    def run_reweight(self, theta=10, plot=False):
+    def run_reweight(self, theta=100, plot=False):
         """
         Run reweighting on the data.
         """
-        if self.nmr_rates is None or self.nmr_err is None:
+        if not hasattr(self, 'nmr_rates') or not hasattr(self, 'nmr_err'):
             self.extract_nmr_data()
         rex = self.nmr_rates
         eex = self.nmr_err
@@ -122,8 +126,7 @@ class NH_Reweight:
         #     rw.plot_phix2r(i)
 
         if plot:
-            opt_theta = 100
-            rw.plot_comparison(1, opt_theta, outfig='t4l/r2_compare2')
+            rw.plot_comparison(1, theta, outfig='t4l/r2_compare3')
 
     def plot_weights(self, run_rw=False):
         """
@@ -137,21 +140,20 @@ class NH_Reweight:
             # print the traj index with the highest weight
             print(f"theta={theta} \t segments of highest/lowest weight = {np.argmax(w_opt)} / {np.argmin(w_opt)}")
             plt.legend()
-        plt.ylim(-0.1, 0.5)
+        #plt.ylim(-0.1, 0.5)
         plt.xlabel("Trajectory Segment")
         plt.ylabel("Weight")
         plt.tight_layout()
         #plt.show()
-        plt.savefig("weight_opt.pdf")
+        plt.savefig("weight_opt2.pdf")
 
 if __name__ == '__main__':
     nh = NH_Reweight()
-    nh.extract_nmr_data()
-    nh.calc_md_data()
-
-    # plot weights
-    #plot_weights(run_rw=True)
-    #plot_weights(run_rw=False)
-
+    #nh.extract_nmr_data()
+    #nh.calc_md_data()
     # run rw to make separate plot of chi^2
-    #run_reweight(plot=True)
+    #nh.run_reweight(plot=True)
+
+    # plot weights and do reweighting
+    nh.plot_weights(run_rw=True)
+    #plot_weights(run_rw=False)

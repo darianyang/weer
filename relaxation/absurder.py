@@ -21,7 +21,7 @@ warnings.filterwarnings('ignore')
 
 class ABSURDer:
 
-    def __init__( self, rex, rmd, eex = '', out = 'results', thetas = np.array([100,1000,10000]), idx = [], methyl_list = None ):
+    def __init__( self, rex, rmd, eex=None, out='results', thetas=np.array([100,1000,10000]), idx=[], methyl_list=None ):
 
         """
         Class constructor
@@ -35,7 +35,7 @@ class ABSURDer:
         eex : str or numpy.ndarray
             path to or numpy ndarray with dimensions nrates*nmethyls containing the experimental errors.
             If empty, a toy model will be built from rex.
-            Default: ''.
+            Default: None.
         out : str
             path to a pickle file where to store results.
             Default: 'results'.
@@ -51,10 +51,10 @@ class ABSURDer:
 
         self.rex = self.load_rates( rex, "experimental" )    # experimental rates
         self.rmd = self.load_rates( rmd, "simulated" )       # simulated rates
-        if eex == '' and len(self.rex.shape) == 3:
+        if eex is None and len(self.rex.shape) == 3:
             self.build_toyexp()                              # no errors provided: build a toy model from rex
             print("# No experimental errors provided: toy model built.")
-        elif eex == '' and len(self.rex.shape) != 3:         # no errors and no blocks provided
+        elif eex is None and len(self.rex.shape) != 3:         # no errors and no blocks provided
             raise ValueError('Experimental errors not provided, but the size of rex is not compatible with the construction of a toy model.' )
         else:
             self.eex = self.load_rates( eex, "errors on" )   # experimental errors
@@ -68,9 +68,9 @@ class ABSURDer:
         if len(self.rmd.shape) != 3:
             raise ValueError("rmd dimension has to be nrates x nmethyls x nblocks")
         if self.rex.shape[0] != self.eex.shape[0] or self.rex.shape[0] != self.rmd.shape[0]:
-            raise ValueError("The number of rates must be identical in rex, eex and rmd")
+            raise ValueError(f"The number of rates must be identical in rex({self.rex.shape[1]}), eex({self.eex.shape[1]}) and rmd({self.rmd.shape[1]})")
         if self.rex.shape[1] != self.eex.shape[1] or self.rex.shape[1] != self.rmd.shape[1]:
-            raise ValueError("The number of methyl groups must be identical in rex, eex and rmd")
+            raise ValueError(f"The number of methyl groups must be identical in rex({self.rex.shape[1]}), eex({self.eex.shape[1]}) and rmd({self.rmd.shape[1]})")
 
         if methyl_list != None:
             self.load_methyl_list(methyl_list)
