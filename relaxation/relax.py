@@ -740,7 +740,7 @@ if __name__ == "__main__":
     def t4l_example():
         relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
                                 "t4l/t4l-10ps-imaged2/segment_001.xtc", max_lag=100,
-                                traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
+                                traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9, b0=600)
         # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
         #                            "t4l/t4l-1ps/segment_001.xtc",
         #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
@@ -749,11 +749,12 @@ if __name__ == "__main__":
         # plot the results
         fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
         relaxation.plot_results(R1, R2, NOE, ax)
-        relaxation.plot_nmr_parameters("data-NH/500MHz-R1R2NOE.dat", ax)
+        relaxation.plot_nmr_parameters("data-NH/600MHz-R1R2NOE.dat", ax)
         # add a legend
         ax[0].legend(frameon=False, bbox_to_anchor=(1.05, 1), loc='upper left')
         plt.tight_layout()
         plt.show()
+        #print(relaxation.residue_indices)
 
     #alanine_dipeptide_example()
     t4l_example()
