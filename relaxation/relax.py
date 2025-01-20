@@ -461,7 +461,8 @@ class NH_Relaxation:
         #print("Initial Amplitudes: ", initial_amplitudes)
         
         # Initial guess for correlation times
-        initial_taus = np.linspace(0.1, 1, self.n_exps) * self.tau_c
+        initial_taus = np.linspace(0.1, 1, self.n_exps)
+        #initial_taus = np.linspace(0.1, 1, self.n_exps) * self.tau_c
         #initial_taus = np.linspace(0.1, 1, self.n_exps) * 10e-12
         #initial_taus = np.ones(self.n_exps) / self.n_exps
 
@@ -722,35 +723,37 @@ class NH_Relaxation:
     # TODO: methods for MF2 analysis for S2 OPs and tau_internal?
 
 if __name__ == "__main__":
-    # Run the NH_Relaxation calculation with alanine-dipeptide
-    relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
-                            "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
-                            traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
-    R1, R2, NOE = relaxation.run()
+    def alanine_dipeptide_example():
+        # Run the NH_Relaxation calculation with alanine-dipeptide
+        relaxation = NH_Relaxation("alanine_dipeptide/alanine-dipeptide.pdb", 
+                                "alanine_dipeptide/alanine-dipeptide-0-250ns.xtc", 
+                                traj_step=10, acf_plot=True, n_exps=5, tau_c=1e-9, max_lag=100)
+        R1, R2, NOE = relaxation.run()
 
-    # Print the results
-    n_vectors = None
-    print(f"\ntau_c: {relaxation.tau_c} s\n")
-    print(f"R1: {R1[:n_vectors]} s^-1 \nT1: {1/R1[:n_vectors]} s\n")
-    print(f"R2: {R2[:n_vectors]} s^-1 \nT2: {1/R2[:n_vectors]} s\n")
-    print(f"NOE: {NOE[:n_vectors]}\n")
+        # Print the results
+        n_vectors = None
+        print(f"\ntau_c: {relaxation.tau_c} s\n")
+        print(f"R1: {R1[:n_vectors]} s^-1 \nT1: {1/R1[:n_vectors]} s\n")
+        print(f"R2: {R2[:n_vectors]} s^-1 \nT2: {1/R2[:n_vectors]} s\n")
+        print(f"NOE: {NOE[:n_vectors]}\n")
 
-    ######
+    def t4l_example():
+        relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
+                                "t4l/t4l-10ps-imaged2/segment_001.xtc", max_lag=100,
+                                traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
+        # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
+        #                            "t4l/t4l-1ps/segment_001.xtc",
+        #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
+        R1, R2, NOE = relaxation.run()
 
-    # # T4L example
-    # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-    #                            "t4l/t4l-10ps-imaged2/segment_001.xtc", max_lag=100,
-    #                            traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
-    # # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
-    # #                            "t4l/t4l-1ps/segment_001.xtc",
-    # #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
-    # R1, R2, NOE = relaxation.run()
+        # plot the results
+        fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
+        relaxation.plot_results(R1, R2, NOE, ax)
+        relaxation.plot_nmr_parameters("data-NH/500MHz-R1R2NOE.dat", ax)
+        # add a legend
+        ax[0].legend(frameon=False, bbox_to_anchor=(1.05, 1), loc='upper left')
+        plt.tight_layout()
+        plt.show()
 
-    # # plot the results
-    # fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
-    # relaxation.plot_results(R1, R2, NOE, ax)
-    # relaxation.plot_nmr_parameters("data-NH/500MHz-R1R2NOE.dat", ax)
-    # # add a legend
-    # ax[0].legend(frameon=False, bbox_to_anchor=(1.05, 1), loc='upper left')
-    # plt.tight_layout()
-    # plt.show()
+    #alanine_dipeptide_example()
+    t4l_example()
