@@ -77,7 +77,7 @@ class NH_Reweight:
         if not hasattr(self, 'exp_residues'):
             self.extract_nmr_data()
         # shape: n_rates x n_vectors x n_trajs (blocks)
-        # here using 107 blocks of 10ns each from MD simulation
+        # here using 107 blocks of 10ns each from MD simulation (TODO: detect n_blocks/trajs from path)
         for i in tqdm(range(1, 107)):
             traj = f"t4l/t4l-10ps-imaged2/segment_{i:03d}.xtc"
             relaxation = relax.NH_Relaxation("t4l/sim1_dry.pdb", traj, max_lag=100,
