@@ -5,3 +5,4 @@ __pycache__
 *.lock
 *.swp
 *.xtc
+.ipynb_checkpoints
