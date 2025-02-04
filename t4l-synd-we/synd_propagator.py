@@ -4,13 +4,14 @@ import scipy.sparse as sparse
 import westpa
 import pickle
 from westpa.core.states import InitialState, BasisState
-import mdtraj as md
+#import mdtraj as md
 from copy import deepcopy
 
 import synd.core
 from synd.models.discrete.markov import MarkovGenerator
 
 import MDAnalysis as mda
+import MDAnalysis.analysis.rms
 
 def get_segment_index(segment):
 
@@ -254,11 +255,12 @@ class SynMDPropagator(WESTPropagator):
             f"Atom selection mismatch: reference has {ref_atoms.n_atoms}, trajectory has {traj_atoms.n_atoms}"
 
         # Perform the RMSD calculation
-        rmsd_analysis = mda.analysis.rms.RMSD(traj_atoms, ref_atoms)  # Initialize RMSD analysis
-        rmsd_analysis.run()  # Run the calculation
+        rmsd_analysis = MDAnalysis.analysis.rms.RMSD(traj_atoms, ref_atoms)
+        rmsd_analysis.run()
 
         # Extract RMSD values (in Ångstroms) for all frames
-        rmsd_values = rmsd_analysis.rmsd[:, 2]  # Column 2 contains RMSD values
+        # Column 2 contains RMSD values: frame | time | RMSD
+        rmsd_values = rmsd_analysis.results.rmsd[:, 2]
 
         return rmsd_values
 
@@ -274,17 +276,14 @@ class SynMDPropagator(WESTPropagator):
             Path to the reference PDB file.
         """
         syn_u = mda.Universe(self.reference_pdb)
-        syn_u.load_new(backmapped_traj[0], format="memory")
+        syn_u.load_new(backmapped_traj, format="memory")
         pcoord = self.calc_heavy_atom_rmsd(syn_u, self.reference_pdb)
-        print(backmapped_traj.shape)
-        print(pcoord.shape)
         return pcoord
 
     def get_pcoord(self, state):
         """
         Get the progress coordinate of the given basis or initial state.
         """
-        print("STATE: ", state)
         state_index = int(state.auxref)
         state.pcoord = self.coords_to_pcoord(self.synd_model.backmap(state_index))
 

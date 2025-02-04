@@ -1,0 +1,18 @@
+Updating system with the options from the configuration file
+SynD propagator inferring 5001 steps per iteration from west.system.system_options.pcoord_len
+Maximum wallclock time: 1 day, 0:00:00
+
+Tue Feb  4 13:02:34 2025
+Iteration 1 (5 requested)
+Beginning iteration 1
+80 segments remain in iteration 1 (80 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.0125
+per-segment maximum non-zero probability:   0.0125
+per-segment probability dynamic range (kT): 0
+norm = 1, error in norm = -1.11022e-16 (-0.5*epsilon)
+Waiting for segments to complete...
+interrupted; shutting down
