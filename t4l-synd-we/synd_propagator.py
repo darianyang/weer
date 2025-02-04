@@ -308,7 +308,7 @@ class SynMDPropagator(WESTPropagator):
 
             segment.pcoord = np.array([
                 self.coords_to_pcoord(self.synd_model.backmap(x)) for x in segment.data["state_indices"]
-            ]).reshape(self.coord_len, -1)
+                ]).reshape(self.coord_len, -1)
             # segment.pcoord = np.array([
             #     self.synd_model.backmap(x) for x in segment.data["state_indices"]
             # ]).reshape(self.coord_len, -1)
