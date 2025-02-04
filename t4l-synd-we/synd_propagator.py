@@ -10,6 +10,7 @@ from copy import deepcopy
 import synd.core
 from synd.models.discrete.markov import MarkovGenerator
 
+import MDAnalysis as mda
 
 def get_segment_index(segment):
 
@@ -145,6 +146,7 @@ class SynMDPropagator(WESTPropagator):
         The keys loaded from WESTPA configuration are:
 
         - :code:`west.system.system_options.pcoord_len`: The number of steps to propagate
+        - :code:`west.data.reference_pdb`: The reference PDB file for RMSD calculations
 
         EITHER
 
@@ -218,12 +220,73 @@ class SynMDPropagator(WESTPropagator):
         self.coord_len = n_steps
         self.coord_dtype = int
 
+        self.reference_pdb = rc.config.get(['west','data', 'reference_pdb'])
+
+    @staticmethod
+    def calc_heavy_atom_rmsd(u, reference_pdb, selection="protein and not name H*"):
+        """
+        Calculate the RMSD of heavy atoms (or a custom selection) for a trajectory compared to a reference structure.
+
+        Parameters
+        ----------
+        u : MDAnalysis.Universe
+            Universe object for the trajectory.
+        reference_pdb : str
+            Path to the reference PDB file.
+        selection : str
+            Atom selection string for selecting heavy atoms. Default is "protein and not name H*".
+
+        Returns
+        -------
+        numpy.ndarray
+            RMSD values for each frame, shape (n_frames,).
+        """
+        # Load the universe for the trajectory and reference
+        #u = mda.Universe(reference_pdb, traj)
+        ref = mda.Universe(reference_pdb)
+
+        # Select heavy atoms in both reference and trajectory
+        ref_atoms = ref.select_atoms(selection)
+        traj_atoms = u.select_atoms(selection)
+
+        # Check that both selections have the same number of atoms
+        assert ref_atoms.n_atoms == traj_atoms.n_atoms, \
+            f"Atom selection mismatch: reference has {ref_atoms.n_atoms}, trajectory has {traj_atoms.n_atoms}"
+
+        # Perform the RMSD calculation
+        rmsd_analysis = mda.analysis.rms.RMSD(traj_atoms, ref_atoms)  # Initialize RMSD analysis
+        rmsd_analysis.run()  # Run the calculation
+
+        # Extract RMSD values (in Ångstroms) for all frames
+        rmsd_values = rmsd_analysis.rmsd[:, 2]  # Column 2 contains RMSD values
+
+        return rmsd_values
+
+    def coords_to_pcoord(self, backmapped_traj):
+        """
+        Given a set of xyz traj coordinates from SynD backmapping, return the progress coordinate.
+
+        Parameters
+        ----------
+        backmapped_traj : numpy.ndarray
+            The backmapped trajectory, shape (n_frames, n_atoms, 3).
+        reference_pdb : str
+            Path to the reference PDB file.
+        """
+        syn_u = mda.Universe(self.reference_pdb)
+        syn_u.load_new(backmapped_traj[0], format="memory")
+        pcoord = self.calc_heavy_atom_rmsd(syn_u, self.reference_pdb)
+        print(backmapped_traj.shape)
+        print(pcoord.shape)
+        return pcoord
+
     def get_pcoord(self, state):
-        """Get the progress coordinate of the given basis or initial state."""
-
+        """
+        Get the progress coordinate of the given basis or initial state.
+        """
+        print("STATE: ", state)
         state_index = int(state.auxref)
-        state.pcoord = self.synd_model.backmap(state_index)
-
+        state.pcoord = self.coords_to_pcoord(self.synd_model.backmap(state_index))
 
     def propagate(self, segments):
 
@@ -245,8 +308,11 @@ class SynMDPropagator(WESTPropagator):
             segment.data["state_indices"] = new_trajectories[iseg, :]
 
             segment.pcoord = np.array([
-                self.synd_model.backmap(x) for x in segment.data["state_indices"]
+                self.coords_to_pcoord(self.synd_model.backmap(x)) for x in segment.data["state_indices"]
             ]).reshape(self.coord_len, -1)
+            # segment.pcoord = np.array([
+            #     self.synd_model.backmap(x) for x in segment.data["state_indices"]
+            # ]).reshape(self.coord_len, -1)
 
             # For H5 plugin
             if westpa.rc.get_data_manager().store_h5:
