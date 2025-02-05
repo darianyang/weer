@@ -285,7 +285,13 @@ class SynMDPropagator(WESTPropagator):
         Get the progress coordinate of the given basis or initial state.
         """
         state_index = int(state.auxref)
-        state.pcoord = self.coords_to_pcoord(self.synd_model.backmap(state_index))
+        # calc the rmsd using the coordinates (slow)
+        #state.pcoord = self.coords_to_pcoord(self.synd_model.backmap(state_index))
+        # calc the rmsd using the state index (fast)
+        # Read previous data
+        with open('backmapper_rmsd.pkl','rb') as file:
+            backmapper_rmsd = pickle.load(file)
+        state.pcoord = backmapper_rmsd[state_index]
 
     def propagate(self, segments):
 
