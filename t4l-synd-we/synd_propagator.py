@@ -280,6 +280,14 @@ class SynMDPropagator(WESTPropagator):
         pcoord = self.calc_heavy_atom_rmsd(syn_u, self.reference_pdb)
         return pcoord
 
+    def backmap_to_rmsd(self, state_index):
+        """
+        Given a state index, return the RMSD of the backmapped coordinates.
+        """
+        with open('backmapper_rmsd.pkl','rb') as file:
+            backmapper_rmsd = pickle.load(file)
+        return backmapper_rmsd[state_index]
+
     def get_pcoord(self, state):
         """
         Get the progress coordinate of the given basis or initial state.
@@ -288,10 +296,7 @@ class SynMDPropagator(WESTPropagator):
         # calc the rmsd using the coordinates (slow)
         #state.pcoord = self.coords_to_pcoord(self.synd_model.backmap(state_index))
         # calc the rmsd using the state index (fast)
-        # Read previous data
-        with open('backmapper_rmsd.pkl','rb') as file:
-            backmapper_rmsd = pickle.load(file)
-        state.pcoord = backmapper_rmsd[state_index]
+        state.pcoord = self.backmap_to_rmsd(state_index)
 
     def propagate(self, segments):
 
@@ -312,9 +317,17 @@ class SynMDPropagator(WESTPropagator):
         for iseg, segment in enumerate(segments):
             segment.data["state_indices"] = new_trajectories[iseg, :]
 
+            # use separate backmapper to get rmsd
             segment.pcoord = np.array([
-                self.coords_to_pcoord(self.synd_model.backmap(x)) for x in segment.data["state_indices"]
+                self.backmap_to_rmsd(x) for x in segment.data["state_indices"]
                 ]).reshape(self.coord_len, -1)
+
+            # use backmapper to get coords and do rmsd calc
+            # segment.pcoord = np.array([
+            #     self.coords_to_pcoord(self.synd_model.backmap(x)) for x in segment.data["state_indices"]
+            #     ]).reshape(self.coord_len, -1)
+            
+            # use pure synd backmapper
             # segment.pcoord = np.array([
             #     self.synd_model.backmap(x) for x in segment.data["state_indices"]
             # ]).reshape(self.coord_len, -1)
