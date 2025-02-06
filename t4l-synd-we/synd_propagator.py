@@ -306,7 +306,6 @@ class SynMDPropagator(WESTPropagator):
         initial_points = np.empty(n_segs, dtype=self.coord_dtype)
 
         for iseg, segment in enumerate(segments):
-
             initial_points[iseg] = get_segment_parent_index(segment)
 
         new_trajectories = self.synd_model.generate_trajectory(

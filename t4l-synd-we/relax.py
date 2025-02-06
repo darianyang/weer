@@ -74,7 +74,13 @@ class NH_Relaxation:
         self.omega_H = b0 * 2 * np.pi * 1e6          # Proton frequency (rad/s)
         self.omega_N = self.omega_H / 10.0           # ~Nitrogen frequency (rad/s)
 
-        self.u = self.load_align_traj()
+        # load mda universe if needed, but if traj is already a mda universe, then no need
+        if not isinstance(traj, mda.Universe):
+            self.u = self.load_align_traj()
+        # for the case where you directly load the pre-aligned trajectory
+        # this works well with the SynD propagator to avoid excess file IO of XTC files
+        else:
+            self.u = traj
 
     def load_align_traj(self):
         """
@@ -85,7 +91,7 @@ class NH_Relaxation:
         u : MDAnalysis.Universe
             The MDAnalysis Universe object containing the trajectory.
         """
-        # Load the alanine dipeptide trajectory
+        # Load the trajectory
         u = mda.Universe(self.pdb, self.traj, in_memory=True, in_memory_step=self.traj_step)
 
         # Align trajectory to the reference frame / pdb
@@ -746,6 +752,8 @@ if __name__ == "__main__":
         #                            "t4l/t4l-1ps/segment_001.xtc",
         #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
         R1, R2, NOE = relaxation.run()
+        print(NOE)
+        print(relaxation.residue_indices)
 
         # plot the results
         fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
