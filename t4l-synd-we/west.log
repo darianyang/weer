@@ -2,7 +2,7 @@ Updating system with the options from the configuration file
 SynD propagator inferring 1001 steps per iteration from west.system.system_options.pcoord_len
 Maximum wallclock time: 1 day, 0:00:00
 
-Fri Feb  7 15:24:33 2025
+Fri Feb  7 16:48:05 2025
 Iteration 1 (2 requested)
 Beginning iteration 1
 4 segments remain in iteration 1 (4 total)
@@ -23,60 +23,37 @@ absurder input shape:  (3, 116, 4)
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   4
-# Overall chi square: 376.27
+# Overall chi square: 476.40
 # THETA: 100         
 # Done! All minimizations terminated successfully
 # Saved results.pkl
-ABSURDer weights:  [0.14909121 0.02959856 0.68915022 0.13216001]
+ABSURDer weights:  [0.06484986 0.03687413 0.53990106 0.35837495]
 current iteration:  1
-WEER split: [1, 0, 0, 0]
-WEER merge: [[], [], [3], []]
-Split indices:  [0]
+WEER split: [0, 0, 1, 0]
+WEER merge: [[], [1], [], []]
+Split indices:  [2]
 split sum:  1
 merge sum:  1
-Bin attrs post WEER:  <Bin at 0x168720c80, label=None, count=4, weight=1>
+Bin attrs post WEER:  <Bin at 0x138d18aa0, label=None, count=4, weight=1.25>
 Total = 4, splitting = 1, merging = 2
 Iteration completed successfully
-Iteration wallclock: 0:00:04.852910, cputime: 0:00:00
+Iteration wallclock: 0:00:04.910385, cputime: 0:00:00
 
 
-Fri Feb  7 15:24:37 2025
+Fri Feb  7 16:48:10 2025
 Iteration 2 (2 requested)
 Beginning iteration 2
 4 segments remain in iteration 2 (4 total)
-1 of 1 (100.000000%) active bins are populated
-per-bin minimum non-zero probability:       1
-per-bin maximum probability:                1
-per-bin probability dynamic range (kT):     0
-per-segment minimum non-zero probability:   0.125
-per-segment maximum non-zero probability:   0.5
-per-segment probability dynamic range (kT): 1.38629
-norm = 1, error in norm = 0 (0*epsilon)
-Waiting for segments to complete...
-weights:  [0.125 0.125 0.25  0.5  ] weights sum:  1.0
-curr data len:  4
-absurder input shape:  (3, 116, 4)
+exception caught; shutting down
+-- ERROR    [w_run] -- Traceback (most recent call last):
+  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/cli/core/w_run.py", line 61, in run_simulation
+    sim_manager.run()
+  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/sim_manager.py", line 758, in run
+    self.prepare_iteration()
+  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/sim_manager.py", line 495, in prepare_iteration
+    self.report_bin_statistics(initial_binning, [], save_summary=True)
+  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/sim_manager.py", line 191, in report_bin_statistics
+    assert abs(1 - norm) < EPS * (len(segments) + n_active_bins)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AssertionError
 
-# INFO ON THE DATASET
-# Number of methyls:  116
-# Number of rates:    3
-# Number of blocks:   4
-# Overall chi square: 380.71
-# THETA: 100         
-# Done! All minimizations terminated successfully
-# Saved results.pkl
-ABSURDer weights:  [0.19029643 0.58720575 0.05585763 0.16664019]
-current iteration:  2
-WEER split: [1, 0, 0, 0]
-WEER merge: [[], [], [3], []]
-Split indices:  [0]
-split sum:  1
-merge sum:  1
-Bin attrs post WEER:  <Bin at 0x168720b90, label=None, count=4, weight=1>
-Total = 4, splitting = 1, merging = 2
-Iteration completed successfully
-Iteration wallclock: 0:00:04.825684, cputime: 0:00:00
-
-
-Fri Feb  7 15:24:42 2025
-WEST run complete.

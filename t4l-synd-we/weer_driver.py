@@ -116,6 +116,24 @@ class WEERDriver(WEDriver):
             merged_segment, parent = self._merge_walkers(segments[:2], cumul_weight=None, bin=bin)
             bin.add(merged_segment)
 
+    def generate_split_merge_decisions(self, segments, absurder_weights, n_splits, n_merges):
+        # Sort segments by absurder weights
+        sorted_indices = np.argsort(absurder_weights)
+        
+        # Initialize split and merge lists
+        split = [0] * len(segments)
+        merge = [[] for _ in range(len(segments))]
+        
+        # Mark the top n_splits segments for splitting
+        for i in range(n_splits):
+            split[sorted_indices[-(i+1)]] = 1
+        
+        # Mark the bottom n_merges segments for merging
+        for i in range(n_merges):
+            merge[sorted_indices[i]].append(sorted_indices[i])
+        
+        return split, merge
+
     def _run_we(self):
         '''
         Run recycle/split/merge. Do not call this function directly; instead, use
@@ -284,11 +302,14 @@ class WEERDriver(WEDriver):
                     split = [0,0,0,0]
                     merge = [[],[],[],[]]
                 else:
-                    split = [1,0,0,0]
-                    merge = [[],[],[3],[]]
+                    # TODO: theres also the question of if I should use the top weight or the 
+                    #       top weight change from the previous iteration (and if I should 
+                    #       initialize the rw weights with the WE traj weights)
+                    # TODO: test right now, update to use absurder weights
+                    # split = [1,0,0,0]
+                    # merge = [[],[],[3],[]]
+                    split, merge = self.generate_split_merge_decisions(segments, absurder_weights, 1, 1)
 
-                # TODO: testing filters
-                #split = [1 if i > 1 else i for i in split]
 
                 print(f"WEER split: {split}\nWEER merge: {merge}")
                 print("Split indices: ", [i for i, e in enumerate(split) if e != 0])
@@ -308,7 +329,6 @@ class WEERDriver(WEDriver):
                         # need an extra walker since split operation reduces total walkers by 1
                         # I think revo doesn't count the current seg
                         self._split_decision(bin, seg, split[i] + 1)
-                        #splitting += split[i] + 1
                         splitting += split[i]
                     if len(merge[i]) != 0:
                         # list of all segs objects in the current merge list element
