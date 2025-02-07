@@ -4,16 +4,50 @@ import numpy as np
 import operator
 from westpa.core.we_driver import WEDriver
 
-#from weer import WEER
 import absurder
 
 log = logging.getLogger(__name__)
 
 class WEERDriver(WEDriver):
     '''
-    This introduces a weight resampling procedure before or after (TODO)
-    the split/merge resampling.
+    Binless resampler with split/merge decisions based on ABSURDer reweighting.
     '''
+
+    def _split_decision(self, bin, to_split, split_into):
+        '''
+        This removes an extra walker
+        '''
+        # remove the walker being split
+        bin.remove(to_split)
+        # get the n split walker children
+        new_segments_list = self._split_walker(to_split, split_into, bin)
+        # add all new split walkers back into bin, maintaining history
+        bin.update(new_segments_list)
+
+        # other implementation, where walkers are split multiple times
+        # if len(to_split) > 1:
+        #     for segment in to_split:
+        #         bin.remove(segment)
+        #         new_segments_list = self._split_walker(segment, split_into, bin)
+        #         bin.update(new_segments_list)
+        # else:
+        #     to_split = to_split[0]
+        #     bin.remove(to_split)
+        #     new_segments_list = self._split_walker(to_split, split_into, bin)
+        #     bin.update(new_segments_list)
+
+
+    def _merge_decision(self, bin, to_merge, cumul_weight=None):
+        '''
+        This adds an extra walker
+        '''
+        # removes every walker in to_merge 
+        # TODO: I think I need to remove the current walker, which isn't in the to_merge list
+        bin.difference_update(to_merge)
+        #new_segment, parent = self._merge_walkers(to_merge, None, bin)
+        new_segment, parent = self._merge_walkers(to_merge, cumul_weight, bin)
+        # add in new merged walker
+        bin.add(new_segment)
 
     def extract_nmr_data(self, nmr_file="data-NH/600MHz-R1R2NOE.dat"):
         """
@@ -52,6 +86,36 @@ class WEERDriver(WEDriver):
         self.nmr_err = nmr_data[:, (2, 4, 6)].T
         return self.nmr_rates, self.nmr_err
 
+    def _adjust_count(self, ibin):
+        '''
+        TODO: adjust to sort/adjust by variance, not weight.
+        '''
+        bin = self.next_iter_binning[ibin]
+        target_count = self.bin_target_counts[ibin]
+        weight_getter = operator.attrgetter('weight')
+
+        #print("PRINT ATTRS: ", dir(bin))
+        #for b in bin:
+        #    print(weight_getter(b))
+
+        # split
+        while len(bin) < target_count:
+            log.debug('adjusting counts by splitting')
+            # always split the highest variance walker into two
+            segments = sorted(bin, key=weight_getter)
+            bin.remove(segments[-1])
+            new_segments_list = self._split_walker(segments[-1], 2, bin)
+            bin.update(new_segments_list)
+
+        # merge
+        while len(bin) > target_count:
+            log.debug('adjusting counts by merging')
+            # always merge the two lowest variance walkers
+            segments = sorted(bin, key=weight_getter)
+            bin.difference_update(segments[:2])
+            merged_segment, parent = self._merge_walkers(segments[:2], cumul_weight=None, bin=bin)
+            bin.add(merged_segment)
+
     def _run_we(self):
         '''
         Run recycle/split/merge. Do not call this function directly; instead, use
@@ -72,7 +136,7 @@ class WEERDriver(WEDriver):
         weights = np.asarray([seg.weight for seg in segments])
         #print("seg list: ", seg_list)
         #print("segments: ", segments[0])
-        print("weights: ", weights)
+        print("weights: ", weights, "weights sum: ", np.sum(weights))
 
         # get all pcoords, not just the final frame
         # curr_segments = np.array(sorted(self.current_iter_segments, 
@@ -118,9 +182,12 @@ class WEERDriver(WEDriver):
             theta = 100 # initial test value (TODO: optimize)
             rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]))
             # reweight according to the data corresponding to the selected index
+            # in this test case, use R2 (TODO: use all rates eventually?)
             rw.reweight(1)
             # save the optimized weights
-            np.savetxt(f"w_opt_{theta}.txt", rw.res[theta])
+            absurder_weights = rw.res[theta]
+            np.savetxt(f"w_opt_{theta}.txt", absurder_weights)
+            print("ABSURDer weights: ", absurder_weights)
             
 
         # TODO: grab data for multiple iterations (could also use this to get aux data?)
@@ -128,94 +195,140 @@ class WEERDriver(WEDriver):
         # I thought it would be useful to use multiple iterations of data
         # but actually this isn't really feasible since I am only optimizing 
         # a single set of weights corresponding to one iteration
-        # n_curr_iter = self.rc.data_manager.current_iteration
-        # print("current iter:", n_curr_iter)
-        # print(self.rc.data_manager.get_iter_group(n_curr_iter)['pcoord'][:].shape)
-        # import sys ; sys.exit(0)
+        n_curr_iter = self.rc.data_manager.current_iteration
+        print("current iteration: ", n_curr_iter)
 
-        # # only use WEER on specific iterations
-        # n_curr_iter = self.rc.data_manager.current_iteration
-        # #if n_curr_iter in [50, 100, 150, 200, 250, 300, 400, 500]:
-        # if n_curr_iter in [i for i in range(50, 1001, 50)]:
-        #     # initialize WEER
-        #     true_dist = np.loadtxt("true_1d_odld.txt")
-        #     reweight = WEER(curr_pcoords, weights, true_dist)
-        #     # opt for updated weights
-        #     weights = reweight.run_weer()
-        #     # set new weights to each segment
-        #     # for i, seg in enumerate(segments):
-        #     #     seg.weight = weights[i]
-        #     for seg, weight in zip(segments, weights):
-        #         seg.weight = weight
+        # reports = segments.copy()
+        # #report_weights = np.array(list(map(operator.attrgetter('weight'), reports)))
+        # report_weights = np.asarray([seg.weight for seg in reports])
+        # #print("OPT SEG WEIGHTS: ", np.array(list(map(operator.attrgetter('weight'), segments))))
+        # #print("OPT SEG WEIGHTS UNSORTED: ", report_weights)
+        # #print("OPT SEG WEIGHTS SORTED: ", np.asarray(sorted(report_weights)))
 
-        reports = segments.copy()
-        #report_weights = np.array(list(map(operator.attrgetter('weight'), reports)))
-        report_weights = np.asarray([seg.weight for seg in reports])
-        #print("OPT SEG WEIGHTS: ", np.array(list(map(operator.attrgetter('weight'), segments))))
-        #print("OPT SEG WEIGHTS UNSORTED: ", report_weights)
-        #print("OPT SEG WEIGHTS SORTED: ", np.asarray(sorted(report_weights)))
+        # TODO: could update to be able to run using bins
 
-        # TODO: NEXT run using bins
+        # # Regardless of current particle count, always split overweight particles and merge underweight particles
+        # # Then and only then adjust for correct particle count
+        # total_number_of_subgroups = 0
+        # total_number_of_particles = 0
+        # for (ibin, bin) in enumerate(self.next_iter_binning):
+        #     if len(bin) == 0:
+        #         continue
 
-        # Regardless of current particle count, always split overweight particles and merge underweight particles
-        # Then and only then adjust for correct particle count
-        total_number_of_subgroups = 0
-        total_number_of_particles = 0
-        for (ibin, bin) in enumerate(self.next_iter_binning):
+        #     # Splits the bin into subgroups as defined by the called function
+        #     target_count = self.bin_target_counts[ibin]
+        #     subgroups = self.subgroup_function(self, ibin, **self.subgroup_function_kwargs)
+        #     total_number_of_subgroups += len(subgroups)
+        #     # grab segments and weights
+        #     segments = np.array(sorted(bin, key=operator.attrgetter('weight')), dtype=np.object_)
+        #     weights = np.array(list(map(operator.attrgetter('weight'), segments)))
+        #     #print("BIN WEIGHT: ", weights)
+
+        #     # Calculate ideal weight and clear the bin
+        #     ideal_weight = weights.sum() / target_count
+        #     bin.clear()
+        #     # Determines to see whether we have more sub bins than we have target walkers in a bin (or equal to), and then uses
+        #     # different logic to deal with those cases.  Should devolve to the Huber/Kim algorithm in the case of few subgroups.
+        #     if len(subgroups) >= target_count:
+        #         for i in subgroups:
+        #             # Merges all members of set i.  Checks to see whether there are any to merge.
+        #             if len(i) > 1:
+        #                 (segment, parent) = self._merge_walkers(
+        #                     list(i),
+        #                     np.add.accumulate(np.array(list(map(operator.attrgetter('weight'), i)))),
+        #                     i,
+        #                 )
+        #                 i.clear()
+        #                 i.add(segment)
+        #             # Add all members of the set i to the bin.  This keeps the bins in sync for the adjustment step.
+        #             bin.update(i)
+
+        #         if len(subgroups) > target_count:
+        #             self._adjust_count(bin, subgroups, target_count)
+
+        #     if len(subgroups) < target_count:
+        #         for i in subgroups:
+        #             self._split_by_weight(i, target_count, ideal_weight)
+        #             self._merge_by_weight(i, target_count, ideal_weight)
+        #             # Same logic here.
+        #             bin.update(i)
+        #         if self.do_adjust_counts:
+        #             # A modified adjustment routine is necessary to ensure we don't unnecessarily destroy trajectory pathways.
+        #             self._adjust_count(bin, subgroups, target_count)
+        #     if self.do_thresholds:
+        #         for i in subgroups:
+        #             self._split_by_threshold(bin, i)
+        #             self._merge_by_threshold(bin, i)
+        #         for iseg in bin:
+        #             if iseg.weight > self.largest_allowed_weight or iseg.weight < self.smallest_allowed_weight:
+        #                 log.warning(
+        #                     f'Unable to fulfill threshold conditions for {iseg}. The given threshold range is likely too small.'
+        #                 )
+        #     total_number_of_particles += len(bin)
+        # log.debug('Total number of subgroups: {!r}'.format(total_number_of_subgroups))
+
+        # dummy resampling block
+        # TODO: wevo is really only using one bin
+        # ibin only needed right now for temp split merge option (TODO)
+        for ibin, bin in enumerate(self.next_iter_binning):
+            
+            # TODO: is this needed? skips empty bins probably
             if len(bin) == 0:
                 continue
 
-            # Splits the bin into subgroups as defined by the called function
-            target_count = self.bin_target_counts[ibin]
-            subgroups = self.subgroup_function(self, ibin, **self.subgroup_function_kwargs)
-            total_number_of_subgroups += len(subgroups)
-            # grab segments and weights
-            segments = np.array(sorted(bin, key=operator.attrgetter('weight')), dtype=np.object_)
-            weights = np.array(list(map(operator.attrgetter('weight'), segments)))
-            #print("BIN WEIGHT: ", weights)
+            else:
+                #resample = REAP(pcoords, weights, n_clusters=20) # 80/4 = 20 (25% of walkers)
+                #split, merge = resample.reap()
+                # special case for initialization
+                if n_curr_iter == 0:
+                    split = [0,0,0,0]
+                    merge = [[],[],[],[]]
+                else:
+                    split = [1,0,0,0]
+                    merge = [[],[],[3],[]]
 
-            # Calculate ideal weight and clear the bin
-            ideal_weight = weights.sum() / target_count
-            bin.clear()
-            # Determines to see whether we have more sub bins than we have target walkers in a bin (or equal to), and then uses
-            # different logic to deal with those cases.  Should devolve to the Huber/Kim algorithm in the case of few subgroups.
-            if len(subgroups) >= target_count:
-                for i in subgroups:
-                    # Merges all members of set i.  Checks to see whether there are any to merge.
-                    if len(i) > 1:
-                        (segment, parent) = self._merge_walkers(
-                            list(i),
-                            np.add.accumulate(np.array(list(map(operator.attrgetter('weight'), i)))),
-                            i,
-                        )
-                        i.clear()
-                        i.add(segment)
-                    # Add all members of the set i to the bin.  This keeps the bins in sync for the adjustment step.
-                    bin.update(i)
+                # TODO: testing filters
+                #split = [1 if i > 1 else i for i in split]
 
-                if len(subgroups) > target_count:
-                    self._adjust_count(bin, subgroups, target_count)
+                print(f"WEER split: {split}\nWEER merge: {merge}")
+                print("Split indices: ", [i for i, e in enumerate(split) if e != 0])
+                print("split sum: ", np.sum(split))
+                print("merge sum: ", np.sum([np.count_nonzero(i) for i in merge]))
 
-            if len(subgroups) < target_count:
-                for i in subgroups:
-                    self._split_by_weight(i, target_count, ideal_weight)
-                    self._merge_by_weight(i, target_count, ideal_weight)
-                    # Same logic here.
-                    bin.update(i)
+                # count each operation and segment as a check
+                segs = 0
+                splitting = 0
+                merging = 0
+
+                # go through each seg and split merge
+                for i, seg in enumerate(segments):
+                    
+                    # split or merge on a segment-by-segment basis
+                    if split[i] != 0:
+                        # need an extra walker since split operation reduces total walkers by 1
+                        # I think revo doesn't count the current seg
+                        self._split_decision(bin, seg, split[i] + 1)
+                        #splitting += split[i] + 1
+                        splitting += split[i]
+                    if len(merge[i]) != 0:
+                        # list of all segs objects in the current merge list element
+                        to_merge = [segment for num, segment in enumerate(segments) if num in merge[i]]
+                        # adding current segment to to_merge list
+                        # I think revo doesn't count the current seg
+                        to_merge.append(seg)
+                        
+                        # cumul_weight should be the total weights of all the segments being merged
+                        # cumul_weight is calculated automatically if not given
+                        self._merge_decision(bin, to_merge)
+                        merging += len(to_merge)
+                    
+                    segs += 1
+
                 if self.do_adjust_counts:
-                    # A modified adjustment routine is necessary to ensure we don't unnecessarily destroy trajectory pathways.
-                    self._adjust_count(bin, subgroups, target_count)
-            if self.do_thresholds:
-                for i in subgroups:
-                    self._split_by_threshold(bin, i)
-                    self._merge_by_threshold(bin, i)
-                for iseg in bin:
-                    if iseg.weight > self.largest_allowed_weight or iseg.weight < self.smallest_allowed_weight:
-                        log.warning(
-                            f'Unable to fulfill threshold conditions for {iseg}. The given threshold range is likely too small.'
-                        )
-            total_number_of_particles += len(bin)
-        log.debug('Total number of subgroups: {!r}'.format(total_number_of_subgroups))
+                    self._adjust_count(ibin)
+
+                print("Bin attrs post WEER: ", self.next_iter_binning[ibin])
+                print(f"Total = {segs}, splitting = {splitting}, merging = {merging}")
 
         self._check_post()
 
