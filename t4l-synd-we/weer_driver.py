@@ -4,7 +4,8 @@ import numpy as np
 import operator
 from westpa.core.we_driver import WEDriver
 
-from weer import WEER
+#from weer import WEER
+import absurder
 
 log = logging.getLogger(__name__)
 
@@ -13,6 +14,43 @@ class WEERDriver(WEDriver):
     This introduces a weight resampling procedure before or after (TODO)
     the split/merge resampling.
     '''
+
+    def extract_nmr_data(self, nmr_file="data-NH/600MHz-R1R2NOE.dat"):
+        """
+        Reference data and errors for reweighting.
+
+        Returned data shape: 
+            n_rates x n_vectors
+
+        Also return error for nmr data with dimensions: 
+            n_rates x n_vectors
+
+        Parameters
+        ----------
+        nmr_file : str, optional
+            Path to the NMR relaxation data file.
+
+        Updates
+        -------
+        exp_residues : np.ndarray
+            Residue list array.
+
+        Returns
+        -------
+        nmr_rates : np.ndarray
+            NMR relaxation rates.
+        nmr_err : np.ndarray
+            NMR relaxation rate errors
+        """
+        # load nmrfile: Res | R1 | R1_err | R2 | R2_err | NOE | NOE_err
+        nmr_data = np.loadtxt(nmr_file)
+        # residue list array
+        self.exp_residues = nmr_data[:, 0]
+        # shape: n_rates x n_vectors x 1 single traj
+        self.nmr_rates = nmr_data[:, (1, 3, 5)].T
+        # shape: n_rates x n_vectors
+        self.nmr_err = nmr_data[:, (2, 4, 6)].T
+        return self.nmr_rates, self.nmr_err
 
     def _run_we(self):
         '''
@@ -33,7 +71,7 @@ class WEERDriver(WEDriver):
         #weights = np.array(list(map(operator.attrgetter('weight'), segments)))
         weights = np.asarray([seg.weight for seg in segments])
         #print("seg list: ", seg_list)
-        print("segments: ", segments[0])
+        #print("segments: ", segments[0])
         print("weights: ", weights)
 
         # get all pcoords, not just the final frame
@@ -42,6 +80,48 @@ class WEERDriver(WEDriver):
         # curr_pcoords = np.array(list(map(operator.attrgetter('pcoord'), curr_segments)))
         curr_segments = sorted(self.current_iter_segments, key=operator.attrgetter('weight'))
         curr_pcoords = np.asarray([seg.pcoord for seg in curr_segments])
+        curr_data = np.asarray([seg.data for seg in curr_segments])
+        print("curr data len: ", len(curr_data))
+        # check for empty dict in first segment (e.g. during init)
+        if not curr_data[0]:
+            print("segment data is empty")
+        else:
+            # otherwise, can save data: n_segs(rows) x residue_id(cols)
+            r1 = np.array([data['R1'] for data in curr_data])
+            r2 = np.array([data['R2'] for data in curr_data])
+            noe = np.array([data['NOE'] for data in curr_data])
+            residues = np.array([data['residues'] for data in curr_data])
+            # the residue arrays for each segment should be the same, make sure this is true
+            assert all(np.array_equal(residues[0], res) for res in residues)
+            # then should be fine to grab the first one
+            residues = residues[0]
+
+            # extract NMR data (also updates self.exp_residues)
+            nmr_rates, nmr_err = self.extract_nmr_data()
+
+            # Convert self.exp_residues to a set for faster membership testing
+            exp_residues_set = set(self.exp_residues)
+
+            # Create a boolean mask for filtering
+            filtered_indices = np.array([resid in exp_residues_set for resid in residues])
+
+            # Apply the mask to filter r1, r2, and noe arrays
+            r1 = r1[:, filtered_indices]
+            r2 = r2[:, filtered_indices]
+            noe = noe[:, filtered_indices]
+
+            # desired shape for ABSURDer: n_rates x n_vectors x n_trajs (blocks)
+            absurder_input = np.stack((r1, r2, noe), axis=0).transpose(0, 2, 1)
+            print("absurder input shape: ", absurder_input.shape)
+
+            # run reweighting
+            theta = 100 # initial test value (TODO: optimize)
+            rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]))
+            # reweight according to the data corresponding to the selected index
+            rw.reweight(1)
+            # save the optimized weights
+            np.savetxt(f"w_opt_{theta}.txt", rw.res[theta])
+            
 
         # TODO: grab data for multiple iterations (could also use this to get aux data?)
         #       maybe, would need to be careful of the seg ordering
@@ -53,27 +133,27 @@ class WEERDriver(WEDriver):
         # print(self.rc.data_manager.get_iter_group(n_curr_iter)['pcoord'][:].shape)
         # import sys ; sys.exit(0)
 
-        # only use WEER on specific iterations
-        n_curr_iter = self.rc.data_manager.current_iteration
-        #if n_curr_iter in [50, 100, 150, 200, 250, 300, 400, 500]:
-        if n_curr_iter in [i for i in range(50, 1001, 50)]:
-            # initialize WEER
-            true_dist = np.loadtxt("true_1d_odld.txt")
-            reweight = WEER(curr_pcoords, weights, true_dist)
-            # opt for updated weights
-            weights = reweight.run_weer()
-            # set new weights to each segment
-            # for i, seg in enumerate(segments):
-            #     seg.weight = weights[i]
-            for seg, weight in zip(segments, weights):
-                seg.weight = weight
+        # # only use WEER on specific iterations
+        # n_curr_iter = self.rc.data_manager.current_iteration
+        # #if n_curr_iter in [50, 100, 150, 200, 250, 300, 400, 500]:
+        # if n_curr_iter in [i for i in range(50, 1001, 50)]:
+        #     # initialize WEER
+        #     true_dist = np.loadtxt("true_1d_odld.txt")
+        #     reweight = WEER(curr_pcoords, weights, true_dist)
+        #     # opt for updated weights
+        #     weights = reweight.run_weer()
+        #     # set new weights to each segment
+        #     # for i, seg in enumerate(segments):
+        #     #     seg.weight = weights[i]
+        #     for seg, weight in zip(segments, weights):
+        #         seg.weight = weight
 
         reports = segments.copy()
         #report_weights = np.array(list(map(operator.attrgetter('weight'), reports)))
         report_weights = np.asarray([seg.weight for seg in reports])
         #print("OPT SEG WEIGHTS: ", np.array(list(map(operator.attrgetter('weight'), segments))))
-        print("OPT SEG WEIGHTS UNSORTED: ", report_weights)
-        print("OPT SEG WEIGHTS SORTED: ", np.asarray(sorted(report_weights)))
+        #print("OPT SEG WEIGHTS UNSORTED: ", report_weights)
+        #print("OPT SEG WEIGHTS SORTED: ", np.asarray(sorted(report_weights)))
 
         # TODO: NEXT run using bins
 
@@ -92,7 +172,7 @@ class WEERDriver(WEDriver):
             # grab segments and weights
             segments = np.array(sorted(bin, key=operator.attrgetter('weight')), dtype=np.object_)
             weights = np.array(list(map(operator.attrgetter('weight'), segments)))
-            print("BIN WEIGHT: ", weights)
+            #print("BIN WEIGHT: ", weights)
 
             # Calculate ideal weight and clear the bin
             ideal_weight = weights.sum() / target_count

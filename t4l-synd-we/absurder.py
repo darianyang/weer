@@ -68,7 +68,7 @@ class ABSURDer:
         if len(self.rmd.shape) != 3:
             raise ValueError("rmd dimension has to be nrates x nmethyls x nblocks")
         if self.rex.shape[0] != self.eex.shape[0] or self.rex.shape[0] != self.rmd.shape[0]:
-            raise ValueError(f"The number of rates must be identical in rex({self.rex.shape[1]}), eex({self.eex.shape[1]}) and rmd({self.rmd.shape[1]})")
+            raise ValueError(f"The number of rates must be identical in rex({self.rex.shape[0]}), eex({self.eex.shape[0]}) and rmd({self.rmd.shape[0]})")
         if self.rex.shape[1] != self.eex.shape[1] or self.rex.shape[1] != self.rmd.shape[1]:
             raise ValueError(f"The number of methyl groups must be identical in rex({self.rex.shape[1]}), eex({self.eex.shape[1]}) and rmd({self.rmd.shape[1]})")
 

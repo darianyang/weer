@@ -2,7 +2,7 @@ Updating system with the options from the configuration file
 SynD propagator inferring 10001 steps per iteration from west.system.system_options.pcoord_len
 Maximum wallclock time: 1 day, 0:00:00
 
-Fri Feb  7 12:51:48 2025
+Fri Feb  7 14:43:08 2025
 Iteration 1 (2 requested)
 Beginning iteration 1
 4 segments remain in iteration 1 (4 total)
@@ -15,11 +15,23 @@ per-segment maximum non-zero probability:   0.25
 per-segment probability dynamic range (kT): 0
 norm = 1, error in norm = 0 (0*epsilon)
 Waiting for segments to complete...
+weights:  [0.25 0.25 0.25 0.25]
+curr data len:  4
+absurder input shape:  (3, 116, 4)
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   4
+# Overall chi square: 579.25
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
 Iteration completed successfully
-Iteration wallclock: 0:00:15.010105, cputime: 0:00:00
+Iteration wallclock: 0:00:15.226076, cputime: 0:00:00
 
 
-Fri Feb  7 12:52:03 2025
+Fri Feb  7 14:43:23 2025
 Iteration 2 (2 requested)
 Beginning iteration 2
 4 segments remain in iteration 2 (4 total)
@@ -32,9 +44,21 @@ per-segment maximum non-zero probability:   0.25
 per-segment probability dynamic range (kT): 0
 norm = 1, error in norm = 0 (0*epsilon)
 Waiting for segments to complete...
+weights:  [0.25 0.25 0.25 0.25]
+curr data len:  4
+absurder input shape:  (3, 116, 4)
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   4
+# Overall chi square: 624.01
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
 Iteration completed successfully
-Iteration wallclock: 0:00:15.249473, cputime: 0:00:00
+Iteration wallclock: 0:00:15.510367, cputime: 0:00:00
 
 
-Fri Feb  7 12:52:19 2025
+Fri Feb  7 14:43:39 2025
 WEST run complete.
