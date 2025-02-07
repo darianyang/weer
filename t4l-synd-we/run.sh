@@ -11,9 +11,9 @@ rm -f west.log
 # should be: label,prob,auxref(stateindex)
 w_init --bstate 'basis,1,800' 
 
-#w_run > west.log
+w_run > west.log
 
 #w_run --work-manager processes "$@" &> west.log
 #w_run --parallel > west.log
 #w_run --work-manager threads > west.log
-w_run --work-manager processes > west.log
+#w_run --work-manager processes > west.log

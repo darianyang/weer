@@ -1,9 +1,9 @@
 Updating system with the options from the configuration file
-SynD propagator inferring 100001 steps per iteration from west.system.system_options.pcoord_len
+SynD propagator inferring 10001 steps per iteration from west.system.system_options.pcoord_len
 Maximum wallclock time: 1 day, 0:00:00
 
-Wed Feb  5 15:31:50 2025
-Iteration 1 (1 requested)
+Fri Feb  7 12:51:48 2025
+Iteration 1 (2 requested)
 Beginning iteration 1
 4 segments remain in iteration 1 (4 total)
 1 of 1 (100.000000%) active bins are populated
@@ -15,42 +15,26 @@ per-segment maximum non-zero probability:   0.25
 per-segment probability dynamic range (kT): 0
 norm = 1, error in norm = 0 (0*epsilon)
 Waiting for segments to complete...
--- ERROR    [westpa.work_managers.core] -- uncaught exception in remote function
-Traceback (most recent call last):
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/work_managers/processes.py", line 84, in task_loop
-    result = fn(*args, **kwargs)
-             ^^^^^^^^^^^^^^^^^^^
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/wm_ops.py", line 40, in propagate
-    incoming_segments = {segment.seg_id: segment for segment in propagator.propagate(segments)}
-                                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/wmd122/github/weer/t4l-synd-we/synd_propagator.py", line 310, in propagate
-    initial_points[iseg] = get_segment_parent_index(segment)
-                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/wmd122/github/weer/t4l-synd-we/synd_propagator.py", line 71, in get_segment_parent_index
-    parent_state_index = get_segment_ibstate_discrete_index(segment)
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/wmd122/github/weer/t4l-synd-we/synd_propagator.py", line 83, in get_segment_ibstate_discrete_index
-    istate = data_manager.get_segment_initial_states([segment])[0]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/data_manager.py", line 732, in get_segment_initial_states
-    n_iter = n_iter or self.current_iteration
-                       ^^^^^^^^^^^^^^^^^^^^^^
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/data_manager.py", line 335, in current_iteration
-    h5file_attrs = self.we_h5file['/'].attrs
-                   ~~~~~~~~~~~~~~^^^^^
-TypeError: 'NoneType' object is not subscriptable
+Iteration completed successfully
+Iteration wallclock: 0:00:15.010105, cputime: 0:00:00
 
-exception caught; shutting down
--- ERROR    [w_run] -- error message: 'NoneType' object is not subscriptable
--- ERROR    [w_run] -- Traceback (most recent call last):
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/cli/core/w_run.py", line 61, in run_simulation
-    sim_manager.run()
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/sim_manager.py", line 762, in run
-    self.propagate()
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/sim_manager.py", line 607, in propagate
-    incoming = future.get_result()
-               ^^^^^^^^^^^^^^^^^^^
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/work_managers/core.py", line 332, in get_result
-    raise self._exception
-TypeError: 'NoneType' object is not subscriptable
 
+Fri Feb  7 12:52:03 2025
+Iteration 2 (2 requested)
+Beginning iteration 2
+4 segments remain in iteration 2 (4 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.25
+per-segment maximum non-zero probability:   0.25
+per-segment probability dynamic range (kT): 0
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+Iteration completed successfully
+Iteration wallclock: 0:00:15.249473, cputime: 0:00:00
+
+
+Fri Feb  7 12:52:19 2025
+WEST run complete.

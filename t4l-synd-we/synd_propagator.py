@@ -13,6 +13,8 @@ from synd.models.discrete.markov import MarkovGenerator
 import MDAnalysis as mda
 import MDAnalysis.analysis.rms
 
+from relax import NH_Relaxation
+
 def get_segment_index(segment):
 
     data_manager = westpa.rc.data_manager
@@ -264,21 +266,13 @@ class SynMDPropagator(WESTPropagator):
 
         return rmsd_values
 
-    def coords_to_pcoord(self, backmapped_traj):
-        """
-        Given a set of xyz traj coordinates from SynD backmapping, return the progress coordinate.
-
-        Parameters
-        ----------
-        backmapped_traj : numpy.ndarray
-            The backmapped trajectory, shape (n_frames, n_atoms, 3).
-        reference_pdb : str
-            Path to the reference PDB file.
-        """
-        syn_u = mda.Universe(self.reference_pdb)
-        syn_u.load_new(backmapped_traj, format="memory")
-        pcoord = self.calc_heavy_atom_rmsd(syn_u, self.reference_pdb)
-        return pcoord
+    # def coords_to_pcoord(self, segment):
+    #     """
+    #     Given a WE segment, backmap to coords and return the progress coordinate.
+    #     """
+    #     syn_u = self.segment_to_syn_u(segment)
+    #     pcoord = self.calc_heavy_atom_rmsd(syn_u, self.reference_pdb)
+    #     return pcoord
 
     def backmap_to_rmsd(self, state_index):
         """
@@ -297,6 +291,37 @@ class SynMDPropagator(WESTPropagator):
         #state.pcoord = self.coords_to_pcoord(self.synd_model.backmap(state_index))
         # calc the rmsd using the state index (fast)
         state.pcoord = self.backmap_to_rmsd(state_index)
+
+    def segment_to_syn_u(self, segment):
+        """
+        Convert a segment to an MDAnalysis Universe object.
+        """
+        backmapped_traj = [self.synd_model.backmap(x) for x in segment.data["state_indices"]]
+        syn_u = mda.Universe(self.reference_pdb)
+        syn_u.load_new(backmapped_traj, format="memory")
+        return syn_u
+
+    def calc_relax(self, segment):
+        """
+        Calculate relaxation rates for a given segment.
+
+        Parameters
+        ----------
+        segment : westpa.core.segment.Segment
+            The segment to calculate relaxation rates for.
+        
+        Returns
+        -------
+        dict
+            Dictionary containing the relaxation rates and the residues they correspond to.
+            Format: {"R1": np.ndarray, "R2": np.ndarray, "NOE": np.ndarray, "residues": np.ndarray}
+        """
+        syn_u = self.segment_to_syn_u(segment)
+        relaxation = NH_Relaxation(self.reference_pdb, syn_u,
+                                   max_lag=100, traj_step=10, acf_plot=False,
+                                   n_exps=5, tau_c=10e-9, b0=600)
+        R1, R2, NOE = relaxation.run()
+        return {"R1": R1, "R2": R2, "NOE": NOE, "residues": relaxation.residue_indices}
 
     def propagate(self, segments):
 
@@ -325,34 +350,44 @@ class SynMDPropagator(WESTPropagator):
             # segment.pcoord = np.array([
             #     self.coords_to_pcoord(self.synd_model.backmap(x)) for x in segment.data["state_indices"]
             #     ]).reshape(self.coord_len, -1)
+            # updated version
+            # segment.pcoord = self.calc_heavy_atom_rmsd(self.segment_to_syn_u(segment), 
+            #                                            self.reference_pdb).reshape(self.coord_len, -1)
             
-            # use pure synd backmapper
+            # use pure synd backmapper (coords return)
             # segment.pcoord = np.array([
             #     self.synd_model.backmap(x) for x in segment.data["state_indices"]
             # ]).reshape(self.coord_len, -1)
 
-            # For H5 plugin
-            if westpa.rc.get_data_manager().store_h5:
+            # calc aux data
+            relaxation_data = self.calc_relax(segment)
+            segment.data["R1"] = relaxation_data["R1"]
+            segment.data["R2"] = relaxation_data["R2"]
+            segment.data["NOE"] = relaxation_data["NOE"]
+            segment.data["residues"] = relaxation_data["residues"]
 
-                # TODO: how to handle restart data?
-                #       I think we just don't for SynD, but let's silence that warning.
-                segment.data['iterh5/restart'] = None
+            # # For H5 plugin
+            # if westpa.rc.get_data_manager().store_h5:
 
-                full_coordinate_trajectory = np.array([
-                    self.synd_model.backmap(x, 'full_coordinates')
-                    for x in segment.data["state_indices"]
-                ])
+            #     # TODO: how to handle restart data?
+            #     #       I think we just don't for SynD, but let's silence that warning.
+            #     segment.data['iterh5/restart'] = None
 
-                # To mimic the behavior of a saved MD trajectory, we omit the first point.
-                # I don't love this, but it's consistent with the OpenMM propagator.
-                # TODO: Change this -- it's inconsistent with how pcoords are saved, and isn't quite right
-                #   for the haMSM plugin.
-                self.topology.xyz = full_coordinate_trajectory[1:]
-                self.topology.time = np.arange(self.coord_len-1) + \
-                                     (self.coord_len-1) * westpa.rc.get_sim_manager().n_iter
+            #     full_coordinate_trajectory = np.array([
+            #         self.synd_model.backmap(x, 'full_coordinates')
+            #         for x in segment.data["state_indices"]
+            #     ])
 
-                # TODO: Avoid this copy! Probably super slow
-                segment.data['iterh5/trajectory'] = deepcopy(self.topology)
+            #     # To mimic the behavior of a saved MD trajectory, we omit the first point.
+            #     # I don't love this, but it's consistent with the OpenMM propagator.
+            #     # TODO: Change this -- it's inconsistent with how pcoords are saved, and isn't quite right
+            #     #   for the haMSM plugin.
+            #     self.topology.xyz = full_coordinate_trajectory[1:]
+            #     self.topology.time = np.arange(self.coord_len-1) + \
+            #                          (self.coord_len-1) * westpa.rc.get_sim_manager().n_iter
+
+            #     # TODO: Avoid this copy! Probably super slow
+            #     segment.data['iterh5/trajectory'] = deepcopy(self.topology)
 
             segment.status = segment.SEG_STATUS_COMPLETE
 

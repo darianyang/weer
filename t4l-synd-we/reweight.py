@@ -80,7 +80,8 @@ class NH_Reweight:
         # here using 107 blocks of 10ns each from MD simulation (TODO: detect n_blocks/trajs from path)
         for i in tqdm(range(1, 107)):
             traj = f"t4l/t4l-10ps-imaged2/segment_{i:03d}.xtc"
-            relaxation = relax.NH_Relaxation("t4l/sim1_dry.pdb", traj, max_lag=100,
+            # TODO: should I only calc the residues in the exp data?
+            relaxation = relax.NH_Relaxation("t4l/sim1_dry.pdb", traj, max_lag=100, b0=self.field,
                                             traj_step=10, acf_plot=False, n_exps=5, tau_c=10e-9)
             R1, R2, NOE = relaxation.run()
             # filter the relaxation data to only include the residues in the experimental data
