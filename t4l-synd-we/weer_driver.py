@@ -242,8 +242,10 @@ class WEERDriver(WEDriver):
                 #split, merge = resample.reap()
                 # special case for initialization
                 if n_curr_iter == 0:
-                    split = [0,0,0,0]
-                    merge = [[],[],[],[]]
+                    # this defaults to empty with 1 bstate
+                    # tested with multiple bstates, seems to work
+                    split = [0] * len(segments)
+                    merge = [[] for _ in range(len(segments))]
                 else:
                     # TODO: theres also the question of if I should use the top weight or the 
                     #       top weight change from the previous iteration (and if I should 
