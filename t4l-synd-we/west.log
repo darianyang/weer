@@ -2,58 +2,385 @@ Updating system with the options from the configuration file
 SynD propagator inferring 1001 steps per iteration from west.system.system_options.pcoord_len
 Maximum wallclock time: 1 day, 0:00:00
 
-Fri Feb  7 16:48:05 2025
-Iteration 1 (2 requested)
+Tue Feb 11 15:46:58 2025
+Iteration 1 (10 requested)
 Beginning iteration 1
-4 segments remain in iteration 1 (4 total)
+6 segments remain in iteration 1 (6 total)
 1 of 1 (100.000000%) active bins are populated
 per-bin minimum non-zero probability:       1
 per-bin maximum probability:                1
 per-bin probability dynamic range (kT):     0
-per-segment minimum non-zero probability:   0.25
+per-segment minimum non-zero probability:   0.125
 per-segment maximum non-zero probability:   0.25
-per-segment probability dynamic range (kT): 0
+per-segment probability dynamic range (kT): 0.693147
 norm = 1, error in norm = 0 (0*epsilon)
 Waiting for segments to complete...
-weights:  [0.25 0.25 0.25 0.25] weights sum:  1.0
-curr data len:  4
-absurder input shape:  (3, 116, 4)
+weights:  [0.125 0.125 0.125 0.125 0.25  0.25 ] weights sum:  1.0
+curr data len:  6
+absurder input shape:  (3, 116, 6)
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
-# Number of blocks:   4
-# Overall chi square: 476.40
+# Number of blocks:   6
+# Overall chi square: 496.25
 # THETA: 100         
 # Done! All minimizations terminated successfully
 # Saved results.pkl
-ABSURDer weights:  [0.06484986 0.03687413 0.53990106 0.35837495]
+ABSURDer weights:  [0.04649332 0.04600327 0.0441927  0.16602186 0.63581202 0.06147684]
 current iteration:  1
-WEER split: [0, 0, 1, 0]
-WEER merge: [[], [1], [], []]
+WEER split: [0, 0, 0, 0, 1, 0]
+WEER merge: [[], [], [1], [], [], []]
+Split indices:  [4]
+split sum:  1
+merge sum:  1
+Bin attrs post WEER:  <Bin at 0x13b4a8410, label=None, count=6, weight=1>
+Total = 6, splitting = 1, merging = 2
+Iteration completed successfully
+Iteration wallclock: 0:00:09.659893, cputime: 0:00:00
+
+
+Tue Feb 11 15:47:08 2025
+Iteration 2 (10 requested)
+Beginning iteration 2
+6 segments remain in iteration 2 (6 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.125
+per-segment maximum non-zero probability:   0.25
+per-segment probability dynamic range (kT): 0.693147
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+weights:  [0.125 0.125 0.125 0.125 0.25  0.25 ] weights sum:  1.0
+curr data len:  6
+absurder input shape:  (3, 116, 6)
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   6
+# Overall chi square: 514.87
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
+ABSURDer weights:  [0.11516008 0.09806732 0.05021229 0.35918163 0.30028796 0.07709071]
+current iteration:  2
+WEER split: [0, 0, 0, 1, 0, 0]
+WEER merge: [[], [], [5], [], [], []]
+Split indices:  [3]
+split sum:  1
+merge sum:  1
+Bin attrs post WEER:  <Bin at 0x13d464500, label=None, count=6, weight=1>
+Total = 6, splitting = 1, merging = 2
+Iteration completed successfully
+Iteration wallclock: 0:00:10.613469, cputime: 0:00:00
+
+
+Tue Feb 11 15:47:18 2025
+Iteration 3 (10 requested)
+Beginning iteration 3
+6 segments remain in iteration 3 (6 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.0625
+per-segment maximum non-zero probability:   0.375
+per-segment probability dynamic range (kT): 1.79176
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+weights:  [0.0625 0.0625 0.125  0.125  0.25   0.375 ] weights sum:  1.0
+curr data len:  6
+absurder input shape:  (3, 116, 6)
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   6
+# Overall chi square: 425.40
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
+ABSURDer weights:  [0.14422133 0.08027068 0.45483677 0.16578422 0.06829222 0.08659478]
+current iteration:  3
+WEER split: [0, 0, 1, 0, 0, 0]
+WEER merge: [[], [], [], [], [1], []]
 Split indices:  [2]
 split sum:  1
 merge sum:  1
-Bin attrs post WEER:  <Bin at 0x138d18aa0, label=None, count=4, weight=1.25>
-Total = 4, splitting = 1, merging = 2
+Bin attrs post WEER:  <Bin at 0x13b4a8140, label=None, count=6, weight=1>
+Total = 6, splitting = 1, merging = 2
 Iteration completed successfully
-Iteration wallclock: 0:00:04.910385, cputime: 0:00:00
+Iteration wallclock: 0:00:10.037298, cputime: 0:00:00
 
 
-Fri Feb  7 16:48:10 2025
-Iteration 2 (2 requested)
-Beginning iteration 2
-4 segments remain in iteration 2 (4 total)
-exception caught; shutting down
--- ERROR    [w_run] -- Traceback (most recent call last):
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/cli/core/w_run.py", line 61, in run_simulation
-    sim_manager.run()
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/sim_manager.py", line 758, in run
-    self.prepare_iteration()
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/sim_manager.py", line 495, in prepare_iteration
-    self.report_bin_statistics(initial_binning, [], save_summary=True)
-  File "/Users/wmd122/miniconda3/envs/weer/lib/python3.11/site-packages/westpa/core/sim_manager.py", line 191, in report_bin_statistics
-    assert abs(1 - norm) < EPS * (len(segments) + n_active_bins)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-AssertionError
+Tue Feb 11 15:47:28 2025
+Iteration 4 (10 requested)
+Beginning iteration 4
+6 segments remain in iteration 4 (6 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.0625
+per-segment maximum non-zero probability:   0.375
+per-segment probability dynamic range (kT): 1.79176
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+weights:  [0.0625 0.0625 0.0625 0.125  0.3125 0.375 ] weights sum:  1.0
+curr data len:  6
+absurder input shape:  (3, 116, 6)
 
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   6
+# Overall chi square: 475.21
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
+ABSURDer weights:  [0.20716201 0.16992756 0.13280829 0.09481017 0.09582433 0.29946764]
+current iteration:  4
+WEER split: [0, 0, 0, 0, 0, 1]
+WEER merge: [[], [], [], [4], [], []]
+Split indices:  [5]
+split sum:  1
+merge sum:  1
+Bin attrs post WEER:  <Bin at 0x13b4a8410, label=None, count=6, weight=1>
+Total = 6, splitting = 1, merging = 2
+Iteration completed successfully
+Iteration wallclock: 0:00:09.797052, cputime: 0:00:00
+
+
+Tue Feb 11 15:47:38 2025
+Iteration 5 (10 requested)
+Beginning iteration 5
+6 segments remain in iteration 5 (6 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.0625
+per-segment maximum non-zero probability:   0.4375
+per-segment probability dynamic range (kT): 1.94591
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+weights:  [0.0625 0.0625 0.0625 0.1875 0.1875 0.4375] weights sum:  1.0
+curr data len:  6
+absurder input shape:  (3, 116, 6)
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   6
+# Overall chi square: 432.08
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
+ABSURDer weights:  [0.08459682 0.04590785 0.01924602 0.23189742 0.48026885 0.13808305]
+current iteration:  5
+WEER split: [0, 0, 0, 0, 1, 0]
+WEER merge: [[], [], [1], [], [], []]
+Split indices:  [4]
+split sum:  1
+merge sum:  1
+Bin attrs post WEER:  <Bin at 0x13b4a8140, label=None, count=6, weight=1>
+Total = 6, splitting = 1, merging = 2
+Iteration completed successfully
+Iteration wallclock: 0:00:10.337452, cputime: 0:00:00
+
+
+Tue Feb 11 15:47:48 2025
+Iteration 6 (10 requested)
+Beginning iteration 6
+6 segments remain in iteration 6 (6 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.0625
+per-segment maximum non-zero probability:   0.4375
+per-segment probability dynamic range (kT): 1.94591
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+weights:  [0.0625  0.09375 0.09375 0.125   0.1875  0.4375 ] weights sum:  1.0
+curr data len:  6
+absurder input shape:  (3, 116, 6)
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   6
+# Overall chi square: 491.67
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
+ABSURDer weights:  [0.06443037 0.09784041 0.19217423 0.21483349 0.28103015 0.14969135]
+current iteration:  6
+WEER split: [0, 0, 0, 0, 1, 0]
+WEER merge: [[1], [], [], [], [], []]
+Split indices:  [4]
+split sum:  1
+merge sum:  1
+Bin attrs post WEER:  <Bin at 0x13b4a8410, label=None, count=6, weight=1>
+Total = 6, splitting = 1, merging = 2
+Iteration completed successfully
+Iteration wallclock: 0:00:10.586294, cputime: 0:00:00
+
+
+Tue Feb 11 15:47:59 2025
+Iteration 7 (10 requested)
+Beginning iteration 7
+6 segments remain in iteration 7 (6 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.09375
+per-segment maximum non-zero probability:   0.4375
+per-segment probability dynamic range (kT): 1.54045
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+weights:  [0.09375 0.09375 0.09375 0.125   0.15625 0.4375 ] weights sum:  1.0
+curr data len:  6
+absurder input shape:  (3, 116, 6)
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   6
+# Overall chi square: 447.66
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
+ABSURDer weights:  [0.25523295 0.07769485 0.12916258 0.22765318 0.0745517  0.23570476]
+current iteration:  7
+WEER split: [1, 0, 0, 0, 0, 0]
+WEER merge: [[], [], [], [], [1], []]
+Split indices:  [0]
+split sum:  1
+merge sum:  1
+Bin attrs post WEER:  <Bin at 0x13b1e58b0, label=None, count=6, weight=1>
+Total = 6, splitting = 1, merging = 2
+Iteration completed successfully
+Iteration wallclock: 0:00:10.232681, cputime: 0:00:00
+
+
+Tue Feb 11 15:48:09 2025
+Iteration 8 (10 requested)
+Beginning iteration 8
+6 segments remain in iteration 8 (6 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.046875
+per-segment maximum non-zero probability:   0.4375
+per-segment probability dynamic range (kT): 2.23359
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+weights:  [0.046875 0.046875 0.09375  0.125    0.25     0.4375  ] weights sum:  1.0
+curr data len:  6
+absurder input shape:  (3, 116, 6)
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   6
+# Overall chi square: 483.79
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
+ABSURDer weights:  [0.07591323 0.25469986 0.40708791 0.11975779 0.0404789  0.10206232]
+current iteration:  8
+WEER split: [0, 0, 1, 0, 0, 0]
+WEER merge: [[], [], [], [], [0], []]
+Split indices:  [2]
+split sum:  1
+merge sum:  0
+Bin attrs post WEER:  <Bin at 0x13d4bc050, label=None, count=6, weight=1>
+Total = 6, splitting = 1, merging = 2
+Iteration completed successfully
+Iteration wallclock: 0:00:10.281825, cputime: 0:00:00
+
+
+Tue Feb 11 15:48:20 2025
+Iteration 9 (10 requested)
+Beginning iteration 9
+6 segments remain in iteration 9 (6 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.046875
+per-segment maximum non-zero probability:   0.4375
+per-segment probability dynamic range (kT): 2.23359
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+weights:  [0.046875 0.046875 0.046875 0.125    0.296875 0.4375  ] weights sum:  1.0
+curr data len:  6
+absurder input shape:  (3, 116, 6)
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   6
+# Overall chi square: 476.82
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
+ABSURDer weights:  [0.11317239 0.14751644 0.3294525  0.12539056 0.20303446 0.08143366]
+current iteration:  9
+WEER split: [0, 0, 1, 0, 0, 0]
+WEER merge: [[], [], [], [], [], [0]]
+Split indices:  [2]
+split sum:  1
+merge sum:  0
+Bin attrs post WEER:  <Bin at 0x16a053e30, label=None, count=6, weight=1>
+Total = 6, splitting = 1, merging = 2
+Iteration completed successfully
+Iteration wallclock: 0:00:10.460022, cputime: 0:00:00
+
+
+Tue Feb 11 15:48:30 2025
+Iteration 10 (10 requested)
+Beginning iteration 10
+6 segments remain in iteration 10 (6 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.0234375
+per-segment maximum non-zero probability:   0.484375
+per-segment probability dynamic range (kT): 3.02852
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+weights:  [0.0234375 0.0234375 0.046875  0.125     0.296875  0.484375 ] weights sum:  1.0
+curr data len:  6
+absurder input shape:  (3, 116, 6)
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   6
+# Overall chi square: 458.16
+# THETA: 100         
+# Done! All minimizations terminated successfully
+# Saved results.pkl
+ABSURDer weights:  [0.16735405 0.15649366 0.16369497 0.14984293 0.01992325 0.34269114]
+current iteration:  10
+WEER split: [0, 0, 0, 0, 0, 1]
+WEER merge: [[], [], [], [], [3], []]
+Split indices:  [5]
+split sum:  1
+merge sum:  1
+Bin attrs post WEER:  <Bin at 0x16a050410, label=None, count=6, weight=1>
+Total = 6, splitting = 1, merging = 2
+Iteration completed successfully
+Iteration wallclock: 0:00:10.145508, cputime: 0:00:00
+
+
+Tue Feb 11 15:48:40 2025
+WEST run complete.

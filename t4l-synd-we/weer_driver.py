@@ -125,12 +125,15 @@ class WEERDriver(WEDriver):
         merge = [[] for _ in range(len(segments))]
         
         # Mark the top n_splits segments for splitting
+        # TODO: think about incorporating >1 splitting ints eventually
         for i in range(n_splits):
-            split[sorted_indices[-(i+1)]] = 1
+            split[sorted_indices[-(i + 1)]] = 1
         
         # Mark the bottom n_merges segments for merging
         for i in range(n_merges):
-            merge[sorted_indices[i]].append(sorted_indices[i])
+            # TODO: ensure there is a different segment to merge into
+            #       I see now, it needs to merge with nearest neighbor, not as it does now with random n value
+            merge[sorted_indices[i]].append(sorted_indices[i + 1])
         
         return split, merge
 
@@ -225,66 +228,6 @@ class WEERDriver(WEDriver):
 
         # TODO: could update to be able to run using bins
 
-        # # Regardless of current particle count, always split overweight particles and merge underweight particles
-        # # Then and only then adjust for correct particle count
-        # total_number_of_subgroups = 0
-        # total_number_of_particles = 0
-        # for (ibin, bin) in enumerate(self.next_iter_binning):
-        #     if len(bin) == 0:
-        #         continue
-
-        #     # Splits the bin into subgroups as defined by the called function
-        #     target_count = self.bin_target_counts[ibin]
-        #     subgroups = self.subgroup_function(self, ibin, **self.subgroup_function_kwargs)
-        #     total_number_of_subgroups += len(subgroups)
-        #     # grab segments and weights
-        #     segments = np.array(sorted(bin, key=operator.attrgetter('weight')), dtype=np.object_)
-        #     weights = np.array(list(map(operator.attrgetter('weight'), segments)))
-        #     #print("BIN WEIGHT: ", weights)
-
-        #     # Calculate ideal weight and clear the bin
-        #     ideal_weight = weights.sum() / target_count
-        #     bin.clear()
-        #     # Determines to see whether we have more sub bins than we have target walkers in a bin (or equal to), and then uses
-        #     # different logic to deal with those cases.  Should devolve to the Huber/Kim algorithm in the case of few subgroups.
-        #     if len(subgroups) >= target_count:
-        #         for i in subgroups:
-        #             # Merges all members of set i.  Checks to see whether there are any to merge.
-        #             if len(i) > 1:
-        #                 (segment, parent) = self._merge_walkers(
-        #                     list(i),
-        #                     np.add.accumulate(np.array(list(map(operator.attrgetter('weight'), i)))),
-        #                     i,
-        #                 )
-        #                 i.clear()
-        #                 i.add(segment)
-        #             # Add all members of the set i to the bin.  This keeps the bins in sync for the adjustment step.
-        #             bin.update(i)
-
-        #         if len(subgroups) > target_count:
-        #             self._adjust_count(bin, subgroups, target_count)
-
-        #     if len(subgroups) < target_count:
-        #         for i in subgroups:
-        #             self._split_by_weight(i, target_count, ideal_weight)
-        #             self._merge_by_weight(i, target_count, ideal_weight)
-        #             # Same logic here.
-        #             bin.update(i)
-        #         if self.do_adjust_counts:
-        #             # A modified adjustment routine is necessary to ensure we don't unnecessarily destroy trajectory pathways.
-        #             self._adjust_count(bin, subgroups, target_count)
-        #     if self.do_thresholds:
-        #         for i in subgroups:
-        #             self._split_by_threshold(bin, i)
-        #             self._merge_by_threshold(bin, i)
-        #         for iseg in bin:
-        #             if iseg.weight > self.largest_allowed_weight or iseg.weight < self.smallest_allowed_weight:
-        #                 log.warning(
-        #                     f'Unable to fulfill threshold conditions for {iseg}. The given threshold range is likely too small.'
-        #                 )
-        #     total_number_of_particles += len(bin)
-        # log.debug('Total number of subgroups: {!r}'.format(total_number_of_subgroups))
-
         # dummy resampling block
         # TODO: wevo is really only using one bin
         # ibin only needed right now for temp split merge option (TODO)
@@ -308,7 +251,10 @@ class WEERDriver(WEDriver):
                     # TODO: test right now, update to use absurder weights
                     # split = [1,0,0,0]
                     # merge = [[],[],[3],[]]
-                    split, merge = self.generate_split_merge_decisions(segments, absurder_weights, 1, 1)
+                    #n_split_merge = int(len(curr_segments) / 2)
+                    n_split_merge = 1
+                    # currently set to use same n_split and n_merge amounts
+                    split, merge = self.generate_split_merge_decisions(segments, absurder_weights, n_split_merge, n_split_merge)
 
 
                 print(f"WEER split: {split}\nWEER merge: {merge}")
