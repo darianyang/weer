@@ -498,13 +498,13 @@ class NH_Relaxation:
             constraints=constraints,
             bounds=bounds,
             method="SLSQP",
-            # options={
-            #     #"disp": True,     # Display convergence messages
-            #     'maxiter': 1000,  # Increase max iterations
-            #     'ftol': 1e-8,     # Tolerance for termination
-            #     #'gtol': 1e-8      # Tolerance for gradients
-            #     #'eps' : 1e-4,  # Step size for numerical approx of jacobian
-            # }
+            options={
+                #"disp": True,     # Display convergence messages
+                'maxiter': 10000,  # Increase max iterations
+                'ftol': 1e-8,     # Tolerance for termination
+                #'gtol': 1e-8      # Tolerance for gradients
+                #'eps' : 1e-4,  # Step size for numerical approx of jacobian
+            }
         )
 
         if not result.success:
