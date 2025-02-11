@@ -320,8 +320,9 @@ class SynMDPropagator(WESTPropagator):
         relaxation = NH_Relaxation(self.reference_pdb, syn_u,
                                    max_lag=100, traj_step=10, acf_plot=False,
                                    n_exps=5, tau_c=10e-9, b0=600)
-        R1, R2, NOE = relaxation.run()
-        return {"R1": R1, "R2": R2, "NOE": NOE, "residues": relaxation.residue_indices}
+        R1, R2, NOE, S2 = relaxation.run()
+        return {"R1" : R1, "R2" : R2, "NOE" : NOE, "S2" : S2,
+                "residues" : relaxation.residue_indices}
 
     def propagate(self, segments):
 
@@ -364,6 +365,7 @@ class SynMDPropagator(WESTPropagator):
             segment.data["R1"] = relaxation_data["R1"]
             segment.data["R2"] = relaxation_data["R2"]
             segment.data["NOE"] = relaxation_data["NOE"]
+            segment.data["S2"] = relaxation_data["S2"]
             segment.data["residues"] = relaxation_data["residues"]
 
             # # For H5 plugin

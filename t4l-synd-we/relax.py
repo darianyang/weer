@@ -615,7 +615,10 @@ class NH_Relaxation:
         # NOE calculation
         NOE = 1 + (self.gamma_H / self.gamma_N) * self.d_oo * (1 / R1) * (6 * J_omega_H_plus_N - J_omega_H_minus_N)
 
-        return R1, R2, NOE
+        # S2 is analogous to A0 values (https://pubs.acs.org/doi/10.1021/ct7000045)
+        S2 = amplitudes[0]
+
+        return R1, R2, NOE, S2
 
     def plot_results(self, R1, R2, NOE, ax=None):
         """
@@ -703,6 +706,7 @@ class NH_Relaxation:
         r1_values = np.zeros(n_bonds)
         r2_values = np.zeros(n_bonds)
         noe_values = np.zeros(n_bonds)
+        s2_values = np.zeros(n_bonds)
 
         # Loop over each NH bond vector's ACF
         for i in range(n_bonds):
@@ -715,17 +719,18 @@ class NH_Relaxation:
             #A, tau, self.result = self.fit_acf_differential_evolution(nh_acf)
             #A, tau, self.result = self.fit_acf_lmfit_minimize(nh_acf)
             
-            # Calculate R1, R2, and NOE using J(w) from ACF fitting results
-            r1, r2, noe = self.compute_relaxation_parameters(A, tau)
+            # Calculate R1, R2, NOE, (using J(w) from ACF fitting results) and S2 from A0
+            r1, r2, noe, s2 = self.compute_relaxation_parameters(A, tau)
             
             # Store the results in the pre-allocated arrays
             r1_values[i] = r1
             r2_values[i] = r2
             noe_values[i] = noe
+            s2_values[i] = s2
 
             # TODO: move plotting function here to show all NH bond vector fits?
 
-        return r1_values, r2_values, noe_values
+        return r1_values, r2_values, noe_values, s2_values
 
     # TODO: methods for MF2 analysis for S2 OPs and tau_internal?
 
@@ -751,9 +756,16 @@ if __name__ == "__main__":
         # relaxation = NH_Relaxation("t4l/sim1_dry.pdb", 
         #                            "t4l/t4l-1ps/segment_001.xtc",
         #                            traj_step=1, acf_plot=False, n_exps=5, tau_c=10e-9, b0=500)
-        R1, R2, NOE = relaxation.run()
-        print(NOE)
-        print(relaxation.residue_indices)
+        R1, R2, NOE, S2 = relaxation.run()
+        # print(NOE)
+        # print(relaxation.residue_indices)
+
+        # S2 plot
+        plt.plot(relaxation.residue_indices, S2)
+        plt.ylim(0, 1)
+        plt.xlabel("Residue Index")
+        plt.ylabel("$S^2$")
+        plt.show()
 
         # plot the results
         fig, ax = plt.subplots(nrows=3, figsize=(7, 5))
