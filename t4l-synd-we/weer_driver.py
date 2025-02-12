@@ -88,7 +88,7 @@ class WEERDriver(WEDriver):
 
     def _adjust_count(self, ibin):
         '''
-        TODO: adjust to sort/adjust by variance, not weight.
+        Adjust the number of walkers in a bin to match the target count.
         '''
         bin = self.next_iter_binning[ibin]
         target_count = self.bin_target_counts[ibin]
@@ -117,6 +117,27 @@ class WEERDriver(WEDriver):
             bin.add(merged_segment)
 
     def generate_split_merge_decisions(self, segments, absurder_weights, n_splits, n_merges):
+        '''
+        Generate split and merge decisions based on ABSURDer weights.
+
+        Parameters
+        ----------
+        segments : list
+            List of segment objects.
+        absurder_weights : np.ndarray
+            ABSURDer weights for each segment.
+        n_splits : int
+            Number of segments to split.
+        n_merges : int
+            Number of segments to merge.    
+
+        Returns
+        -------
+        split : list
+            List of split decisions.
+        merge : list of lists
+            List of list of merge decisions.
+        '''
         # Sort segments by absurder weights
         sorted_indices = np.argsort(absurder_weights)
         
@@ -124,16 +145,22 @@ class WEERDriver(WEDriver):
         split = [0] * len(segments)
         merge = [[] for _ in range(len(segments))]
         
+        # Split the sorted segments into top and bottom halves
+        mid_index = len(sorted_indices) // 2
+        top_half_indices = sorted_indices[mid_index:]
+        bottom_half_indices = sorted_indices[:mid_index]
+        
         # Mark the top n_splits segments for splitting
-        # TODO: think about incorporating >1 splitting ints eventually
         for i in range(n_splits):
-            split[sorted_indices[-(i + 1)]] = 1
+            split_index = top_half_indices[-(i % len(top_half_indices) + 1)]
+            split[split_index] += 1
         
         # Mark the bottom n_merges segments for merging
         for i in range(n_merges):
-            # TODO: ensure there is a different segment to merge into
-            #       I see now, it needs to merge with nearest neighbor, not as it does now with random n value
-            merge[sorted_indices[i]].append(sorted_indices[i + 1])
+            merge_index = bottom_half_indices[i % len(bottom_half_indices)]
+            neighbor_index = bottom_half_indices[(i + 1) % len(bottom_half_indices)]
+            if merge_index != neighbor_index:
+                merge[merge_index].append(neighbor_index)
         
         return split, merge
 
@@ -254,9 +281,10 @@ class WEERDriver(WEDriver):
                     # split = [1,0,0,0]
                     # merge = [[],[],[3],[]]
                     #n_split_merge = int(len(curr_segments) / 2)
-                    n_split_merge = 1
+                    n_split_merge = 2
                     # currently set to use same n_split and n_merge amounts
-                    split, merge = self.generate_split_merge_decisions(segments, absurder_weights, n_split_merge, n_split_merge)
+                    split, merge = self.generate_split_merge_decisions(segments, absurder_weights, 
+                                                                       0, n_split_merge)
 
 
                 print(f"WEER split: {split}\nWEER merge: {merge}")
@@ -292,8 +320,8 @@ class WEERDriver(WEDriver):
                     
                     segs += 1
 
-                if self.do_adjust_counts:
-                    self._adjust_count(ibin)
+                # if self.do_adjust_counts:
+                #     self._adjust_count(ibin)
 
                 print("Bin attrs post WEER: ", self.next_iter_binning[ibin])
                 print(f"Total = {segs}, splitting = {splitting}, merging = {merging}")

@@ -318,7 +318,7 @@ class SynMDPropagator(WESTPropagator):
         """
         syn_u = self.segment_to_syn_u(segment)
         relaxation = NH_Relaxation(self.reference_pdb, syn_u,
-                                   max_lag=100, traj_step=10, acf_plot=False,
+                                   max_lag=100, traj_step=1, acf_plot=False,
                                    n_exps=5, tau_c=10e-9, b0=600)
         R1, R2, NOE, S2 = relaxation.run()
         return {"R1" : R1, "R2" : R2, "NOE" : NOE, "S2" : S2,
