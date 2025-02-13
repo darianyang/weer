@@ -321,8 +321,10 @@ class ABSURDer:
             k += 1
 
         # save all the results in a pickle
-        with open( self.out + ".pkl", "wb" ) as fp:
-            pickle.dump( results, fp )
+        # TODO: temp skip
+        print(f"Skip save of {self.out}.pkl for temp testing")
+        # with open( self.out + ".pkl", "wb" ) as fp:
+        #     pickle.dump( results, fp )
 
         self.res = results
     #----------------------------------------------------------------------------------------------------------------
@@ -362,8 +364,7 @@ class ABSURDer:
             print("\n# Done! Some minimizations terminated unsuccessfully: ")
             print(flags)
 
-        #self._save()
-        print(f"Skip save of {self.out}.pkl for temp testing")
+        self._save()
         #print( f"# Saved {self.out}.pkl" )
     #----------------------------------------------------------------------------------------------------------------
 
