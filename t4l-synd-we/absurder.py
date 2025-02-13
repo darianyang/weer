@@ -362,8 +362,9 @@ class ABSURDer:
             print("\n# Done! Some minimizations terminated unsuccessfully: ")
             print(flags)
 
-        self._save()
-        print( f"# Saved {self.out}.pkl" )
+        #self._save()
+        print(f"Skip save of {self.out}.pkl for temp testing")
+        #print( f"# Saved {self.out}.pkl" )
     #----------------------------------------------------------------------------------------------------------------
 
     def run( self ):
