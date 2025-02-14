@@ -331,10 +331,13 @@ class WEERDriver(WEDriver):
 
             # run reweighting
             theta = 100 # initial test value (TODO: optimize)
-            rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]))
+            # initialize ABSURDer object
+            # TODO: testing use with initial WE weights, not sure if this will be for better or worse
+            #       I should test with and without
+            rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=weights)
             # reweight according to the data corresponding to the selected index
-            # in this test case, use R2 (TODO: use all rates eventually?)
-            rw.reweight(1)
+            # in this test case, use R2 (TODO: use all rates eventually? Would just use -1)
+            rw.reweight(-1)
             # save the optimized weights
             absurder_weights = rw.res[theta]
             # TODO: save weights per iteration

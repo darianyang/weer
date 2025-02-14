@@ -21,7 +21,7 @@ warnings.filterwarnings('ignore')
 
 class ABSURDer:
 
-    def __init__( self, rex, rmd, eex=None, out='results', thetas=np.array([100,1000,10000]), idx=[], methyl_list=None ):
+    def __init__( self, rex, rmd, eex=None, out='results', thetas=np.array([100,1000,10000]), idx=[], methyl_list=None, w0=None ):
 
         """
         Class constructor
@@ -47,6 +47,8 @@ class ABSURDer:
             Default: [].
         methyl_list: str
             path to the list of methyl group names. The ordering is expected to be the same as in the rate matrices.
+        w0 : numpy.ndarray
+            Array of initial weights. If not provided, the initial weights will be set to 1/nblocks.
         """
 
         self.rex = self.load_rates( rex, "experimental" )    # experimental rates
@@ -85,7 +87,10 @@ class ABSURDer:
         self.b   = self.rmd.shape[-1]                                # number of blocks
         self.emd = np.std( self.rmd, axis = -1 ) / np.sqrt( self.b ) # errors on simulated rates
         self.rav = np.mean( self.rmd, axis = -1 )                    # average simulated rates
-        self.w0  = np.full( self.b, 1./self.b )                      # initial weights
+        if w0 is None:
+            self.w0  = np.full( self.b, 1./self.b )                  # initial weights
+        else:
+            self.w0 = w0
         self.ix2 = []                                                # initial chi2 before optimization
         self.res = {}                                                # dictionary of optimized weights for each theta
         self.phi = []                                                # fraction of effective frames
