@@ -10,7 +10,8 @@ rm -f west.log
 #w_init --bstate 'basis,4,4,4,4,4,4' --tstate 'target,1,1,1,1,1,1'
 # should be: label,prob,auxref(stateindex)
 #w_init --bstate 'basis,1,800' 
-w_init --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800'
+#w_init --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800'
+w_init --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800' --bstate 'basis,1,800'
 
 w_run > west.log
 

@@ -171,49 +171,48 @@ class WEERDriver(WEDriver):
         merge : list of lists
             List of list of merge decisions.
         '''
-        # Sort segments by absurder weights
+        # Sort segments by absurder weights (smallest to largest)
         sorted_indices = np.argsort(absurder_weights)
         
         # Initialize split and merge lists
         split = [0] * len(segments)
         merge = [[] for _ in range(len(segments))]
         
-        # Split the sorted segments into top and bottom halves
-        mid_index = len(sorted_indices) // 2
-        top_half_indices = sorted_indices[mid_index:]
-        bottom_half_indices = sorted_indices[:mid_index]
-        
-        # Mark the top n_splits segments for splitting
+        # Split the sorted segments into top and bottom parts
+        # top third for splitting and bottom two-thirds for merging
+        thirds_index = len(sorted_indices) // 3
+        top_split_indices = sorted_indices[thirds_index * 2:]
+        bottom_merge_indices = sorted_indices[:thirds_index * 2]
+        print(f"thirds index: {thirds_index}")
+        print(f"sorted indices: {sorted_indices}")
+        print(f"top (split) indices: {top_split_indices}")
+        print(f"bottom (merge) indices: {bottom_merge_indices}")    
+    
+        # SPLITTING: Mark the top n_splits segments for splitting
         split_segments = set()
         for i in range(n_splits):
             # TODO: need to be able to split segment multiple times
-            split_index = top_half_indices[-(i % len(top_half_indices) + 1)]
+            # go from the end of the top half indices to the beginning (reverse order)
+            # i.e. split the largest ABSURDer weight segment first
+            split_index = top_split_indices[-(i % len(top_split_indices) + 1)]
+            print(f"...SPLIT segment: {split_index}")
+            # increment the split count for the segment
             split[split_index] += 1
             # mark segment being split if not already marked
             if split_index not in split_segments:
                 split_segments.add(split_index)
-        
-        # # Mark the bottom n_merges segments for merging
-        # merged_segments = set()
-        # for i in range(n_merges):
-        #     merge_index = bottom_half_indices[i % len(bottom_half_indices)]
-        #     neighbor_index = bottom_half_indices[(i + 1) % len(bottom_half_indices)]
-        #     # TODO: need to basically go to next neighbor if already merged
-        #     if merge_index != neighbor_index and merge_index not in merged_segments and neighbor_index not in merged_segments:
-        #         merge[merge_index].append(neighbor_index)
-        #         merged_segments.add(merge_index)
-        #         merged_segments.add(neighbor_index)
-        #     else:
-        #         print(f"*** skipping redundant merge: {merge_index} and {neighbor_index}")
 
-        # Mark the bottom n_merges segments for merging
+        # MERGING: Mark the bottom n_merges segments for merging
         merged_segments = set()
         for i in range(n_merges):
             # get the segment to merge
-            merge_index = bottom_half_indices[i % len(bottom_half_indices)]
+            merge_index = bottom_merge_indices[i % len(bottom_merge_indices)]
             # if the merge_index is already being merged or split, try the next one
+            # TODO: note that this while loop can also be problematic if there are no eligible merges
             while merge_index in merged_segments or merge_index in split_segments:
-                merge_index = bottom_half_indices[i % len(bottom_half_indices)]
+                #merge_index = bottom_merge_indices[i % len(bottom_merge_indices)] # this can cause an infinite loop
+                merge_index = bottom_merge_indices[i]
+                print(f"......accessing eligibility of merge index: {merge_index}")
                 i += 1
 
             # find the nearest neighbor to merge with (skip index 0, which is the segment itself (dist 0))
@@ -225,12 +224,13 @@ class WEERDriver(WEDriver):
 
             # if the merge_partner the the segment itself or is already being merged or split: 
             # find the next (eligible) nearest neighbor
-            print(f"...merged segments = {merged_segments}")
+            print(f"...MERGE: current merged segments = {merged_segments}")
             if merge_partner == merge_index \
             or merge_partner in merged_segments or merge_partner in split_segments:
-                print("...looking for eligible merge partner")
+                print("......looking for eligible merge partner")
                 
                 # iterate through the distances to find the next nearest neighbor (starting with index 2)
+                # TODO: using a while loop like above might simplify this a bit
                 for j in range(2, len(self.dist_matrix[merge_index])):
                     # get the next nearest neighbor
                     merge_partner = np.argsort(self.dist_matrix[merge_index])[j]
@@ -242,12 +242,12 @@ class WEERDriver(WEDriver):
 
                 # if no eligible merge partner was found, (TODO: deal with this case)
                 if merge_partner in merged_segments or merge_partner in split_segments:
-                    print(f"......no eligible merge found for: {merge_index} and {merge_partner}")
+                    print(f".........FAILURE: no eligible merge found for: {merge_index} and {merge_partner}")
                 else:
-                    print(f"......attempting merge: {merge_index} and {merge_partner}")
+                    print(f".........attempting merge: {merge_index} and {merge_partner}")
                 
             else:
-                print(f"...found good initial merge: {merge_index} and {merge_partner}")
+                print(f"......found good initial merge: {merge_index} and {merge_partner}")
 
             # add the eligible merge pair to the merge list and merged_segment set
             merge[merge_index].append(merge_partner)
@@ -384,7 +384,7 @@ class WEERDriver(WEDriver):
                     # split = [1,0,0,0]
                     # merge = [[],[],[3],[]]
                     #n_split_merge = int(len(curr_segments) / 2)
-                    n_split_merge = 2
+                    n_split_merge = 4
                     # currently set to use same n_split and n_merge amounts
                     split, merge = self.generate_split_merge_decisions(segments, absurder_weights, 
                                                                        n_split_merge, n_split_merge)
