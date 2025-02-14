@@ -183,10 +183,10 @@ class WEERDriver(WEDriver):
         thirds_index = len(sorted_indices) // 3
         top_split_indices = sorted_indices[thirds_index * 2:]
         bottom_merge_indices = sorted_indices[:thirds_index * 2]
-        print(f"thirds index: {thirds_index}")
-        print(f"sorted indices: {sorted_indices}")
-        print(f"top (split) indices: {top_split_indices}")
-        print(f"bottom (merge) indices: {bottom_merge_indices}")    
+        # print(f"thirds index: {thirds_index}")
+        # print(f"sorted indices: {sorted_indices}")
+        # print(f"top (split) indices: {top_split_indices}")
+        # print(f"bottom (merge) indices: {bottom_merge_indices}")    
     
         # SPLITTING: Mark the top n_splits segments for splitting
         split_segments = set()
@@ -195,7 +195,7 @@ class WEERDriver(WEDriver):
             # go from the end of the top half indices to the beginning (reverse order)
             # i.e. split the largest ABSURDer weight segment first
             split_index = top_split_indices[-(i % len(top_split_indices) + 1)]
-            print(f"...SPLIT segment: {split_index}")
+            #print(f"...SPLIT segment: {split_index}")
             # increment the split count for the segment
             split[split_index] += 1
             # mark segment being split if not already marked
@@ -380,14 +380,16 @@ class WEERDriver(WEDriver):
                     # TODO: theres also the question of if I should use the top weight or the 
                     #       top weight change from the previous iteration (and if I should 
                     #       initialize the rw weights with the WE traj weights)
-                    # TODO: test right now, update to use absurder weights
-                    # split = [1,0,0,0]
-                    # merge = [[],[],[3],[]]
-                    #n_split_merge = int(len(curr_segments) / 2)
-                    n_split_merge = 4
-                    # currently set to use same n_split and n_merge amounts
-                    split, merge = self.generate_split_merge_decisions(segments, absurder_weights, 
-                                                                       n_split_merge, n_split_merge)
+
+                    # TODO: testing with fake decision lists
+                    split = [2,0,0,0]
+                    merge = [[],[],[3,1],[]]
+
+                    # # the number of splits/merges is (max) 1/3 of the total number of segments
+                    # n_split_merge = len(curr_segments) // 3
+                    # # currently set to use same n_split and n_merge amounts
+                    # split, merge = self.generate_split_merge_decisions(segments, absurder_weights, 
+                    #                                                    n_split_merge, n_split_merge)
 
 
                 print(f"WEER split: {split}\nWEER merge: {merge}")
@@ -423,8 +425,8 @@ class WEERDriver(WEDriver):
                     
                     segs += 1
 
-                # if self.do_adjust_counts:
-                #     self._adjust_count(ibin)
+                if self.do_adjust_counts:
+                    self._adjust_count(ibin)
 
                 print("Bin attrs post WEER: ", self.next_iter_binning[ibin])
                 print(f"Total = {segs}, splitting = {splitting}, merging = {merging}")
