@@ -116,6 +116,39 @@ class WEERDriver(WEDriver):
             merged_segment, parent = self._merge_walkers(segments[:2], cumul_weight=None, bin=bin)
             bin.add(merged_segment)
 
+    def _all_to_all_distance(self, pcoords):
+        '''
+        Calculate the pairwise all-to-all distances between segments.
+        TODO: sort function to turn distance matrix to paired list?
+        TODO: can this handle ndarrays where n > 1 ?
+            I think so, if pcoord = [[0, 0, n],
+                                     [0, 0, n]
+                                     [0, 0, n]
+                                     [...]]
+
+        Parameters
+        ----------
+        pcoords : 2d array
+            Segment coordinate values.
+                                     
+        Returns
+        -------
+        dist_matrix : 2d array
+            Distance matrix between each segment coordinate value.
+        '''
+        # initialize an all-to-all matrix, with 0.0 for self distances (diagonal)
+        dist_matrix = np.zeros((len(pcoords), len(pcoords)))
+
+        # build distance matrix from pcoord value distances
+        for i, pcoord_i in enumerate(pcoords):
+            for j, pcoord_j in enumerate(pcoords):
+                # calculate Euclidean distance between two points 
+                # points can be n-dimensional
+                dist = np.linalg.norm(pcoord_i - pcoord_j)
+                dist_matrix[i,j] = dist
+        
+        return dist_matrix
+
     def generate_split_merge_decisions(self, segments, absurder_weights, n_splits, n_merges):
         '''
         Generate split and merge decisions based on ABSURDer weights.
@@ -151,16 +184,75 @@ class WEERDriver(WEDriver):
         bottom_half_indices = sorted_indices[:mid_index]
         
         # Mark the top n_splits segments for splitting
+        split_segments = set()
         for i in range(n_splits):
+            # TODO: need to be able to split segment multiple times
             split_index = top_half_indices[-(i % len(top_half_indices) + 1)]
             split[split_index] += 1
+            # mark segment being split if not already marked
+            if split_index not in split_segments:
+                split_segments.add(split_index)
         
+        # # Mark the bottom n_merges segments for merging
+        # merged_segments = set()
+        # for i in range(n_merges):
+        #     merge_index = bottom_half_indices[i % len(bottom_half_indices)]
+        #     neighbor_index = bottom_half_indices[(i + 1) % len(bottom_half_indices)]
+        #     # TODO: need to basically go to next neighbor if already merged
+        #     if merge_index != neighbor_index and merge_index not in merged_segments and neighbor_index not in merged_segments:
+        #         merge[merge_index].append(neighbor_index)
+        #         merged_segments.add(merge_index)
+        #         merged_segments.add(neighbor_index)
+        #     else:
+        #         print(f"*** skipping redundant merge: {merge_index} and {neighbor_index}")
+
         # Mark the bottom n_merges segments for merging
+        merged_segments = set()
         for i in range(n_merges):
+            # get the segment to merge
             merge_index = bottom_half_indices[i % len(bottom_half_indices)]
-            neighbor_index = bottom_half_indices[(i + 1) % len(bottom_half_indices)]
-            if merge_index != neighbor_index:
-                merge[merge_index].append(neighbor_index)
+            # if the merge_index is already being merged or split, try the next one
+            while merge_index in merged_segments or merge_index in split_segments:
+                merge_index = bottom_half_indices[i % len(bottom_half_indices)]
+                i += 1
+
+            # find the nearest neighbor to merge with (skip index 0, which is the segment itself (dist 0))
+            merge_partner = np.argsort(self.dist_matrix[merge_index])[1]
+            # checked and the argsort looks good, merging dists look correct
+            #print(f"merge index: {merge_index}, merge partner: {merge_partner}")
+            #print(f"dists: {self.dist_matrix[merge_index]}")
+            #print(f"sorted dists: {np.argsort(self.dist_matrix[merge_index])}")
+
+            # if the merge_partner the the segment itself or is already being merged or split: 
+            # find the next (eligible) nearest neighbor
+            print(f"...merged segments = {merged_segments}")
+            if merge_partner == merge_index \
+            or merge_partner in merged_segments or merge_partner in split_segments:
+                print("...looking for eligible merge partner")
+                
+                # iterate through the distances to find the next nearest neighbor (starting with index 2)
+                for j in range(2, len(self.dist_matrix[merge_index])):
+                    # get the next nearest neighbor
+                    merge_partner = np.argsort(self.dist_matrix[merge_index])[j]
+                    # if the merge pair members are not already being merged or split
+                    # then a suitable merge partner has been found, break the loop
+                    if merge_partner not in merged_segments and merge_partner not in split_segments:
+                        print(f"......eligible merge found: {merge_index} and {merge_partner}")
+                        break
+
+                # if no eligible merge partner was found, (TODO: deal with this case)
+                if merge_partner in merged_segments or merge_partner in split_segments:
+                    print(f"......no eligible merge found for: {merge_index} and {merge_partner}")
+                else:
+                    print(f"......attempting merge: {merge_index} and {merge_partner}")
+                
+            else:
+                print(f"...found good initial merge: {merge_index} and {merge_partner}")
+
+            # add the eligible merge pair to the merge list and merged_segment set
+            merge[merge_index].append(merge_partner)
+            merged_segments.add(merge_index)
+            merged_segments.add(merge_partner)
         
         return split, merge
 
@@ -186,12 +278,23 @@ class WEERDriver(WEDriver):
         #print("segments: ", segments[0])
         print("weights: ", weights, "weights sum: ", np.sum(weights))
 
+        # get final frame pcoords
+        pcoords = np.array(list(map(operator.attrgetter('pcoord'), segments)))
+        # pcoord for the last frame of previous iteration
+        # or the first frame of current iteration
+        pcoords = pcoords[:,0,:]
+        print("pcoords shape: ", pcoords.shape)
+        # calculate all-to-all distances
+        self.dist_matrix = self._all_to_all_distance(pcoords)
+        # print("dist matrix shape: ", self.dist_matrix.shape)
+        # print("dist matrix: \n", self.dist_matrix)
+
         # get all pcoords, not just the final frame
         # curr_segments = np.array(sorted(self.current_iter_segments, 
         #                                 key=operator.attrgetter('weight')), dtype=np.object_)
         # curr_pcoords = np.array(list(map(operator.attrgetter('pcoord'), curr_segments)))
         curr_segments = sorted(self.current_iter_segments, key=operator.attrgetter('weight'))
-        curr_pcoords = np.asarray([seg.pcoord for seg in curr_segments])
+        #curr_pcoords = np.asarray([seg.pcoord for seg in curr_segments])
         curr_data = np.asarray([seg.data for seg in curr_segments])
         print("curr data len: ", len(curr_data))
         # check for empty dict in first segment (e.g. during init)
@@ -284,7 +387,7 @@ class WEERDriver(WEDriver):
                     n_split_merge = 2
                     # currently set to use same n_split and n_merge amounts
                     split, merge = self.generate_split_merge_decisions(segments, absurder_weights, 
-                                                                       0, n_split_merge)
+                                                                       n_split_merge, n_split_merge)
 
 
                 print(f"WEER split: {split}\nWEER merge: {merge}")
