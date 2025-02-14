@@ -327,7 +327,7 @@ class WEERDriver(WEDriver):
 
             # desired shape for ABSURDer: n_rates x n_vectors x n_trajs (blocks)
             absurder_input = np.stack((r1, r2, noe), axis=0).transpose(0, 2, 1)
-            print("absurder input shape: ", absurder_input.shape)
+            #print("absurder input shape: ", absurder_input.shape)
 
             # run reweighting
             theta = 100 # initial test value (TODO: optimize)
@@ -337,8 +337,10 @@ class WEERDriver(WEDriver):
             rw.reweight(1)
             # save the optimized weights
             absurder_weights = rw.res[theta]
-            np.savetxt(f"w_opt_{theta}.txt", absurder_weights)
+            # TODO: save weights per iteration
+            #np.savetxt(f"w_opt_{theta}.txt", absurder_weights)
             print("ABSURDer weights: \n", absurder_weights)
+            print(f"ABSURDer phi_eff: {rw.phi_eff(absurder_weights)}")
             
 
         # TODO: grab data for multiple iterations (could also use this to get aux data?)
