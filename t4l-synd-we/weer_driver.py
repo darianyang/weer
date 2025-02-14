@@ -191,7 +191,7 @@ class WEERDriver(WEDriver):
         # SPLITTING: Mark the top n_splits segments for splitting
         split_segments = set()
         for i in range(n_splits):
-            # TODO: need to be able to split segment multiple times
+            # TODO: eventually consider splitting a segment multiple times
             # go from the end of the top half indices to the beginning (reverse order)
             # i.e. split the largest ABSURDer weight segment first
             split_index = top_split_indices[-(i % len(top_split_indices) + 1)]
@@ -215,6 +215,7 @@ class WEERDriver(WEDriver):
                 print(f"......accessing eligibility of merge index: {merge_index}")
                 i += 1
 
+            # TODO: eventually consider multiple merges into one segment
             # find the nearest neighbor to merge with (skip index 0, which is the segment itself (dist 0))
             merge_partner = np.argsort(self.dist_matrix[merge_index])[1]
             # checked and the argsort looks good, merging dists look correct
@@ -222,11 +223,10 @@ class WEERDriver(WEDriver):
             #print(f"dists: {self.dist_matrix[merge_index]}")
             #print(f"sorted dists: {np.argsort(self.dist_matrix[merge_index])}")
 
-            # if the merge_partner the the segment itself or is already being merged or split: 
+            # if the merge_partner is same segment as merge index or is already being merged or split: 
             # find the next (eligible) nearest neighbor
             print(f"...MERGE: current merged segments = {merged_segments}")
-            if merge_partner == merge_index \
-            or merge_partner in merged_segments or merge_partner in split_segments:
+            if merge_partner == merge_index or merge_partner in merged_segments or merge_partner in split_segments:
                 print("......looking for eligible merge partner")
                 
                 # iterate through the distances to find the next nearest neighbor (starting with index 2)
@@ -242,9 +242,9 @@ class WEERDriver(WEDriver):
 
                 # if no eligible merge partner was found, (TODO: deal with this case)
                 if merge_partner in merged_segments or merge_partner in split_segments:
-                    print(f".........FAILURE: no eligible merge found for: {merge_index} and {merge_partner}")
+                    print(f"..........FAILURE: no eligible merge found for: {merge_index} and {merge_partner}")
                 else:
-                    print(f".........attempting merge: {merge_index} and {merge_partner}")
+                    print(f"..........attempting merge: {merge_index} and {merge_partner}")
                 
             else:
                 print(f"......found good initial merge: {merge_index} and {merge_partner}")
@@ -276,7 +276,7 @@ class WEERDriver(WEDriver):
         weights = np.asarray([seg.weight for seg in segments])
         #print("seg list: ", seg_list)
         #print("segments: ", segments[0])
-        print("weights: ", weights, "weights sum: ", np.sum(weights))
+        print("WE weights: \n", weights, "\nweights sum: ", np.sum(weights))
 
         # get final frame pcoords
         pcoords = np.array(list(map(operator.attrgetter('pcoord'), segments)))
@@ -338,7 +338,7 @@ class WEERDriver(WEDriver):
             # save the optimized weights
             absurder_weights = rw.res[theta]
             np.savetxt(f"w_opt_{theta}.txt", absurder_weights)
-            print("ABSURDer weights: ", absurder_weights)
+            print("ABSURDer weights: \n", absurder_weights)
             
 
         # TODO: grab data for multiple iterations (could also use this to get aux data?)
@@ -382,14 +382,14 @@ class WEERDriver(WEDriver):
                     #       initialize the rw weights with the WE traj weights)
 
                     # TODO: testing with fake decision lists
-                    split = [2,0,0,0]
-                    merge = [[],[],[3,1],[]]
+                    # split = [2,0,0,0]
+                    # merge = [[],[],[3,1],[]]
 
-                    # # the number of splits/merges is (max) 1/3 of the total number of segments
-                    # n_split_merge = len(curr_segments) // 3
-                    # # currently set to use same n_split and n_merge amounts
-                    # split, merge = self.generate_split_merge_decisions(segments, absurder_weights, 
-                    #                                                    n_split_merge, n_split_merge)
+                    # the number of splits/merges is (max) 1/3 of the total number of segments
+                    n_split_merge = len(curr_segments) // 3
+                    # currently set to use same n_split and n_merge amounts
+                    split, merge = self.generate_split_merge_decisions(segments, absurder_weights, 
+                                                                       n_split_merge, n_split_merge)
 
 
                 print(f"WEER split: {split}\nWEER merge: {merge}")
