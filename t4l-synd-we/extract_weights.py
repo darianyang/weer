@@ -157,10 +157,12 @@ def plot_weights(we_weights, absurder_weights):
 if __name__ == "__main__":
     # Example usage
     #filename = "test-data/west.log"
+    filename = "we_weight_input_False/west.log"
     filename = "we_weight_input_True/west.log"
+    we_weights, absurder_weights, chi2, phi_eff = extract_weights(filename)
+    print(f"\nCHI2:PHI_EFF {list(zip(chi2, phi_eff))}\n")
+    plot_weights(we_weights, absurder_weights)
+
     h5_filename = "we_weight_input_True/west.h5"
-    #we_weights, absurder_weights, chi2, phi_eff = extract_weights(filename)
-    #print(chi2, phi_eff)
-    w_diffs = extract_weights_from_h5(h5_filename)
-    print(w_diffs.shape)
-    #plot_weights(we_weights, absurder_weights)
+    # w_diffs = extract_weights_from_h5(h5_filename)
+    # print(w_diffs.shape)
