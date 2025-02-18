@@ -63,21 +63,26 @@ def extract_weights(filename):
 
     return np.array(we_weights), np.array(absurder_weights), np.array(chi2), np.array(phi_eff)
 
-def extract_weights_from_h5(filename):
+def extract_weights_from_h5(filename, absurder_weights):
     """
     Extract weights and weight changes from previous iteration
-    from the west.h5 file.
+    from the west.h5 file. Sort WE weights, WE weight diffs, and 
+    ABSURDer weights together and consistently for comparison.
 
     Parameters
     ----------
     filename : str
         Path to the west.h5 file.
+    absurder_weights : np.array
+        Array of ABSURDer weights.
     
     Returns
     -------
     """
+    # all tracked weight values
+    all_weights = [] 
     # weight diffs
-    weight_diffs = []
+    #all_weight_diffs = []
 
     # Open the west.h5 file
     with h5py.File(filename, 'r') as f:
@@ -90,15 +95,30 @@ def extract_weights_from_h5(filename):
             we_weights = f[f"iterations/iter_{it:08d}/seg_index"]["weight"]
             # Extract the parent segments
             parent_segs = f[f"iterations/iter_{it:08d}/seg_index"]["parent_id"]
-
+            
             # Extract the weight changes from the previous iteration
+            # TODO: make sure that this works for same weight walkers later when sorted
             weight_diff = we_weights - init_we_weights[parent_segs]
+
             # update the initial weights for the next iteration
             init_we_weights = we_weights
+            
             # Append the weight changes
-            weight_diffs.append(weight_diff)
-    
-    return np.array(weight_diffs)
+            #all_weight_diffs.append(weight_diff)
+
+            # Sort the weights and weight diffs together
+            # smallest to largest weight indices (also how ABSURDer weights are sorted)
+            sort_indices = np.argsort(we_weights)
+            we_weights_sorted = we_weights[sort_indices]
+            #parent_segs_sorted = parent_segs[sort_indices]
+            weight_diff_sorted = weight_diff[sort_indices]
+            # grab the corresponding ABSURDer weights
+            absurder_weights_sorted = absurder_weights[it-1]
+
+            # Append the sorted values
+            all_weights.append((we_weights_sorted, weight_diff_sorted, absurder_weights_sorted))
+
+    return np.array(all_weights)
 
 def plot_weights(we_weights, absurder_weights):
     # # Print the extracted weights for checking
@@ -157,12 +177,24 @@ def plot_weights(we_weights, absurder_weights):
 if __name__ == "__main__":
     # Example usage
     #filename = "test-data/west.log"
+    # TODO: make comparison plot of the two conditions
     filename = "we_weight_input_False/west.log"
-    filename = "we_weight_input_True/west.log"
-    we_weights, absurder_weights, chi2, phi_eff = extract_weights(filename)
-    print(f"\nCHI2:PHI_EFF {list(zip(chi2, phi_eff))}\n")
-    plot_weights(we_weights, absurder_weights)
+    h5_filename = "we_weight_input_False/west.h5"
+    # filename = "we_weight_input_True/west.log"
+    # h5_filename = "we_weight_input_True/west.h5"
 
-    h5_filename = "we_weight_input_True/west.h5"
-    # w_diffs = extract_weights_from_h5(h5_filename)
-    # print(w_diffs.shape)
+    we_weights, absurder_weights, chi2, phi_eff = extract_weights(filename)
+    # print(f"\nCHI2:PHI_EFF {list(zip(chi2, phi_eff))}\n")
+    # plot_weights(we_weights, absurder_weights)
+
+    weights = extract_weights_from_h5(h5_filename, absurder_weights)
+    # loop each iteration
+    for it in weights:
+        we_weights, weight_diff, absurder_weights = it
+        plt.plot(weight_diff)
+        plt.plot(absurder_weights)
+        break
+
+    # TODO: is there a more intuitive way to sort the walkers per iteration?
+
+    plt.show()
