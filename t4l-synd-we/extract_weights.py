@@ -55,7 +55,7 @@ def extract_weights(filename):
     return np.array(we_weights), np.array(absurder_weights)
 
 # Example usage
-we_weights, absurder_weights = extract_weights("west.log")
+we_weights, absurder_weights = extract_weights("test-data/west.log")
 
 # # Print the extracted weights for checking
 # print("WE Weights:", we_weights.shape, we_weights)

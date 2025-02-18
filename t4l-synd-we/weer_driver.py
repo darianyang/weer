@@ -212,7 +212,7 @@ class WEERDriver(WEDriver):
             while merge_index in merged_segments or merge_index in split_segments:
                 #merge_index = bottom_merge_indices[i % len(bottom_merge_indices)] # this can cause an infinite loop
                 merge_index = bottom_merge_indices[i]
-                print(f"......accessing eligibility of merge index: {merge_index}")
+                #print(f"......accessing eligibility of merge index: {merge_index}")
                 i += 1
 
             # TODO: eventually consider multiple merges into one segment
@@ -225,9 +225,9 @@ class WEERDriver(WEDriver):
 
             # if the merge_partner is same segment as merge index or is already being merged or split: 
             # find the next (eligible) nearest neighbor
-            print(f"...MERGE: current merged segments = {merged_segments}")
+            #print(f"...MERGE: current merged segments = {merged_segments}")
             if merge_partner == merge_index or merge_partner in merged_segments or merge_partner in split_segments:
-                print("......looking for eligible merge partner")
+                #print("......looking for eligible merge partner")
                 
                 # iterate through the distances to find the next nearest neighbor (starting with index 2)
                 # TODO: using a while loop like above might simplify this a bit
@@ -237,17 +237,17 @@ class WEERDriver(WEDriver):
                     # if the merge pair members are not already being merged or split
                     # then a suitable merge partner has been found, break the loop
                     if merge_partner not in merged_segments and merge_partner not in split_segments:
-                        print(f"......eligible merge found: {merge_index} and {merge_partner}")
+                        #print(f"......eligible merge found: {merge_index} and {merge_partner}")
                         break
 
                 # if no eligible merge partner was found, (TODO: deal with this case)
                 if merge_partner in merged_segments or merge_partner in split_segments:
                     print(f"..........FAILURE: no eligible merge found for: {merge_index} and {merge_partner}")
-                else:
-                    print(f"..........attempting merge: {merge_index} and {merge_partner}")
+            #     else:
+            #         print(f"..........attempting merge: {merge_index} and {merge_partner}")
                 
-            else:
-                print(f"......found good initial merge: {merge_index} and {merge_partner}")
+            # else:
+            #     print(f"......found good initial merge: {merge_index} and {merge_partner}")
 
             # add the eligible merge pair to the merge list and merged_segment set
             merge[merge_index].append(merge_partner)
@@ -330,6 +330,7 @@ class WEERDriver(WEDriver):
             #print("absurder input shape: ", absurder_input.shape)
 
             # run reweighting
+            # TODO: could also input multiple and find the best one
             theta = 100 # initial test value (TODO: optimize)
             # initialize ABSURDer object
             # TODO: testing use with initial WE weights, not sure if this will be for better or worse
@@ -337,13 +338,15 @@ class WEERDriver(WEDriver):
             rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=weights)
             # reweight according to the data corresponding to the selected index
             # in this test case, use R2 (TODO: use all rates eventually? Would just use -1)
-            rw.reweight(-1)
+            rw.reweight(1)
             # save the optimized weights
             absurder_weights = rw.res[theta]
             # TODO: save weights per iteration
             #np.savetxt(f"w_opt_{theta}.txt", absurder_weights)
             print("ABSURDer weights: \n", absurder_weights)
             print(f"ABSURDer phi_eff: {rw.phi_eff(absurder_weights)}")
+            # TODO: eventually could include in resampler script or pull from cfg:
+            #       theta value, use WE initial weights bool, which rate to use, etc.
             
 
         # TODO: grab data for multiple iterations (could also use this to get aux data?)
@@ -364,7 +367,7 @@ class WEERDriver(WEDriver):
         # TODO: could update to be able to run using bins
 
         # dummy resampling block
-        # TODO: wevo is really only using one bin
+        # TODO: really only using one bin
         # ibin only needed right now for temp split merge option (TODO)
         for ibin, bin in enumerate(self.next_iter_binning):
             

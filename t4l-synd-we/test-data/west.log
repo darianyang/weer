@@ -1,0 +1,891 @@
+Updating system with the options from the configuration file
+SynD propagator inferring 10001 steps per iteration from west.system.system_options.pcoord_len
+Maximum wallclock time: 1 day, 0:00:00
+
+Tue Feb 18 14:55:29 2025
+Iteration 1 (10 requested)
+Beginning iteration 1
+24 segments remain in iteration 1 (24 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.03125
+per-segment maximum non-zero probability:   0.0625
+per-segment probability dynamic range (kT): 0.693147
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+WE weights: 
+ [0.03125 0.03125 0.03125 0.03125 0.03125 0.03125 0.03125 0.03125 0.03125
+ 0.03125 0.03125 0.03125 0.03125 0.03125 0.03125 0.03125 0.0625  0.0625
+ 0.0625  0.0625  0.0625  0.0625  0.0625  0.0625 ] 
+weights sum:  1.0
+pcoords shape:  (24, 1)
+curr data len:  24
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   24
+# Overall chi square: 673.16
+# THETA: 100         
+# Done! All minimizations terminated successfully
+Skip save of results.pkl for temp testing
+ABSURDer weights: 
+ [0.05383518 0.03292185 0.06142513 0.07726813 0.04072641 0.06362468
+ 0.02249711 0.0194751  0.03092629 0.04911408 0.06106071 0.04740806
+ 0.0552083  0.02125733 0.02093439 0.02584884 0.08989748 0.05684654
+ 0.03282674 0.01956952 0.02297442 0.04555048 0.02113229 0.02767095]
+ABSURDer phi_eff: 0.8395248199015698
+current iteration:  1
+...MERGE: current merged segments = set()
+......found good initial merge: 7 and 22
+...MERGE: current merged segments = {22, 7}
+......found good initial merge: 19 and 23
+...MERGE: current merged segments = {19, 23, 22, 7}
+......found good initial merge: 14 and 1
+......accessing eligibility of merge index: 22
+......accessing eligibility of merge index: 13
+...MERGE: current merged segments = {1, 7, 14, 19, 22, 23}
+......looking for eligible merge partner
+......eligible merge found: 13 and 6
+..........attempting merge: 13 and 6
+......accessing eligibility of merge index: 13
+......accessing eligibility of merge index: 6
+......accessing eligibility of merge index: 20
+...MERGE: current merged segments = {1, 6, 7, 13, 14, 19, 22, 23}
+......found good initial merge: 20 and 8
+......accessing eligibility of merge index: 6
+......accessing eligibility of merge index: 20
+......accessing eligibility of merge index: 15
+...MERGE: current merged segments = {1, 6, 7, 8, 13, 14, 19, 20, 22, 23}
+......found good initial merge: 15 and 4
+......accessing eligibility of merge index: 20
+......accessing eligibility of merge index: 15
+......accessing eligibility of merge index: 23
+......accessing eligibility of merge index: 8
+......accessing eligibility of merge index: 18
+...MERGE: current merged segments = {1, 4, 6, 7, 8, 13, 14, 15, 19, 20, 22, 23}
+......found good initial merge: 18 and 9
+......accessing eligibility of merge index: 15
+......accessing eligibility of merge index: 23
+......accessing eligibility of merge index: 8
+......accessing eligibility of merge index: 18
+......accessing eligibility of merge index: 1
+......accessing eligibility of merge index: 4
+......accessing eligibility of merge index: 21
+...MERGE: current merged segments = {1, 4, 6, 7, 8, 9, 13, 14, 15, 18, 19, 20, 22, 23}
+......found good initial merge: 21 and 11
+WEER split: [1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0]
+WEER merge: [[], [], [], [], [], [], [], [22], [], [], [], [], [], [6], [1], [4], [], [], [9], [23], [8], [11], [], []]
+Split indices:  [0, 2, 3, 5, 10, 12, 16, 17]
+split sum:  8
+merge sum:  8
+Bin attrs post WEER:  <Bin at 0x151aec050, label=None, count=24, weight=1>
+Total = 24, splitting = 8, merging = 16
+Iteration completed successfully
+Iteration wallclock: 0:01:45.479230, cputime: 0:00:00
+
+
+Tue Feb 18 14:57:14 2025
+Iteration 2 (10 requested)
+Beginning iteration 2
+24 segments remain in iteration 2 (24 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.015625
+per-segment maximum non-zero probability:   0.125
+per-segment probability dynamic range (kT): 2.07944
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+WE weights: 
+ [0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625 0.015625
+ 0.015625 0.015625 0.015625 0.015625 0.03125  0.03125  0.03125  0.03125
+ 0.0625   0.0625   0.0625   0.09375  0.09375  0.09375  0.09375  0.125   ] 
+weights sum:  1.0
+pcoords shape:  (24, 1)
+curr data len:  24
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   24
+# Overall chi square: 671.83
+# THETA: 100         
+# Done! All minimizations terminated successfully
+Skip save of results.pkl for temp testing
+ABSURDer weights: 
+ [0.0038043  0.00537859 0.00940277 0.00674806 0.01075306 0.00818088
+ 0.02407545 0.01156423 0.02394098 0.00281973 0.04292677 0.00692763
+ 0.02178882 0.04503802 0.04778378 0.04881346 0.04013251 0.06914051
+ 0.02889885 0.09860852 0.10367604 0.11384567 0.05928397 0.1664674 ]
+ABSURDer phi_eff: 0.9095312757850637
+current iteration:  2
+...MERGE: current merged segments = set()
+......found good initial merge: 9 and 11
+...MERGE: current merged segments = {9, 11}
+......found good initial merge: 0 and 3
+...MERGE: current merged segments = {0, 9, 11, 3}
+......looking for eligible merge partner
+......eligible merge found: 1 and 5
+..........attempting merge: 1 and 5
+......accessing eligibility of merge index: 3
+......accessing eligibility of merge index: 11
+......accessing eligibility of merge index: 5
+......accessing eligibility of merge index: 2
+...MERGE: current merged segments = {0, 1, 3, 5, 9, 11}
+......looking for eligible merge partner
+......eligible merge found: 2 and 12
+..........attempting merge: 2 and 12
+......accessing eligibility of merge index: 11
+......accessing eligibility of merge index: 5
+......accessing eligibility of merge index: 2
+......accessing eligibility of merge index: 4
+...MERGE: current merged segments = {0, 1, 2, 3, 5, 9, 11, 12}
+......looking for eligible merge partner
+......eligible merge found: 4 and 13
+..........attempting merge: 4 and 13
+......accessing eligibility of merge index: 5
+......accessing eligibility of merge index: 2
+......accessing eligibility of merge index: 4
+......accessing eligibility of merge index: 7
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 9, 11, 12, 13}
+......found good initial merge: 7 and 6
+......accessing eligibility of merge index: 2
+......accessing eligibility of merge index: 4
+......accessing eligibility of merge index: 7
+......accessing eligibility of merge index: 12
+......accessing eligibility of merge index: 8
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 12, 13}
+......looking for eligible merge partner
+......eligible merge found: 8 and 16
+..........attempting merge: 8 and 16
+......accessing eligibility of merge index: 4
+......accessing eligibility of merge index: 7
+......accessing eligibility of merge index: 12
+......accessing eligibility of merge index: 8
+......accessing eligibility of merge index: 6
+......accessing eligibility of merge index: 18
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 11, 12, 13, 16}
+......looking for eligible merge partner
+......eligible merge found: 18 and 10
+..........attempting merge: 18 and 10
+WEER split: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1]
+WEER merge: [[3], [5], [12], [], [13], [], [], [6], [16], [11], [], [], [], [], [], [], [], [], [10], [], [], [], [], []]
+Split indices:  [14, 15, 17, 19, 20, 21, 22, 23]
+split sum:  8
+merge sum:  8
+Bin attrs post WEER:  <Bin at 0x136248410, label=None, count=24, weight=1>
+Total = 24, splitting = 8, merging = 16
+Iteration completed successfully
+Iteration wallclock: 0:01:47.318153, cputime: 0:00:00
+
+
+Tue Feb 18 14:59:02 2025
+Iteration 3 (10 requested)
+Beginning iteration 3
+24 segments remain in iteration 3 (24 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.015625
+per-segment maximum non-zero probability:   0.078125
+per-segment probability dynamic range (kT): 1.60944
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+WE weights: 
+ [0.015625 0.015625 0.015625 0.015625 0.03125  0.03125  0.03125  0.03125
+ 0.03125  0.03125  0.046875 0.046875 0.046875 0.046875 0.046875 0.046875
+ 0.046875 0.046875 0.046875 0.046875 0.0625   0.0625   0.078125 0.078125] 
+weights sum:  1.0
+pcoords shape:  (24, 1)
+curr data len:  24
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   24
+# Overall chi square: 669.90
+# THETA: 100         
+# Done! All minimizations terminated successfully
+Skip save of results.pkl for temp testing
+ABSURDer weights: 
+ [0.01795458 0.01267357 0.02504277 0.01121072 0.01727945 0.02632305
+ 0.02195791 0.02633842 0.027437   0.03084681 0.07488668 0.04051861
+ 0.04611251 0.02473466 0.01717448 0.02159475 0.04038243 0.07659168
+ 0.09497564 0.00775464 0.04768398 0.09081719 0.08351123 0.11619725]
+ABSURDer phi_eff: 0.893136930161916
+current iteration:  3
+...MERGE: current merged segments = set()
+......found good initial merge: 19 and 7
+...MERGE: current merged segments = {19, 7}
+......found good initial merge: 3 and 14
+...MERGE: current merged segments = {3, 19, 14, 7}
+......found good initial merge: 1 and 15
+......accessing eligibility of merge index: 14
+......accessing eligibility of merge index: 4
+...MERGE: current merged segments = {1, 3, 7, 14, 15, 19}
+......found good initial merge: 4 and 2
+......accessing eligibility of merge index: 4
+......accessing eligibility of merge index: 0
+...MERGE: current merged segments = {1, 2, 3, 4, 7, 14, 15, 19}
+......found good initial merge: 0 and 11
+......accessing eligibility of merge index: 0
+......accessing eligibility of merge index: 15
+......accessing eligibility of merge index: 6
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 7, 11, 14, 15, 19}
+......found good initial merge: 6 and 13
+......accessing eligibility of merge index: 15
+......accessing eligibility of merge index: 6
+......accessing eligibility of merge index: 13
+......accessing eligibility of merge index: 2
+......accessing eligibility of merge index: 5
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 6, 7, 11, 13, 14, 15, 19}
+......looking for eligible merge partner
+......eligible merge found: 5 and 9
+..........attempting merge: 5 and 9
+......accessing eligibility of merge index: 6
+......accessing eligibility of merge index: 13
+......accessing eligibility of merge index: 2
+......accessing eligibility of merge index: 5
+......accessing eligibility of merge index: 7
+......accessing eligibility of merge index: 8
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 14, 15, 19}
+......looking for eligible merge partner
+......eligible merge found: 8 and 16
+..........attempting merge: 8 and 16
+WEER split: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1]
+WEER merge: [[11], [15], [], [14], [2], [9], [13], [], [16], [], [], [], [], [], [], [], [], [], [], [7], [], [], [], []]
+Split indices:  [10, 12, 17, 18, 20, 21, 22, 23]
+split sum:  8
+merge sum:  8
+Bin attrs post WEER:  <Bin at 0x136249310, label=None, count=24, weight=1>
+Total = 24, splitting = 8, merging = 16
+Iteration completed successfully
+Iteration wallclock: 0:01:47.850206, cputime: 0:00:00
+
+
+Tue Feb 18 15:00:50 2025
+Iteration 4 (10 requested)
+Beginning iteration 4
+24 segments remain in iteration 4 (24 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.0234375
+per-segment maximum non-zero probability:   0.078125
+per-segment probability dynamic range (kT): 1.20397
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+WE weights: 
+ [0.0234375 0.0234375 0.0234375 0.0234375 0.0234375 0.0234375 0.0234375
+ 0.0234375 0.03125   0.03125   0.03125   0.03125   0.0390625 0.0390625
+ 0.0390625 0.0390625 0.046875  0.0625    0.0625    0.0625    0.0625
+ 0.078125  0.078125  0.078125 ] 
+weights sum:  1.0
+pcoords shape:  (24, 1)
+curr data len:  24
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   24
+# Overall chi square: 672.25
+# THETA: 100         
+# Done! All minimizations terminated successfully
+Skip save of results.pkl for temp testing
+ABSURDer weights: 
+ [0.02196792 0.05836    0.00859712 0.02971552 0.03059989 0.00996696
+ 0.01570179 0.00871315 0.04364831 0.04668962 0.04478249 0.02238235
+ 0.03006471 0.01090736 0.01023221 0.03413542 0.03092017 0.08619782
+ 0.06230867 0.05253058 0.04024658 0.03564831 0.11528016 0.15040289]
+ABSURDer phi_eff: 0.8693055696592447
+current iteration:  4
+...MERGE: current merged segments = set()
+......found good initial merge: 2 and 14
+...MERGE: current merged segments = {2, 14}
+......found good initial merge: 7 and 3
+...MERGE: current merged segments = {2, 3, 14, 7}
+......found good initial merge: 5 and 12
+......accessing eligibility of merge index: 14
+......accessing eligibility of merge index: 13
+...MERGE: current merged segments = {2, 3, 5, 7, 12, 14}
+......looking for eligible merge partner
+......eligible merge found: 13 and 11
+..........attempting merge: 13 and 11
+......accessing eligibility of merge index: 13
+......accessing eligibility of merge index: 6
+...MERGE: current merged segments = {2, 3, 5, 7, 11, 12, 13, 14}
+......found good initial merge: 6 and 16
+......accessing eligibility of merge index: 6
+......accessing eligibility of merge index: 0
+...MERGE: current merged segments = {2, 3, 5, 6, 7, 11, 12, 13, 14, 16}
+......found good initial merge: 0 and 8
+......accessing eligibility of merge index: 0
+......accessing eligibility of merge index: 11
+......accessing eligibility of merge index: 3
+......accessing eligibility of merge index: 12
+......accessing eligibility of merge index: 4
+...MERGE: current merged segments = {0, 2, 3, 5, 6, 7, 8, 11, 12, 13, 14, 16}
+......found good initial merge: 4 and 20
+......accessing eligibility of merge index: 11
+......accessing eligibility of merge index: 3
+......accessing eligibility of merge index: 12
+......accessing eligibility of merge index: 4
+......accessing eligibility of merge index: 16
+......accessing eligibility of merge index: 15
+...MERGE: current merged segments = {0, 2, 3, 4, 5, 6, 7, 8, 11, 12, 13, 14, 16, 20}
+......looking for eligible merge partner
+......eligible merge found: 15 and 21
+..........attempting merge: 15 and 21
+WEER split: [0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1]
+WEER merge: [[8], [], [14], [], [20], [12], [16], [3], [], [], [], [], [], [11], [], [21], [], [], [], [], [], [], [], []]
+Split indices:  [1, 9, 10, 17, 18, 19, 22, 23]
+split sum:  8
+merge sum:  8
+Bin attrs post WEER:  <Bin at 0x136249220, label=None, count=24, weight=1>
+Total = 24, splitting = 8, merging = 16
+Iteration completed successfully
+Iteration wallclock: 0:01:48.005631, cputime: 0:00:00
+
+
+Tue Feb 18 15:02:38 2025
+Iteration 5 (10 requested)
+Beginning iteration 5
+24 segments remain in iteration 5 (24 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.0117188
+per-segment maximum non-zero probability:   0.117188
+per-segment probability dynamic range (kT): 2.30259
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+WE weights: 
+ [0.01171875 0.01171875 0.015625   0.015625   0.015625   0.015625
+ 0.03125    0.03125    0.03125    0.03125    0.03125    0.03125
+ 0.0390625  0.0390625  0.0390625  0.0390625  0.046875   0.0546875
+ 0.0625     0.0625     0.0703125  0.0703125  0.0859375  0.1171875 ] 
+weights sum:  1.0
+pcoords shape:  (24, 1)
+curr data len:  24
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   24
+# Overall chi square: 666.11
+# THETA: 100         
+# Done! All minimizations terminated successfully
+Skip save of results.pkl for temp testing
+ABSURDer weights: 
+ [0.00310759 0.01203404 0.01501143 0.01429572 0.01016222 0.00216373
+ 0.05425671 0.03397622 0.08341562 0.02195647 0.01504871 0.05219019
+ 0.02563485 0.10498995 0.02161901 0.04474131 0.04868908 0.05749084
+ 0.03583673 0.05344348 0.07751998 0.08887898 0.04292472 0.08061241]
+ABSURDer phi_eff: 0.8697779157001359
+current iteration:  5
+...MERGE: current merged segments = set()
+......found good initial merge: 5 and 1
+...MERGE: current merged segments = {1, 5}
+......looking for eligible merge partner
+......eligible merge found: 0 and 3
+..........attempting merge: 0 and 3
+...MERGE: current merged segments = {0, 1, 3, 5}
+......found good initial merge: 4 and 15
+......accessing eligibility of merge index: 1
+......accessing eligibility of merge index: 3
+......accessing eligibility of merge index: 2
+...MERGE: current merged segments = {0, 1, 3, 4, 5, 15}
+......found good initial merge: 2 and 18
+......accessing eligibility of merge index: 3
+......accessing eligibility of merge index: 2
+......accessing eligibility of merge index: 10
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 15, 18}
+......found good initial merge: 10 and 12
+......accessing eligibility of merge index: 2
+......accessing eligibility of merge index: 10
+......accessing eligibility of merge index: 14
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 10, 12, 15, 18}
+......looking for eligible merge partner
+......eligible merge found: 14 and 9
+..........attempting merge: 14 and 9
+......accessing eligibility of merge index: 10
+......accessing eligibility of merge index: 14
+......accessing eligibility of merge index: 9
+......accessing eligibility of merge index: 12
+......accessing eligibility of merge index: 7
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 9, 10, 12, 14, 15, 18}
+......looking for eligible merge partner
+......eligible merge found: 7 and 22
+..........attempting merge: 7 and 22
+......accessing eligibility of merge index: 14
+......accessing eligibility of merge index: 9
+......accessing eligibility of merge index: 12
+......accessing eligibility of merge index: 7
+......accessing eligibility of merge index: 18
+......accessing eligibility of merge index: 22
+......accessing eligibility of merge index: 15
+......accessing eligibility of merge index: 16
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 7, 9, 10, 12, 14, 15, 18, 22}
+......looking for eligible merge partner
+......eligible merge found: 16 and 11
+..........attempting merge: 16 and 11
+WEER split: [0, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 1, 1, 0, 1]
+WEER merge: [[3], [], [18], [], [15], [1], [], [22], [], [], [12], [], [], [], [9], [], [11], [], [], [], [], [], [], []]
+Split indices:  [6, 8, 13, 17, 19, 20, 21, 23]
+split sum:  8
+merge sum:  8
+Bin attrs post WEER:  <Bin at 0x136248f50, label=None, count=24, weight=1>
+Total = 24, splitting = 8, merging = 16
+Iteration completed successfully
+Iteration wallclock: 0:01:47.959815, cputime: 0:00:00
+
+
+Tue Feb 18 15:04:26 2025
+Iteration 6 (10 requested)
+Beginning iteration 6
+24 segments remain in iteration 6 (24 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.015625
+per-segment maximum non-zero probability:   0.117188
+per-segment probability dynamic range (kT): 2.0149
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+WE weights: 
+ [0.015625   0.015625   0.015625   0.015625   0.01953125 0.01953125
+ 0.02734375 0.02734375 0.02734375 0.02734375 0.03125    0.03125
+ 0.03515625 0.03515625 0.03515625 0.03515625 0.0546875  0.05859375
+ 0.05859375 0.0703125  0.0703125  0.078125   0.078125   0.1171875 ] 
+weights sum:  1.0
+pcoords shape:  (24, 1)
+curr data len:  24
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   24
+# Overall chi square: 665.38
+# THETA: 100         
+# Done! All minimizations terminated successfully
+Skip save of results.pkl for temp testing
+ABSURDer weights: 
+ [0.00869658 0.01470906 0.00217966 0.00998186 0.01555493 0.01438729
+ 0.01582087 0.00852534 0.01900265 0.02309759 0.02279554 0.07953139
+ 0.01597271 0.04784899 0.01282869 0.0379936  0.05118692 0.04073427
+ 0.08415731 0.17342137 0.06928304 0.05657854 0.08688521 0.0888266 ]
+ABSURDer phi_eff: 0.8681863408945473
+current iteration:  6
+...MERGE: current merged segments = set()
+......looking for eligible merge partner
+......eligible merge found: 2 and 15
+..........attempting merge: 2 and 15
+...MERGE: current merged segments = {2, 15}
+......looking for eligible merge partner
+......eligible merge found: 7 and 14
+..........attempting merge: 7 and 14
+...MERGE: current merged segments = {2, 7, 14, 15}
+......looking for eligible merge partner
+......eligible merge found: 0 and 17
+..........attempting merge: 0 and 17
+...MERGE: current merged segments = {0, 2, 7, 14, 15, 17}
+......found good initial merge: 3 and 6
+......accessing eligibility of merge index: 14
+......accessing eligibility of merge index: 5
+...MERGE: current merged segments = {0, 2, 3, 6, 7, 14, 15, 17}
+......looking for eligible merge partner
+......eligible merge found: 5 and 8
+..........attempting merge: 5 and 8
+......accessing eligibility of merge index: 5
+......accessing eligibility of merge index: 1
+...MERGE: current merged segments = {0, 2, 3, 5, 6, 7, 8, 14, 15, 17}
+......found good initial merge: 1 and 12
+......accessing eligibility of merge index: 1
+......accessing eligibility of merge index: 4
+...MERGE: current merged segments = {0, 1, 2, 3, 5, 6, 7, 8, 12, 14, 15, 17}
+......looking for eligible merge partner
+......eligible merge found: 4 and 13
+..........attempting merge: 4 and 13
+......accessing eligibility of merge index: 4
+......accessing eligibility of merge index: 6
+......accessing eligibility of merge index: 12
+......accessing eligibility of merge index: 8
+......accessing eligibility of merge index: 10
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 17}
+......looking for eligible merge partner
+......eligible merge found: 10 and 9
+..........attempting merge: 10 and 9
+WEER split: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 1]
+WEER merge: [[17], [12], [15], [6], [13], [8], [], [14], [], [], [9], [], [], [], [], [], [], [], [], [], [], [], [], []]
+Split indices:  [11, 16, 18, 19, 20, 21, 22, 23]
+split sum:  8
+merge sum:  8
+Bin attrs post WEER:  <Bin at 0x1362094f0, label=None, count=24, weight=1>
+Total = 24, splitting = 8, merging = 16
+Iteration completed successfully
+Iteration wallclock: 0:01:47.828745, cputime: 0:00:00
+
+
+Tue Feb 18 15:06:13 2025
+Iteration 7 (10 requested)
+Beginning iteration 7
+24 segments remain in iteration 7 (24 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.015625
+per-segment maximum non-zero probability:   0.0742188
+per-segment probability dynamic range (kT): 1.55814
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+WE weights: 
+ [0.015625   0.015625   0.02734375 0.02734375 0.02929688 0.02929688
+ 0.03515625 0.03515625 0.03515625 0.03515625 0.0390625  0.0390625
+ 0.0390625  0.0390625  0.04296875 0.046875   0.05078125 0.05078125
+ 0.0546875  0.05859375 0.05859375 0.05859375 0.0625     0.07421875] 
+weights sum:  1.0
+pcoords shape:  (24, 1)
+curr data len:  24
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   24
+# Overall chi square: 668.70
+# THETA: 100         
+# Done! All minimizations terminated successfully
+Skip save of results.pkl for temp testing
+ABSURDer weights: 
+ [0.02571966 0.00875808 0.07616622 0.09946869 0.00623518 0.00886353
+ 0.07333753 0.029972   0.04679835 0.01194024 0.04242985 0.0116839
+ 0.03657762 0.03598791 0.03726633 0.03258416 0.04678666 0.04660591
+ 0.02855795 0.12412245 0.03216486 0.01820671 0.0642631  0.05550311]
+ABSURDer phi_eff: 0.8006079462729663
+current iteration:  7
+...MERGE: current merged segments = set()
+......found good initial merge: 4 and 1
+......accessing eligibility of merge index: 1
+......accessing eligibility of merge index: 5
+...MERGE: current merged segments = {1, 4}
+......found good initial merge: 5 and 7
+......accessing eligibility of merge index: 5
+......accessing eligibility of merge index: 11
+...MERGE: current merged segments = {1, 4, 5, 7}
+......found good initial merge: 11 and 14
+......accessing eligibility of merge index: 11
+......accessing eligibility of merge index: 9
+...MERGE: current merged segments = {1, 4, 5, 7, 11, 14}
+......looking for eligible merge partner
+......eligible merge found: 9 and 13
+..........attempting merge: 9 and 13
+......accessing eligibility of merge index: 9
+......accessing eligibility of merge index: 21
+...MERGE: current merged segments = {1, 4, 5, 7, 9, 11, 13, 14}
+......looking for eligible merge partner
+......eligible merge found: 21 and 17
+..........attempting merge: 21 and 17
+......accessing eligibility of merge index: 21
+......accessing eligibility of merge index: 0
+...MERGE: current merged segments = {1, 4, 5, 7, 9, 11, 13, 14, 17, 21}
+......found good initial merge: 0 and 20
+......accessing eligibility of merge index: 0
+......accessing eligibility of merge index: 18
+...MERGE: current merged segments = {0, 1, 4, 5, 7, 9, 11, 13, 14, 17, 20, 21}
+......looking for eligible merge partner
+......eligible merge found: 18 and 10
+..........attempting merge: 18 and 10
+......accessing eligibility of merge index: 18
+......accessing eligibility of merge index: 7
+......accessing eligibility of merge index: 20
+......accessing eligibility of merge index: 15
+...MERGE: current merged segments = {0, 1, 4, 5, 7, 9, 10, 11, 13, 14, 17, 18, 20, 21}
+......looking for eligible merge partner
+......eligible merge found: 15 and 12
+..........attempting merge: 15 and 12
+WEER split: [0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1]
+WEER merge: [[20], [], [], [], [1], [7], [], [], [], [13], [], [14], [], [], [], [12], [], [], [10], [], [], [17], [], []]
+Split indices:  [2, 3, 6, 8, 16, 19, 22, 23]
+split sum:  8
+merge sum:  8
+Bin attrs post WEER:  <Bin at 0x140748500, label=None, count=24, weight=1>
+Total = 24, splitting = 8, merging = 16
+Iteration completed successfully
+Iteration wallclock: 0:01:48.090206, cputime: 0:00:00
+
+
+Tue Feb 18 15:08:02 2025
+Iteration 8 (10 requested)
+Beginning iteration 8
+24 segments remain in iteration 8 (24 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.0136719
+per-segment maximum non-zero probability:   0.109375
+per-segment probability dynamic range (kT): 2.07944
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+WE weights: 
+ [0.01367188 0.01367188 0.01367188 0.01367188 0.01757812 0.01757812
+ 0.01757812 0.01757812 0.02539062 0.02539062 0.02929688 0.02929688
+ 0.03125    0.03125    0.03710938 0.03710938 0.04492188 0.06445312
+ 0.07421875 0.07421875 0.08203125 0.0859375  0.09375    0.109375  ] 
+weights sum:  1.0
+pcoords shape:  (24, 1)
+curr data len:  24
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   24
+# Overall chi square: 661.87
+# THETA: 100         
+# Done! All minimizations terminated successfully
+Skip save of results.pkl for temp testing
+ABSURDer weights: 
+ [0.00265581 0.02434847 0.00464397 0.002001   0.00661192 0.01261515
+ 0.01074934 0.0062292  0.00295561 0.01761706 0.01390912 0.02270358
+ 0.00180358 0.04575532 0.01087737 0.02626906 0.03414046 0.08666011
+ 0.03484842 0.13694824 0.18461521 0.03499105 0.08348589 0.19256505]
+ABSURDer phi_eff: 0.793925218953162
+current iteration:  8
+...MERGE: current merged segments = set()
+......looking for eligible merge partner
+......eligible merge found: 12 and 9
+..........attempting merge: 12 and 9
+...MERGE: current merged segments = {9, 12}
+......found good initial merge: 3 and 0
+......accessing eligibility of merge index: 0
+......accessing eligibility of merge index: 8
+...MERGE: current merged segments = {0, 9, 3, 12}
+......looking for eligible merge partner
+......eligible merge found: 8 and 5
+..........attempting merge: 8 and 5
+......accessing eligibility of merge index: 8
+......accessing eligibility of merge index: 2
+...MERGE: current merged segments = {0, 3, 5, 8, 9, 12}
+......found good initial merge: 2 and 15
+......accessing eligibility of merge index: 2
+......accessing eligibility of merge index: 7
+...MERGE: current merged segments = {0, 2, 3, 5, 8, 9, 12, 15}
+......looking for eligible merge partner
+......eligible merge found: 7 and 14
+..........attempting merge: 7 and 14
+......accessing eligibility of merge index: 7
+......accessing eligibility of merge index: 4
+...MERGE: current merged segments = {0, 2, 3, 5, 7, 8, 9, 12, 14, 15}
+......looking for eligible merge partner
+......eligible merge found: 4 and 1
+..........attempting merge: 4 and 1
+......accessing eligibility of merge index: 4
+......accessing eligibility of merge index: 6
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 7, 8, 9, 12, 14, 15}
+......looking for eligible merge partner
+......eligible merge found: 6 and 10
+..........attempting merge: 6 and 10
+......accessing eligibility of merge index: 6
+......accessing eligibility of merge index: 14
+......accessing eligibility of merge index: 5
+......accessing eligibility of merge index: 10
+......accessing eligibility of merge index: 9
+......accessing eligibility of merge index: 11
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 15}
+......found good initial merge: 11 and 16
+WEER split: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
+WEER merge: [[], [], [15], [0], [1], [], [10], [14], [5], [], [], [16], [9], [], [], [], [], [], [], [], [], [], [], []]
+Split indices:  [13, 17, 18, 19, 20, 21, 22, 23]
+split sum:  8
+merge sum:  7
+Bin attrs post WEER:  <Bin at 0x1407486e0, label=None, count=24, weight=1>
+Total = 24, splitting = 8, merging = 16
+Iteration completed successfully
+Iteration wallclock: 0:01:47.970385, cputime: 0:00:00
+
+
+Tue Feb 18 15:09:50 2025
+Iteration 9 (10 requested)
+Beginning iteration 9
+24 segments remain in iteration 9 (24 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.015625
+per-segment maximum non-zero probability:   0.0742188
+per-segment probability dynamic range (kT): 1.55814
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+WE weights: 
+ [0.015625   0.015625   0.02734375 0.03125    0.03222656 0.03222656
+ 0.03710938 0.03710938 0.03710938 0.03710938 0.04101562 0.04101562
+ 0.04296875 0.04296875 0.04296875 0.046875   0.046875   0.046875
+ 0.05078125 0.0546875  0.0546875  0.0546875  0.05664062 0.07421875] 
+weights sum:  1.0
+pcoords shape:  (24, 1)
+curr data len:  24
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   24
+# Overall chi square: 664.22
+# THETA: 100         
+# Done! All minimizations terminated successfully
+Skip save of results.pkl for temp testing
+ABSURDer weights: 
+ [0.0144778  0.03814834 0.00801836 0.0159815  0.0328042  0.01144014
+ 0.00249802 0.04555118 0.01650037 0.0433392  0.02687947 0.05452441
+ 0.088836   0.04869615 0.01907001 0.02239408 0.05257408 0.02136854
+ 0.08262236 0.0590167  0.0785833  0.09550257 0.01899818 0.10217505]
+ABSURDer phi_eff: 0.8458408911217159
+current iteration:  9
+...MERGE: current merged segments = set()
+......looking for eligible merge partner
+......eligible merge found: 6 and 2
+..........attempting merge: 6 and 2
+......accessing eligibility of merge index: 2
+......accessing eligibility of merge index: 5
+...MERGE: current merged segments = {2, 6}
+......found good initial merge: 5 and 13
+......accessing eligibility of merge index: 5
+......accessing eligibility of merge index: 0
+...MERGE: current merged segments = {2, 13, 5, 6}
+......found good initial merge: 0 and 1
+......accessing eligibility of merge index: 0
+......accessing eligibility of merge index: 3
+...MERGE: current merged segments = {0, 1, 2, 5, 6, 13}
+......found good initial merge: 3 and 17
+......accessing eligibility of merge index: 3
+......accessing eligibility of merge index: 8
+...MERGE: current merged segments = {0, 1, 2, 3, 5, 6, 13, 17}
+......looking for eligible merge partner
+......eligible merge found: 8 and 7
+..........attempting merge: 8 and 7
+......accessing eligibility of merge index: 8
+......accessing eligibility of merge index: 22
+...MERGE: current merged segments = {0, 1, 2, 3, 5, 6, 7, 8, 13, 17}
+......found good initial merge: 22 and 10
+......accessing eligibility of merge index: 22
+......accessing eligibility of merge index: 14
+...MERGE: current merged segments = {0, 1, 2, 3, 5, 6, 7, 8, 10, 13, 17, 22}
+......looking for eligible merge partner
+......eligible merge found: 14 and 4
+..........attempting merge: 14 and 4
+......accessing eligibility of merge index: 14
+......accessing eligibility of merge index: 17
+......accessing eligibility of merge index: 15
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 6, 7, 8, 10, 13, 14, 17, 22}
+......looking for eligible merge partner
+......eligible merge found: 15 and 9
+..........attempting merge: 15 and 9
+WEER split: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 1, 0, 1, 1, 1, 1, 0, 1]
+WEER merge: [[1], [], [], [17], [], [13], [2], [], [7], [], [], [], [], [], [4], [9], [], [], [], [], [], [], [10], []]
+Split indices:  [11, 12, 16, 18, 19, 20, 21, 23]
+split sum:  8
+merge sum:  8
+Bin attrs post WEER:  <Bin at 0x14003c050, label=None, count=24, weight=1>
+Total = 24, splitting = 8, merging = 16
+Iteration completed successfully
+Iteration wallclock: 0:01:46.673912, cputime: 0:00:00
+
+
+Tue Feb 18 15:11:36 2025
+Iteration 10 (10 requested)
+Beginning iteration 10
+24 segments remain in iteration 10 (24 total)
+1 of 1 (100.000000%) active bins are populated
+per-bin minimum non-zero probability:       1
+per-bin maximum probability:                1
+per-bin probability dynamic range (kT):     0
+per-segment minimum non-zero probability:   0.0205078
+per-segment maximum non-zero probability:   0.0976562
+per-segment probability dynamic range (kT): 1.56065
+norm = 1, error in norm = 0 (0*epsilon)
+Waiting for segments to complete...
+WE weights: 
+ [0.02050781 0.02050781 0.02148438 0.02148438 0.0234375  0.0234375
+ 0.02539062 0.02539062 0.02734375 0.02734375 0.02734375 0.02734375
+ 0.02734375 0.02734375 0.03125    0.03710938 0.03710938 0.06445312
+ 0.07421875 0.07519531 0.07519531 0.078125   0.08398438 0.09765625] 
+weights sum:  1.0
+pcoords shape:  (24, 1)
+curr data len:  24
+
+# INFO ON THE DATASET
+# Number of methyls:  116
+# Number of rates:    3
+# Number of blocks:   24
+# Overall chi square: 673.50
+# THETA: 100         
+# Done! All minimizations terminated successfully
+Skip save of results.pkl for temp testing
+ABSURDer weights: 
+ [0.03105219 0.01008068 0.0322449  0.01567837 0.00954679 0.01371688
+ 0.0364383  0.01940076 0.03413861 0.01422892 0.0149044  0.02002196
+ 0.02674269 0.02439976 0.01640514 0.02879534 0.02185009 0.05204595
+ 0.14147678 0.05023275 0.09010805 0.05194529 0.09485979 0.14968561]
+ABSURDer phi_eff: 0.9171084457829487
+current iteration:  10
+...MERGE: current merged segments = set()
+......looking for eligible merge partner
+......eligible merge found: 4 and 3
+..........attempting merge: 4 and 3
+...MERGE: current merged segments = {3, 4}
+......looking for eligible merge partner
+......eligible merge found: 1 and 0
+..........attempting merge: 1 and 0
+...MERGE: current merged segments = {0, 1, 3, 4}
+......found good initial merge: 5 and 11
+...MERGE: current merged segments = {0, 1, 3, 4, 5, 11}
+......found good initial merge: 9 and 10
+......accessing eligibility of merge index: 10
+......accessing eligibility of merge index: 3
+......accessing eligibility of merge index: 14
+...MERGE: current merged segments = {0, 1, 3, 4, 5, 9, 10, 11}
+......found good initial merge: 14 and 16
+......accessing eligibility of merge index: 3
+......accessing eligibility of merge index: 14
+......accessing eligibility of merge index: 7
+...MERGE: current merged segments = {0, 1, 3, 4, 5, 9, 10, 11, 14, 16}
+......looking for eligible merge partner
+......eligible merge found: 7 and 15
+..........attempting merge: 7 and 15
+......accessing eligibility of merge index: 14
+......accessing eligibility of merge index: 7
+......accessing eligibility of merge index: 11
+......accessing eligibility of merge index: 16
+......accessing eligibility of merge index: 13
+...MERGE: current merged segments = {0, 1, 3, 4, 5, 7, 9, 10, 11, 14, 15, 16}
+......found good initial merge: 13 and 2
+......accessing eligibility of merge index: 7
+......accessing eligibility of merge index: 11
+......accessing eligibility of merge index: 16
+......accessing eligibility of merge index: 13
+......accessing eligibility of merge index: 12
+...MERGE: current merged segments = {0, 1, 2, 3, 4, 5, 7, 9, 10, 11, 13, 14, 15, 16}
+......looking for eligible merge partner
+......eligible merge found: 12 and 8
+..........attempting merge: 12 and 8
+WEER split: [0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1]
+WEER merge: [[], [0], [], [], [3], [11], [], [15], [], [10], [], [], [8], [2], [16], [], [], [], [], [], [], [], [], []]
+Split indices:  [6, 17, 18, 19, 20, 21, 22, 23]
+split sum:  8
+merge sum:  7
+Bin attrs post WEER:  <Bin at 0x13620af30, label=None, count=24, weight=1>
+Total = 24, splitting = 8, merging = 16
+Iteration completed successfully
+Iteration wallclock: 0:01:50.426241, cputime: 0:00:00
+
+
+Tue Feb 18 15:13:27 2025
+WEST run complete.
