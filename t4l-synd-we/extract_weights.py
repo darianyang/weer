@@ -88,13 +88,21 @@ def extract_weights_from_h5(filename, absurder_weights):
     with h5py.File(filename, 'r') as f:
 
         # Extract the weight segments
-        init_we_weights = f[f"iterations/iter_{1:08d}/seg_index"]["weight"]
+        #init_we_weights = f[f"iterations/iter_{1:08d}/seg_index"]["weight"]
+        n_init_segs = f["summary"]["n_particles"][0]
+        init_we_weights = np.ones(n_init_segs) / n_init_segs
+        init_parent_weights = init_we_weights
+        #print("Initial WE Weights:", init_we_weights.shape, init_we_weights)
         for it in range(1, f.attrs["west_current_iteration"]):
 
             # Extract the weight segments
             we_weights = f[f"iterations/iter_{it:08d}/seg_index"]["weight"]
-            # Extract the parent segments
+            # Extract the parent segment ids and weights
             parent_segs = f[f"iterations/iter_{it:08d}/seg_index"]["parent_id"]
+            if it == 1:
+                parent_weights = init_parent_weights[parent_segs]
+            else:
+                parent_weights = f[f"iterations/iter_{it-1:08d}/seg_index"]["weight"][parent_segs]
             
             # Extract the weight changes from the previous iteration
             # TODO: make sure that this works for same weight walkers later when sorted
@@ -102,6 +110,7 @@ def extract_weights_from_h5(filename, absurder_weights):
 
             # update the initial weights for the next iteration
             init_we_weights = we_weights
+            init_parent_weights = parent_weights
             
             # Append the weight changes
             #all_weight_diffs.append(weight_diff)
@@ -114,9 +123,11 @@ def extract_weights_from_h5(filename, absurder_weights):
             weight_diff_sorted = weight_diff[sort_indices]
             # grab the corresponding ABSURDer weights
             absurder_weights_sorted = absurder_weights[it-1]
+            # and the parent weights
+            parent_weights_sorted = parent_weights[sort_indices]
 
             # Append the sorted values
-            all_weights.append((we_weights_sorted, weight_diff_sorted, absurder_weights_sorted))
+            all_weights.append((we_weights_sorted, weight_diff_sorted, absurder_weights_sorted, parent_weights_sorted))
 
     return np.array(all_weights)
 
@@ -166,8 +177,9 @@ def plot_weights(we_weights, absurder_weights):
         top_indices = np.argsort(absurder_weights[i])[-8:]
         ax[row, col].scatter(top_indices, absurder_weights[i][top_indices], color='red', zorder=5)
         
-        ax[row, col].set_yscale("log")
+        #ax[row, col].set_yscale("log")
         ax[row, col].set_title(f"WE Iteration {i+1}")
+        ax[row, col].hlines(0, 0, 24, color='gray', linestyle='--')
 
     ax[0,0].legend()
     plt.tight_layout()
@@ -178,23 +190,26 @@ if __name__ == "__main__":
     # Example usage
     #filename = "test-data/west.log"
     # TODO: make comparison plot of the two conditions
-    filename = "we_weight_input_False/west.log"
-    h5_filename = "we_weight_input_False/west.h5"
-    # filename = "we_weight_input_True/west.log"
-    # h5_filename = "we_weight_input_True/west.h5"
+    #       also include the Chi2 and Phi_eff values
+    # filename = "we_weight_input_False/west.log"
+    # h5_filename = "we_weight_input_False/west.h5"
+    filename = "we_weight_input_True/west.log"
+    h5_filename = "we_weight_input_True/west.h5"
 
     we_weights, absurder_weights, chi2, phi_eff = extract_weights(filename)
-    # print(f"\nCHI2:PHI_EFF {list(zip(chi2, phi_eff))}\n")
+    print(f"\nCHI2:PHI_EFF {list(zip(chi2, phi_eff))}\n")
     # plot_weights(we_weights, absurder_weights)
 
+    # returns (sorted): weight | weight_diff | absurder_weight
     weights = extract_weights_from_h5(h5_filename, absurder_weights)
     # loop each iteration
-    for it in weights:
-        we_weights, weight_diff, absurder_weights = it
-        plt.plot(weight_diff)
-        plt.plot(absurder_weights)
-        break
+    # TODO: make plotting function for weight diffs and absurder weights
+    # for it in weights:
+    #     we_weights, weight_diff, absurder_weights = it
+    # plt.plot(weight_diff)
+    # plt.plot(absurder_weights)
+    plot_weights(weights[:,3], weights[:,2])
+        
 
     # TODO: is there a more intuitive way to sort the walkers per iteration?
-
     plt.show()
