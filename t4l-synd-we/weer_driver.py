@@ -100,15 +100,18 @@ class WEERDriver(WEDriver):
 
         # split
         while len(bin) < target_count:
+            #print('adjusting counts by splitting')
             log.debug('adjusting counts by splitting')
             # always split the highest variance walker into two
             segments = sorted(bin, key=weight_getter)
             bin.remove(segments[-1])
             new_segments_list = self._split_walker(segments[-1], 2, bin)
             bin.update(new_segments_list)
+            #print("New segment weights: ", [seg.weight for seg in new_segments_list])
 
         # merge
         while len(bin) > target_count:
+            #print('adjusting counts by merging')
             log.debug('adjusting counts by merging')
             # always merge the two lowest variance walkers
             segments = sorted(bin, key=weight_getter)
@@ -331,12 +334,13 @@ class WEERDriver(WEDriver):
 
             # run reweighting
             # TODO: could also input multiple and find the best one
-            theta = 100 # initial test value (TODO: optimize)
+            #theta = 100 # initial test value (TODO: optimize)
+            theta = 1000
             # initialize ABSURDer object
             # TODO: testing use with initial WE weights, not sure if this will be for better or worse
             #       I should test with and without
-            rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=None)
-            #rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=weights)
+            #rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=None)
+            rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=weights)
             # reweight according to the data corresponding to the selected index
             # in this test case, use R2 (TODO: use all rates eventually? Would just use -1)
             rw.reweight(1)
@@ -434,10 +438,11 @@ class WEERDriver(WEDriver):
                     
                     segs += 1
 
-                if self.do_adjust_counts:
-                    self._adjust_count(ibin)
+                # if self.do_adjust_counts:
+                #     self._adjust_count(ibin)
 
                 print("Bin attrs post WEER: ", self.next_iter_binning[ibin])
+                print("New weights:\n", np.asarray([seg.weight for seg in self.next_iter_segments]))
                 print(f"Total = {segs}, splitting = {splitting}, merging = {merging}")
 
         self._check_post()
