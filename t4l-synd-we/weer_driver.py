@@ -273,18 +273,18 @@ class WEERDriver(WEDriver):
         # TODO: could also do it after the setup?
         # grab segments and weights and pcoords
         #seg_list = list(self.next_iter_segments)
+        # trying this without sorting the segments by weight
         segments = sorted(self.next_iter_segments, key=operator.attrgetter('weight'))
-        #segments = np.asarray(sorted())
-        #weights = np.array(list(map(operator.attrgetter('weight'), segments)))
         weights = np.asarray([seg.weight for seg in segments])
         #print("seg list: ", seg_list)
         #print("segments: ", segments[0])
         print("WE weights: \n", weights, "\nweights sum: ", np.sum(weights))
 
-        # get final frame pcoords
+        ## get final frame pcoords
         pcoords = np.array(list(map(operator.attrgetter('pcoord'), segments)))
         # pcoord for the last frame of previous iteration
         # or the first frame of current iteration
+        # print("pcoords: ", pcoords)
         pcoords = pcoords[:,0,:]
         print("pcoords shape: ", pcoords.shape)
         # calculate all-to-all distances
@@ -296,8 +296,22 @@ class WEERDriver(WEDriver):
         # curr_segments = np.array(sorted(self.current_iter_segments, 
         #                                 key=operator.attrgetter('weight')), dtype=np.object_)
         # curr_pcoords = np.array(list(map(operator.attrgetter('pcoord'), curr_segments)))
+
+        # TODO: do absurder without sorting segments, this way we keep the segment order consistent with h5 file
         curr_segments = sorted(self.current_iter_segments, key=operator.attrgetter('weight'))
+        #curr_segments = self.current_iter_segments
         #curr_pcoords = np.asarray([seg.pcoord for seg in curr_segments])
+        curr_parent_ids = np.asarray([seg.parent_id for seg in curr_segments])
+        #print("curr pcoords: ", curr_pcoords)
+        print("curr parent ids: ", curr_parent_ids)
+        
+        # # first/last-of-previous frame pcoords
+        # pcoords = curr_pcoords[:,0,:]
+        # print("pcoords shape: ", pcoords.shape)
+        # # calculate all-to-all distances
+        # self.dist_matrix = self._all_to_all_distance(pcoords)
+        
+        # extract aux data
         curr_data = np.asarray([seg.data for seg in curr_segments])
         print("curr data len: ", len(curr_data))
         # check for empty dict in first segment (e.g. during init)
@@ -335,12 +349,12 @@ class WEERDriver(WEDriver):
             # run reweighting
             # TODO: could also input multiple and find the best one
             #theta = 100 # initial test value (TODO: optimize)
-            theta = 1000
+            theta = 100
             # initialize ABSURDer object
             # TODO: testing use with initial WE weights, not sure if this will be for better or worse
             #       I should test with and without
-            #rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=None)
-            rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=weights)
+            rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=None)
+            #rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=weights)
             # reweight according to the data corresponding to the selected index
             # in this test case, use R2 (TODO: use all rates eventually? Would just use -1)
             rw.reweight(1)
@@ -388,7 +402,7 @@ class WEERDriver(WEDriver):
                     # this defaults to empty with 1 bstate
                     # tested with multiple bstates, seems to work
                     split = [0] * len(segments)
-                    merge = [[] for _ in range(len(segments))]
+                    merge = [[] for _ in range(len(weights))]
                 else:
                     # TODO: theres also the question of if I should use the top weight or the 
                     #       top weight change from the previous iteration (and if I should 
@@ -399,7 +413,7 @@ class WEERDriver(WEDriver):
                     # merge = [[],[],[3,1],[]]
 
                     # the number of splits/merges is (max) 1/3 of the total number of segments
-                    n_split_merge = len(curr_segments) // 3
+                    n_split_merge = len(segments) // 3
                     # currently set to use same n_split and n_merge amounts
                     split, merge = self.generate_split_merge_decisions(segments, absurder_weights, 
                                                                        n_split_merge, n_split_merge)

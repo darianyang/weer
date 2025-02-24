@@ -222,7 +222,7 @@ def plot_weights(weights):
         top_indices = np.argsort(absurder_weights[i])[-(n_segments//3):]
         ax[row, col].scatter(top_indices, absurder_weights[i][top_indices], color='red', zorder=5)
         
-        ax[row, col].set_yscale("log")
+        #ax[row, col].set_yscale("log")
         ax[row, col].set_title(f"WE Iteration {i+1}")
         #ax[row, col].hlines(0, 0, 24, color='gray', linestyle='--')
         ax[row, col].grid(True)
@@ -238,7 +238,7 @@ if __name__ == "__main__":
     # TODO: make comparison plot of the two conditions
     #       also include the Chi2 and Phi_eff values
     we_weight_input = True
-    theta = 100
+    theta = 1000
     filename = f"we_weight_input_{we_weight_input}_theta{theta}"
     #filename = "."
 

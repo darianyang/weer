@@ -66,38 +66,38 @@ def plot_resampling_tree(nodes, edges, weights, metric_values, rows=2, cols=3):
 
 
 if __name__ == '__main__':
-    # # Example data: node weights and metrics
-    # nodes = ['T1', 'T2', 'T3', 'T4', 'T5']
-    # edges = [('T1', 'T5'), ('T2', 'T4'), ('T3', 'T5'), ('T4', 'T5')]
+    # Example data: node weights and metrics
+    nodes = ['T1', 'T2', 'T3', 'T4', 'T5']
+    edges = [('T1', 'T5'), ('T2', 'T4'), ('T3', 'T5'), ('T4', 'T5')]
 
-    # # Precalculated metric for each trajectory (e.g., some property)
-    # metric_values = {'T1': 0.1, 'T2': 0.5, 'T3': 0.9, 'T4': 0.7, 'T5': 0.3}
-    # weights = {'T1': 2, 'T2': 3, 'T3': 5, 'T4': 4, 'T5': 1}
+    # Precalculated metric for each trajectory (e.g., some property)
+    metric_values = {'T1': 0.1, 'T2': 0.5, 'T3': 0.9, 'T4': 0.7, 'T5': 0.3}
+    weights = {'T1': 2, 'T2': 3, 'T3': 5, 'T4': 4, 'T5': 1}
 
-    # Initialize an empty dictionary for nodes
-    nodes_data = {}
+    # # Initialize an empty dictionary for nodes
+    # nodes_data = {}
 
-    # Example node attributes (these can be dynamically generated or read from a file)
-    node_names = ['T1', 'T2', 'T3', 'T4', 'T5']
-    weights = [2, 3, 5, 4, 1]
-    metrics = [0.1, 0.5, 0.9, 0.7, 0.3]
-    edges = [['T5'], ['T4'], ['T5'], ['T5'], []]
+    # # Example node attributes (these can be dynamically generated or read from a file)
+    # node_names = ['T1', 'T2', 'T3', 'T4', 'T5']
+    # weights = [2, 3, 5, 4, 1]
+    # metrics = [0.1, 0.5, 0.9, 0.7, 0.3]
+    # edges = [['T5'], ['T4'], ['T5'], ['T5'], []]
 
-    # Populate the dictionary by iterating through the nodes data
-    for name, weight, metric, edge_list in zip(node_names, weights, metrics, edges):
-        nodes_data[name] = {
-            'weight': weight,
-            'metric': metric,
-            'edges': edge_list
-        }
+    # # Populate the dictionary by iterating through the nodes data
+    # for name, weight, metric, edge_list in zip(node_names, weights, metrics, edges):
+    #     nodes_data[name] = {
+    #         'weight': weight,
+    #         'metric': metric,
+    #         'edges': edge_list
+    #     }
 
-    # Print the resulting dictionary
-    weights = {node: data['weight'] for node, data in nodes_data.items()}
-    print(weights)
-    print(nodes_data.keys())
+    # # Print the resulting dictionary
+    # weights = {node: data['weight'] for node, data in nodes_data.items()}
+    # print(weights)
+    # print(nodes_data.keys())
 
     # TODO: okay, so I need to make a data structure that has node-name, edge/connection, WE weight, and absurder_weight
 
     # TODO: eventually include a line plot sideways that shows phi_eff and chi2 for each iteration
 
-    #plot_resampling_tree(nodes, edges, weights, metric_values)
+    plot_resampling_tree(nodes, edges, weights, metric_values)
