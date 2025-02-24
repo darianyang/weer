@@ -6,82 +6,76 @@ import numpy as np
 import matplotlib.pyplot as plt
 import h5py
 
-def extract_weights(filename):
-    we_weights = []
-    new_we_weights = []
-    absurder_weights = []
+def extract_data_from_log(filename):
+    """
+    Extract data from the west.log file.
 
-    current_we = None
-    current_new_we = None
-    current_absurder = None
-    collecting_we = False
-    collecting_new_we = False
-    collecting_absurder = False
-    we_buffer = []
-    new_we_buffer = []
-    absurder_buffer = []
-    chi2 = []
-    phi_eff = []
+    Parameters
+    ----------
+    filename : str
+        Path to the west.log file.
+
+    Returns
+    -------
+    dict
+        Dictionary of extracted data:
+        {"WE weights": np.array(we_weights),
+         "New weights": np.array(new_we_weights),
+         "ABSURDer weights": np.array(absurder_weights),
+         "pcoords": np.array(pcoords),
+         "parent_ids": np.array(parent_ids),
+         "chi2": np.array(chi2),
+         "phi_eff": np.array(phi_eff)
+        }
+    """
+    def collect_multiline_data(start_token, collecting_flag, buffer, data_list):
+        if line.startswith(start_token):
+            collecting_flag = True
+            buffer = []
+            return collecting_flag, buffer
+        if collecting_flag:
+            buffer.append(line)
+            if line.endswith("]"):
+                data_string = " ".join(buffer).replace("[", "").replace("]", "")
+                data_list.append(np.fromstring(data_string, sep=" "))
+                collecting_flag = False
+        return collecting_flag, buffer
+
+    we_weights, new_we_weights, absurder_weights = [], [], []
+    pcoords, parent_ids = [], []
+    chi2, phi_eff = [], []
+
+    collecting_we = collecting_new_we = collecting_absurder = False
+    collecting_pcoords = collecting_parent_ids = False
+    we_buffer = new_we_buffer = absurder_buffer = []
+    pcoords_buffer = parent_ids_buffer = []
 
     with open(filename, 'r') as file:
         for line in file:
             line = line.strip()
 
-            # Detect WE weights start
-            if line.startswith("WE weights:"):
-                collecting_we = True
-                we_buffer = []
-                continue
+            collecting_we, we_buffer = collect_multiline_data("WE weights:", collecting_we, we_buffer, we_weights)
+            collecting_new_we, new_we_buffer = collect_multiline_data("New weights:", collecting_new_we, new_we_buffer, new_we_weights)
+            collecting_absurder, absurder_buffer = collect_multiline_data("ABSURDer weights:", collecting_absurder, absurder_buffer, absurder_weights)
+            collecting_pcoords, pcoords_buffer = collect_multiline_data("curr pcoords:", collecting_pcoords, pcoords_buffer, pcoords)
+            collecting_parent_ids, parent_ids_buffer = collect_multiline_data("curr parent ids:", collecting_parent_ids, parent_ids_buffer, parent_ids)
 
-            # Detect ABSURDer weights start
-            if line.startswith("ABSURDer weights:"):
-                collecting_absurder = True
-                absurder_buffer = []
-                continue
-
-            # Detect new WE weights start
-            if line.startswith("New weights:"):
-                collecting_new_we = True
-                new_we_buffer = []
-                continue
-
-            # Collect WE weights over multiple lines
-            if collecting_we:
-                we_buffer.append(line)
-                if line.endswith("]"):
-                    # Combine and parse once the full list is collected
-                    weights_string = " ".join(we_buffer).replace("[", "").replace("]", "")
-                    current_we = np.fromstring(weights_string, sep=" ")
-                    we_weights.append(current_we)
-                    collecting_we = False
-
-            # Collect ABSURDer weights over multiple lines
-            if collecting_absurder:
-                absurder_buffer.append(line)
-                if line.endswith("]"):
-                    # Combine and parse once the full list is collected
-                    weights_string = " ".join(absurder_buffer).replace("[", "").replace("]", "")
-                    current_absurder = np.fromstring(weights_string, sep=" ")
-                    absurder_weights.append(current_absurder)
-                    collecting_absurder = False
-            
-            # Collect new WE weights over multiple lines
-            if collecting_new_we:
-                new_we_buffer.append(line)
-                if line.endswith("]"):
-                    # Combine and parse once the full list is collected
-                    weights_string = " ".join(new_we_buffer).replace("[", "").replace("]", "")
-                    current_new_we = np.fromstring(weights_string, sep=" ")
-                    new_we_weights.append(current_new_we)
-                    collecting_new_we = False
-
-            # Collect chi2 and phi_eff
             if line.startswith("# Overall chi square"):
                 chi2.append(float(line.split(":")[1]))
             if line.startswith("ABSURDer phi_eff"):
                 phi_eff.append(float(line.split(":")[1]))
 
-    return np.array(we_weights), np.array(new_we_weights), np.array(absurder_weights), np.array(chi2), np.array(phi_eff)
+    #return np.array(we_weights), np.array(new_we_weights), np.array(absurder_weights), np.array(chi2), np.array(phi_eff)
+    # return a dictionary of the extracted data
+    return {
+        "WE weights": np.array(we_weights),
+        "New weights": np.array(new_we_weights),
+        "ABSURDer weights": np.array(absurder_weights),
+        "pcoords": np.array(pcoords),
+        "parent_ids": np.array(parent_ids),
+        "chi2": np.array(chi2),
+        "phi_eff": np.array(phi_eff)
+    }
 
 def extract_weights_from_h5(filename, absurder_weights):
     """
@@ -239,10 +233,19 @@ if __name__ == "__main__":
     #       also include the Chi2 and Phi_eff values
     we_weight_input = True
     theta = 1000
-    filename = f"we_weight_input_{we_weight_input}_theta{theta}"
-    #filename = "."
+    #filename = f"we_weight_input_{we_weight_input}_theta{theta}"
+    filename = "."
 
-    we_weights, new_we_weights, absurder_weights, chi2, phi_eff = extract_weights(f"{filename}/west.log")
+    #we_weights, new_we_weights, absurder_weights, chi2, phi_eff = extract_data_from_log(f"{filename}/west.log")
+    data = extract_data_from_log(f"{filename}/west.log")
+    we_weights = data["WE weights"]
+    new_we_weights = data["New weights"]
+    absurder_weights = data["ABSURDer weights"]
+    pcoords = data["pcoords"]
+    parent_ids = data["parent_ids"]
+    chi2 = data["chi2"]
+    phi_eff = data["phi_eff"]
+    print(data)
     #weights = np.array([we_weights, new_we_weights, new_we_weights-we_weights, absurder_weights])
     #print(f"WE Weights: {weights.shape}")
     print(f"\nCHI2:PHI_EFF {list(zip(chi2, phi_eff))}\n")

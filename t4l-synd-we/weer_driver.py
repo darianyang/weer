@@ -286,7 +286,8 @@ class WEERDriver(WEDriver):
         # or the first frame of current iteration
         # print("pcoords: ", pcoords)
         pcoords = pcoords[:,0,:]
-        print("pcoords shape: ", pcoords.shape)
+        print("curr pcoords:\n", pcoords.reshape(-1))
+        #print("pcoords shape: ", pcoords.shape)
         # calculate all-to-all distances
         self.dist_matrix = self._all_to_all_distance(pcoords)
         # print("dist matrix shape: ", self.dist_matrix.shape)
@@ -303,7 +304,7 @@ class WEERDriver(WEDriver):
         #curr_pcoords = np.asarray([seg.pcoord for seg in curr_segments])
         curr_parent_ids = np.asarray([seg.parent_id for seg in curr_segments])
         #print("curr pcoords: ", curr_pcoords)
-        print("curr parent ids: ", curr_parent_ids)
+        print("curr parent ids:\n", curr_parent_ids)
         
         # # first/last-of-previous frame pcoords
         # pcoords = curr_pcoords[:,0,:]
