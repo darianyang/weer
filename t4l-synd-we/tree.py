@@ -7,6 +7,8 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
 
+import extract
+
 # Function to generate grid positions
 # TODO: rows is not needed I suppose
 def generate_grid_positions(nodes, rows, cols):
@@ -74,40 +76,25 @@ def plot_resampling_tree(node_names, weights, metrics, edges, rows=2, cols=3):
 
 
 if __name__ == '__main__':
-    ### intial data structure
-    # # Example data: node weights and metrics
-    # nodes = ['T1', 'T2', 'T3', 'T4', 'T5']
-    # edges = [('T1', 'T5'), ('T2', 'T4'), ('T3', 'T5'), ('T4', 'T5')]
-    # # Precalculated metric for each trajectory (e.g., some property)
-    # metric_values = {'T1': 0.1, 'T2': 0.5, 'T3': 0.9, 'T4': 0.7, 'T5': 0.3}
-    # weights = {'T1': 2, 'T2': 3, 'T3': 5, 'T4': 4, 'T5': 1}
-    #plot_resampling_tree(nodes, edges, weights, metric_values)
-
-    # Initialize an empty dictionary for nodes
-    #nodes_data = {}
-
     # Example node attributes (these can be dynamically generated or read from a file)
+    # TODO: eventually use pre-cast arrays here: str, float, float, obj
     node_names = ['T1', 'T2', 'T3', 'T4', 'T5']
     weights = [2, 3, 5, 4, 1]
     metrics = [0.1, 0.5, 0.9, 0.7, 0.3]
     edges = [(('T1', 'T5'), ('T1', 'T4')), ('T2', 'T4'), ('T3', 'T5'), ('T4', 'T5'), ('T5', 'T5')]
 
-    # # Populate the dictionary by iterating through the nodes data
-    # for name, weight, metric, edge_list in zip(node_names, weights, metrics, edges):
-    #     nodes_data[name] = {
-    #         'weight': weight,
-    #         'metric': metric,
-    #         'edges': edge_list
-    #     }
-
-    # # Print the resulting dictionary
-    # weights = {node: data['weight'] for node, data in nodes_data.items()}
-    # print(weights)
-    # print(nodes_data.keys())
-
-    # TODO: okay, so I need to make a data structure that has node-name, edge/connection, WE weight, and absurder_weight
-
+    # TODO: okay, so I need data with node-name, WE weight, and absurder_weight, and edges/connections
     # TODO: eventually include a line plot sideways that shows phi_eff and chi2 for each iteration
 
-    #plot_resampling_tree(nodes_data)
-    plot_resampling_tree(node_names, weights, metrics, edges)
+    data = extract.extract_data_from_log(f"./west.log")
+    we_weights = data["WE weights"]
+    new_we_weights = data["New weights"]
+    absurder_weights = data["ABSURDer weights"]
+    pcoords = data["pcoords"]
+    parent_ids = data["parent_ids"]
+    chi2 = data["chi2"]
+    phi_eff = data["phi_eff"]
+
+    print(data)
+
+    #plot_resampling_tree(node_names, weights, metrics, edges)
