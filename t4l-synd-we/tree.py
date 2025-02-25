@@ -32,11 +32,16 @@ def plot_resampling_tree(node_names, weights, metrics, edges, rows=2, cols=3):
     for i, node in enumerate(node_names):
         G.add_node(node, weight=weights[i], metric=metrics[i])
 
-    # Add edges based on history
+    # Add edges between nodes
     for edge in edges:
-        if isinstance(edge[0], tuple):
+        # case with empty tuple (no edges), continue to next node
+        if edge == ():
+            continue
+        # case with tuple of tuples for multiple edges
+        elif isinstance(edge[0], tuple):
             for sub_edge in edge:
                 G.add_edge(sub_edge[0], sub_edge[1])
+        # case with tuple for a single edge connection
         else:
             G.add_edge(edge[0], edge[1])
 
@@ -81,20 +86,23 @@ if __name__ == '__main__':
     node_names = ['T1', 'T2', 'T3', 'T4', 'T5']
     weights = [2, 3, 5, 4, 1]
     metrics = [0.1, 0.5, 0.9, 0.7, 0.3]
-    edges = [(('T1', 'T5'), ('T1', 'T4')), ('T2', 'T4'), ('T3', 'T5'), ('T4', 'T5'), ('T5', 'T5')]
+    edges = [(('T1', 'T5'), ('T1', 'T4')), ('T2', 'T4'), (), ('T4', 'T5'), ('T5', 'T5')]
 
     # TODO: okay, so I need data with node-name, WE weight, and absurder_weight, and edges/connections
     # TODO: eventually include a line plot sideways that shows phi_eff and chi2 for each iteration
 
-    data = extract.extract_data_from_log(f"./west.log")
-    we_weights = data["WE weights"]
-    new_we_weights = data["New weights"]
-    absurder_weights = data["ABSURDer weights"]
-    pcoords = data["pcoords"]
-    parent_ids = data["parent_ids"]
-    chi2 = data["chi2"]
-    phi_eff = data["phi_eff"]
+    # TODO: also save the dict as output and just load it as pickle?
+    # data = extract.extract_data_from_log(f"./west.log")
+    # we_weights = data["WE weights"]
+    # new_we_weights = data["New weights"]
+    # absurder_weights = data["ABSURDer weights"]
+    # pcoords = data["pcoords"]
+    # parent_ids = data["parent_ids"]
+    # chi2 = data["chi2"]
+    # phi_eff = data["phi_eff"]
 
-    print(data)
+    # print(data)
 
-    #plot_resampling_tree(node_names, weights, metrics, edges)
+
+
+    plot_resampling_tree(node_names, weights, metrics, edges)
