@@ -7,6 +7,29 @@ import matplotlib.pyplot as plt
 import h5py
 import pickle
 
+import numpy as np
+import pickle
+import re
+
+def parse_parent_wtg_ids(s):
+    """
+    Parse a string like "[{5} {5} {0} {0} {1, 3} {2, 4}]" into a list of sets,
+    where each set contains a tuple of integers.
+    """
+    # Remove surrounding square brackets
+    s = s.strip()[1:-1]
+    # Use regex to capture each {...} group
+    groups = re.findall(r'\{([^}]*)\}', s)
+    result = []
+    for group in groups:
+        # Split on commas (and possibly whitespace)
+        numbers = [int(x.strip()) for x in group.split(',') if x.strip() != '']
+        # append as a set
+        result.append(set(numbers))
+    return result
+
+# TODO: this is overall not the best, but it works for now
+# eventually I can either save the data to h5 or parse everything from the h5 directly
 def extract_data_from_log(filename, results='extracted_data.pkl'):
     """
     Extract data from the west.log file.
@@ -26,63 +49,83 @@ def extract_data_from_log(filename, results='extracted_data.pkl'):
          "New weights": np.array(new_we_weights),
          "ABSURDer weights": np.array(absurder_weights),
          "pcoords": np.array(pcoords),
-         "parent_ids": np.array(parent_ids),
+         "parent_ids": np.array(parent_ids, dtype=int),
+         "parent_wtg_ids": list of sets of tuples,
          "chi2": np.array(chi2),
          "phi_eff": np.array(phi_eff)
         }
     """
-    def collect_multiline_data(start_token, collecting_flag, buffer, data_list):
-        if line.startswith(start_token):
-            collecting_flag = True
-            buffer = []
-            return collecting_flag, buffer
-        if collecting_flag:
-            buffer.append(line)
-            if line.endswith("]"):
-                data_string = " ".join(buffer).replace("[", "").replace("]", "")
-                data_list.append(np.fromstring(data_string, sep=" "))
-                collecting_flag = False
-        return collecting_flag, buffer
-
-    we_weights, new_we_weights, absurder_weights = [], [], []
-    pcoords, parent_ids = [], []
-    chi2, phi_eff = [], []
-
-    collecting_we = collecting_new_we = collecting_absurder = False
-    collecting_pcoords = collecting_parent_ids = False
-    we_buffer = new_we_buffer = absurder_buffer = []
-    pcoords_buffer = parent_ids_buffer = []
+    # Define keywords and initialize storage dictionaries
+    data_keys = {
+        "WE weights:": "WE weights",
+        "New weights:": "New weights",
+        "ABSURDer weights:": "ABSURDer weights",
+        "curr pcoords:": "pcoords",
+        "curr parent ids:": "parent_ids",
+        "curr parent wtg ids:": "parent_wtg_ids"
+    }
+    
+    data_store = {key: [] for key in data_keys.values()}
+    scalars = {"# Overall chi square": "chi2", "ABSURDer phi_eff": "phi_eff"}
+    scalar_store = {key: [] for key in scalars.values()}
+    
+    collecting_key = None  # currently active data key
+    buffer = []
 
     with open(filename, 'r') as file:
         for line in file:
             line = line.strip()
 
-            collecting_we, we_buffer = collect_multiline_data("WE weights:", collecting_we, we_buffer, we_weights)
-            collecting_new_we, new_we_buffer = collect_multiline_data("New weights:", collecting_new_we, new_we_buffer, new_we_weights)
-            collecting_absurder, absurder_buffer = collect_multiline_data("ABSURDer weights:", collecting_absurder, absurder_buffer, absurder_weights)
-            collecting_pcoords, pcoords_buffer = collect_multiline_data("curr pcoords:", collecting_pcoords, pcoords_buffer, pcoords)
-            collecting_parent_ids, parent_ids_buffer = collect_multiline_data("curr parent ids:", collecting_parent_ids, parent_ids_buffer, parent_ids)
+            # Check if the line signals the start of a data block
+            if line in data_keys:
+                # If we were collecting a previous block, process it.
+                if collecting_key is not None:
+                    block_data = " ".join(buffer)
+                    if collecting_key == "parent_wtg_ids":
+                        # Use the specialized parser for parent_wtg_ids
+                        data_store[collecting_key].append(parse_parent_wtg_ids(block_data))
+                    else:
+                        # Remove any surrounding brackets and parse numeric data
+                        cleaned = block_data.replace("[", "").replace("]", "")
+                        data_store[collecting_key].append(np.fromstring(cleaned, sep=" "))
+                # Set new collecting key and reset buffer
+                collecting_key = data_keys[line]
+                buffer = []
+                continue
 
-            if line.startswith("# Overall chi square"):
-                chi2.append(float(line.split(":")[1]))
-            if line.startswith("ABSURDer phi_eff"):
-                phi_eff.append(float(line.split(":")[1]))
+            # If we're in the middle of collecting multiline data, add to the buffer
+            if collecting_key:
+                buffer.append(line)
+                if line.endswith("]"):
+                    block_data = " ".join(buffer)
+                    if collecting_key == "parent_wtg_ids":
+                        data_store[collecting_key].append(parse_parent_wtg_ids(block_data))
+                    else:
+                        cleaned = block_data.replace("[", "").replace("]", "")
+                        data_store[collecting_key].append(np.fromstring(cleaned, sep=" "))
+                    collecting_key = None
+                    buffer = []
+                continue
 
-    # return a dictionary of the extracted data (use arrays for easier indexing later)
-    data_dict = {"WE weights": np.array(we_weights),
-                "New weights": np.array(new_we_weights),
-                "ABSURDer weights": np.array(absurder_weights),
-                "pcoords": np.array(pcoords),
-                "parent_ids": np.array(parent_ids, dtype=int),
-                "chi2": np.array(chi2),
-                "phi_eff": np.array(phi_eff)
-                }
-    
-    # save the dictionary as a pickle file
+            # Process scalar values in single lines
+            for key, name in scalars.items():
+                if line.startswith(key):
+                    scalar_store[name].append(float(line.split(":")[1]))
+                    break
+
+    # Convert numerical lists to NumPy arrays
+    for key in data_store:
+        if key != "parent_wtg_ids":  # keep parent_wtg_ids as list of sets of tuples
+            data_store[key] = np.array(data_store[key])
+    for key in scalar_store:
+        data_store[key] = np.array(scalar_store[key])
+
+    # Save the extracted data as a pickle file
     with open(results, "wb") as f:
-       pickle.dump(data_dict, f)
+        pickle.dump(data_store, f)
 
-    return data_dict
+    return data_store
+
 
 def extract_weights_from_h5(filename, absurder_weights):
     """
@@ -250,6 +293,7 @@ if __name__ == "__main__":
     absurder_weights = data["ABSURDer weights"]
     pcoords = data["pcoords"]
     parent_ids = data["parent_ids"]
+    parent_wtg_ids = data["parent_wtg_ids"]
     chi2 = data["chi2"]
     phi_eff = data["phi_eff"]
     print(data)
