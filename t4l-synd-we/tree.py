@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
 import pickle
+import os
 
 import extract
 
@@ -21,6 +22,7 @@ def generate_grid_positions(nodes, rows, cols):
         positions[node] = (col, row)  # Positive row to go up from bottom
     return positions
 
+# TODO: auto detection of row/cols and node_size calc
 def plot_resampling_tree(node_names, weights, metrics, edges, rows=2, cols=3, 
                          node_size=500, node_labels=False, cbar_label='pcoord',
                          plot_title='WE Resampling Tree'):
@@ -84,7 +86,7 @@ def plot_resampling_tree(node_names, weights, metrics, edges, rows=2, cols=3,
     plt.title(plot_title)
     plt.show()
 
-def w_tree():
+def w_tree(logfile="west.log", data="extracted_data.pkl"):
     """
     Extract data from from west.log file, do data processing and formatting,
     then plot a resampling tree.
@@ -93,10 +95,16 @@ def w_tree():
 
     # TODO: add to args
     # extract data from log file (and save to pickle file)
-    extract.extract_data_from_log(f"./west.log")
-    # load the saved pickle file
-    with open("extracted_data.pkl", "rb") as f:
-        data = pickle.load(f)
+
+    # # check if the datafile already exists
+    # if not os.path.exists(data):
+    #     # if it doesn't, extract the data from the log file
+    #     data = extract.extract_data_from_log(logfile)
+    # # otherwise, load the data from the pickle file
+    # else:
+    #     with open(data, "rb") as f:
+    #         data = pickle.load(f)
+    data = extract.extract_data_from_log(logfile)
 
     we_weights = data["WE weights"]
     new_we_weights = data["New weights"]
@@ -112,8 +120,7 @@ def w_tree():
 
     # grab n_iters and n_segments per iter
     n_iterations, n_segments = we_weights.shape
-
-    # TODO: test accuracy with half iters for now
+    # TODO: last iteration specification?
     n_iterations //= 2
 
     # Create an array of node numbers and convert to strings using vectorized concatenation operator
@@ -156,7 +163,7 @@ def w_tree():
     #print(edges)
     # plot the resampling tree
     plot_resampling_tree(node_names.flatten(), we_weights.flatten(), absurder_weights.flatten(), edges.flatten(), 
-                         rows=n_iterations, cols=n_segments, node_size=600, cbar_label='ABSURDer Weight')    
+                         rows=n_iterations, cols=n_segments, node_size=1000, cbar_label='ABSURDer Weight')
 
 if __name__ == '__main__':
     # Example node attributes (these can be dynamically generated or read from a file)
@@ -169,4 +176,4 @@ if __name__ == '__main__':
     #plot_resampling_tree(node_names, weights, metrics, edges)
 
     # plot a resampling tree from west.log data
-    w_tree()
+    w_tree(logfile="we_weight_input_True_theta1000/west.log")

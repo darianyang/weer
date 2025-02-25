@@ -2,7 +2,7 @@ Updating system with the options from the configuration file
 SynD propagator inferring 10001 steps per iteration from west.system.system_options.pcoord_len
 Maximum wallclock time: 1 day, 0:00:00
 
-Thu Feb 20 15:18:22 2025
+Tue Feb 25 18:00:37 2025
 Iteration 1 (10 requested)
 Beginning iteration 1
 6 segments remain in iteration 1 (6 total)
@@ -18,35 +18,40 @@ Waiting for segments to complete...
 WE weights: 
  [0.16666667 0.16666667 0.16666667 0.16666667 0.16666667 0.16666667] 
 weights sum:  0.9999999999999999
-pcoords shape:  (6, 1)
+curr pcoords:
+ [2.0043957 1.9593552 2.0859852 2.0563986 2.0283155 1.9813012]
+curr parent ids:
+ [-2 -6 -1 -4 -3 -5]
+curr parent wtg ids:
+ [{-2} {-6} {-1} {-4} {-3} {-5}]
 curr data len:  6
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   6
-# Overall chi square: 605.37
+# Overall chi square: 590.55
 # THETA: 1000         
 # Done! All minimizations terminated successfully
 Skip save of results.pkl for temp testing
 ABSURDer weights: 
- [0.17366501 0.177289   0.16851711 0.15008399 0.16153156 0.16891333]
-ABSURDer phi_eff: 0.9985655760861522
+ [0.15881801 0.15803019 0.17204972 0.16658183 0.16637877 0.17814149]
+ABSURDer phi_eff: 0.9991123541678024
 current iteration:  1
-WEER split: [1, 1, 0, 0, 0, 0]
-WEER merge: [[], [], [], [5], [2], []]
-Split indices:  [0, 1]
+WEER split: [0, 0, 1, 0, 0, 1]
+WEER merge: [[], [0], [], [], [3], []]
+Split indices:  [2, 5]
 split sum:  2
-merge sum:  2
-Bin attrs post WEER:  <Bin at 0x16e415c70, label=None, count=6, weight=1>
+merge sum:  1
+Bin attrs post WEER:  <Bin at 0x139c18f50, label=None, count=6, weight=1>
 New weights:
- [0.08333333 0.33333333 0.33333333 0.08333333 0.08333333 0.08333333]
+ [0.33333333 0.08333333 0.33333333 0.08333333 0.08333333 0.08333333]
 Total = 6, splitting = 2, merging = 4
 Iteration completed successfully
-Iteration wallclock: 0:00:26.250101, cputime: 0:00:00
+Iteration wallclock: 0:00:25.692561, cputime: 0:00:00
 
 
-Thu Feb 20 15:18:48 2025
+Tue Feb 25 18:01:03 2025
 Iteration 2 (10 requested)
 Beginning iteration 2
 6 segments remain in iteration 2 (6 total)
@@ -62,35 +67,40 @@ Waiting for segments to complete...
 WE weights: 
  [0.08333333 0.08333333 0.08333333 0.08333333 0.33333333 0.33333333] 
 weights sum:  1.0
-pcoords shape:  (6, 1)
+curr pcoords:
+ [2.1289065 2.141012  1.9909503 2.157887  2.1203763 2.140067 ]
+curr parent ids:
+ [2 5 5 2 4 3]
+curr parent wtg ids:
+ [{2} {5} {5} {2} {0, 4} {1, 3}]
 curr data len:  6
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   6
-# Overall chi square: 598.55
+# Overall chi square: 577.67
 # THETA: 1000         
 # Done! All minimizations terminated successfully
 Skip save of results.pkl for temp testing
 ABSURDer weights: 
- [0.08031775 0.08283085 0.07517097 0.08216225 0.3542777  0.32524048]
-ABSURDer phi_eff: 0.9987785700705037
+ [0.09060773 0.08345512 0.09259182 0.0822477  0.32567239 0.32542523]
+ABSURDer phi_eff: 0.9990051206835691
 current iteration:  2
 WEER split: [0, 0, 0, 0, 1, 1]
-WEER merge: [[], [], [0], [1], [], []]
+WEER merge: [[2], [], [], [1], [], []]
 Split indices:  [4, 5]
 split sum:  2
-merge sum:  1
-Bin attrs post WEER:  <Bin at 0x16e414b90, label=None, count=6, weight=1>
+merge sum:  2
+Bin attrs post WEER:  <Bin at 0x139c18c80, label=None, count=6, weight=1>
 New weights:
  [0.16666667 0.16666667 0.16666667 0.16666667 0.16666667 0.16666667]
 Total = 6, splitting = 2, merging = 4
 Iteration completed successfully
-Iteration wallclock: 0:00:26.014493, cputime: 0:00:00
+Iteration wallclock: 0:00:25.989841, cputime: 0:00:00
 
 
-Thu Feb 20 15:19:14 2025
+Tue Feb 25 18:01:29 2025
 Iteration 3 (10 requested)
 Beginning iteration 3
 6 segments remain in iteration 3 (6 total)
@@ -106,35 +116,40 @@ Waiting for segments to complete...
 WE weights: 
  [0.16666667 0.16666667 0.16666667 0.16666667 0.16666667 0.16666667] 
 weights sum:  0.9999999999999999
-pcoords shape:  (6, 1)
+curr pcoords:
+ [2.045599  2.157663  2.2408485 2.199412  1.8589822 1.7553203]
+curr parent ids:
+ [4 5 0 2 2 0]
+curr parent wtg ids:
+ [{1, 4} {3, 5} {0} {2} {2} {0}]
 curr data len:  6
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   6
-# Overall chi square: 626.07
+# Overall chi square: 620.41
 # THETA: 1000         
 # Done! All minimizations terminated successfully
 Skip save of results.pkl for temp testing
 ABSURDer weights: 
- [0.15375768 0.1687613  0.17459424 0.16547773 0.16314402 0.17426502]
-ABSURDer phi_eff: 0.9990759692454019
+ [0.16368994 0.17411349 0.15661014 0.16302003 0.17110783 0.17145856]
+ABSURDer phi_eff: 0.9993327670658118
 current iteration:  3
-WEER split: [0, 0, 1, 0, 0, 1]
-WEER merge: [[3], [], [], [], [1], []]
-Split indices:  [2, 5]
+WEER split: [0, 1, 0, 0, 0, 1]
+WEER merge: [[4], [], [3], [], [], []]
+Split indices:  [1, 5]
 split sum:  2
 merge sum:  2
-Bin attrs post WEER:  <Bin at 0x17f6c19a0, label=None, count=6, weight=1>
+Bin attrs post WEER:  <Bin at 0x13a24ac60, label=None, count=6, weight=1>
 New weights:
- [0.08333333 0.33333333 0.08333333 0.33333333 0.08333333 0.08333333]
+ [0.08333333 0.08333333 0.33333333 0.08333333 0.33333333 0.08333333]
 Total = 6, splitting = 2, merging = 4
 Iteration completed successfully
-Iteration wallclock: 0:00:26.456320, cputime: 0:00:00
+Iteration wallclock: 0:00:26.307916, cputime: 0:00:00
 
 
-Thu Feb 20 15:19:41 2025
+Tue Feb 25 18:01:55 2025
 Iteration 4 (10 requested)
 Beginning iteration 4
 6 segments remain in iteration 4 (6 total)
@@ -150,35 +165,40 @@ Waiting for segments to complete...
 WE weights: 
  [0.08333333 0.08333333 0.08333333 0.08333333 0.33333333 0.33333333] 
 weights sum:  1.0
-pcoords shape:  (6, 1)
+curr pcoords:
+ [1.7120067 2.6274533 2.2263694 2.220635  2.332131  1.7959014]
+curr parent ids:
+ [4 0 0 4 1 2]
+curr parent wtg ids:
+ [{4} {0} {0} {4} {1, 5} {2, 3}]
 curr data len:  6
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   6
-# Overall chi square: 623.08
+# Overall chi square: 621.15
 # THETA: 1000         
 # Done! All minimizations terminated successfully
 Skip save of results.pkl for temp testing
 ABSURDer weights: 
- [0.077596   0.08251924 0.08192674 0.07553589 0.36195182 0.32047031]
-ABSURDer phi_eff: 0.9979609680363585
+ [0.0804697  0.07773246 0.08395462 0.08589287 0.33855955 0.33339081]
+ABSURDer phi_eff: 0.9996757098804694
 current iteration:  4
 WEER split: [0, 0, 0, 0, 1, 1]
-WEER merge: [[1], [], [], [2], [], []]
+WEER merge: [[3], [2], [], [], [], []]
 Split indices:  [4, 5]
 split sum:  2
 merge sum:  2
-Bin attrs post WEER:  <Bin at 0x16e416d50, label=None, count=6, weight=1>
+Bin attrs post WEER:  <Bin at 0x139c188c0, label=None, count=6, weight=1>
 New weights:
  [0.16666667 0.16666667 0.16666667 0.16666667 0.16666667 0.16666667]
 Total = 6, splitting = 2, merging = 4
 Iteration completed successfully
-Iteration wallclock: 0:00:26.980407, cputime: 0:00:00
+Iteration wallclock: 0:00:26.485885, cputime: 0:00:00
 
 
-Thu Feb 20 15:20:08 2025
+Tue Feb 25 18:02:22 2025
 Iteration 5 (10 requested)
 Beginning iteration 5
 6 segments remain in iteration 5 (6 total)
@@ -194,35 +214,40 @@ Waiting for segments to complete...
 WE weights: 
  [0.16666667 0.16666667 0.16666667 0.16666667 0.16666667 0.16666667] 
 weights sum:  0.9999999999999999
-pcoords shape:  (6, 1)
+curr pcoords:
+ [1.8280815 2.1957104 2.1768107 2.1432352 2.0694687 2.084062 ]
+curr parent ids:
+ [5 1 4 2 4 2]
+curr parent wtg ids:
+ [{0, 5} {1, 3} {4} {2} {4} {2}]
 curr data len:  6
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   6
-# Overall chi square: 587.65
+# Overall chi square: 589.65
 # THETA: 1000         
 # Done! All minimizations terminated successfully
 Skip save of results.pkl for temp testing
 ABSURDer weights: 
- [0.16028974 0.16349521 0.17350677 0.17421926 0.16854366 0.15994536]
-ABSURDer phi_eff: 0.9993912419003237
+ [0.16211447 0.17218758 0.13245462 0.17780839 0.17578801 0.17964693]
+ABSURDer phi_eff: 0.9949772523829294
 current iteration:  5
-WEER split: [0, 0, 1, 1, 0, 0]
-WEER merge: [[4], [], [], [], [], [1]]
-Split indices:  [2, 3]
+WEER split: [0, 0, 0, 1, 0, 1]
+WEER merge: [[4], [], [1], [], [], []]
+Split indices:  [3, 5]
 split sum:  2
 merge sum:  2
-Bin attrs post WEER:  <Bin at 0x16e4177a0, label=None, count=6, weight=1>
+Bin attrs post WEER:  <Bin at 0x139c19310, label=None, count=6, weight=1>
 New weights:
- [0.33333333 0.08333333 0.08333333 0.08333333 0.33333333 0.08333333]
+ [0.08333333 0.33333333 0.08333333 0.08333333 0.33333333 0.08333333]
 Total = 6, splitting = 2, merging = 4
 Iteration completed successfully
-Iteration wallclock: 0:00:26.727677, cputime: 0:00:00
+Iteration wallclock: 0:00:26.578847, cputime: 0:00:00
 
 
-Thu Feb 20 15:20:35 2025
+Tue Feb 25 18:02:48 2025
 Iteration 6 (10 requested)
 Beginning iteration 6
 6 segments remain in iteration 6 (6 total)
@@ -238,35 +263,40 @@ Waiting for segments to complete...
 WE weights: 
  [0.08333333 0.08333333 0.08333333 0.08333333 0.33333333 0.33333333] 
 weights sum:  1.0
-pcoords shape:  (6, 1)
+curr pcoords:
+ [2.6045754 2.2054265 2.180903  1.8959196 2.079225  2.0705173]
+curr parent ids:
+ [3 3 1 1 5 2]
+curr parent wtg ids:
+ [{3} {3} {1} {1} {0, 5} {2, 4}]
 curr data len:  6
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   6
-# Overall chi square: 599.74
+# Overall chi square: 589.66
 # THETA: 1000         
 # Done! All minimizations terminated successfully
 Skip save of results.pkl for temp testing
 ABSURDer weights: 
- [0.07562904 0.08108562 0.08242976 0.08493483 0.37582011 0.30010064]
-ABSURDer phi_eff: 0.9952786786415863
+ [0.08633952 0.07747538 0.07720347 0.08379309 0.32827632 0.34691221]
+ABSURDer phi_eff: 0.9991919380913794
 current iteration:  6
 WEER split: [0, 0, 0, 0, 1, 1]
-WEER merge: [[1], [], [3], [], [], []]
+WEER merge: [[], [], [1], [0], [], []]
 Split indices:  [4, 5]
 split sum:  2
-merge sum:  2
-Bin attrs post WEER:  <Bin at 0x16e417d40, label=None, count=6, weight=1>
+merge sum:  1
+Bin attrs post WEER:  <Bin at 0x139c1bc50, label=None, count=6, weight=1>
 New weights:
  [0.16666667 0.16666667 0.16666667 0.16666667 0.16666667 0.16666667]
 Total = 6, splitting = 2, merging = 4
 Iteration completed successfully
-Iteration wallclock: 0:00:26.897456, cputime: 0:00:00
+Iteration wallclock: 0:00:26.732396, cputime: 0:00:00
 
 
-Thu Feb 20 15:21:02 2025
+Tue Feb 25 18:03:15 2025
 Iteration 7 (10 requested)
 Beginning iteration 7
 6 segments remain in iteration 7 (6 total)
@@ -282,35 +312,40 @@ Waiting for segments to complete...
 WE weights: 
  [0.16666667 0.16666667 0.16666667 0.16666667 0.16666667 0.16666667] 
 weights sum:  0.9999999999999999
-pcoords shape:  (6, 1)
+curr pcoords:
+ [2.2489977 1.9092509 1.9497732 1.8566387 2.2615974 2.093601 ]
+curr parent ids:
+ [1 0 4 1 4 3]
+curr parent wtg ids:
+ [{1} {0, 5} {4} {1} {4} {2, 3}]
 curr data len:  6
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   6
-# Overall chi square: 634.17
+# Overall chi square: 589.52
 # THETA: 1000         
 # Done! All minimizations terminated successfully
 Skip save of results.pkl for temp testing
 ABSURDer weights: 
- [0.17528099 0.15580257 0.16696386 0.16628634 0.17331643 0.1623498 ]
-ABSURDer phi_eff: 0.9992313525476034
+ [0.15494661 0.1633366  0.18275622 0.15982657 0.15382133 0.18531268]
+ABSURDer phi_eff: 0.9971390189888966
 current iteration:  7
-WEER split: [1, 0, 0, 0, 1, 0]
-WEER merge: [[], [3], [], [], [], [2]]
-Split indices:  [0, 4]
+WEER split: [0, 0, 1, 0, 0, 1]
+WEER merge: [[], [], [], [1], [0], []]
+Split indices:  [2, 5]
 split sum:  2
-merge sum:  2
-Bin attrs post WEER:  <Bin at 0x33ac467b0, label=None, count=6, weight=1>
+merge sum:  1
+Bin attrs post WEER:  <Bin at 0x14b9205f0, label=None, count=6, weight=1>
 New weights:
- [0.08333333 0.08333333 0.33333333 0.08333333 0.33333333 0.08333333]
+ [0.08333333 0.33333333 0.08333333 0.33333333 0.08333333 0.08333333]
 Total = 6, splitting = 2, merging = 4
 Iteration completed successfully
-Iteration wallclock: 0:00:26.946364, cputime: 0:00:00
+Iteration wallclock: 0:00:26.344044, cputime: 0:00:00
 
 
-Thu Feb 20 15:21:28 2025
+Tue Feb 25 18:03:41 2025
 Iteration 8 (10 requested)
 Beginning iteration 8
 6 segments remain in iteration 8 (6 total)
@@ -326,35 +361,40 @@ Waiting for segments to complete...
 WE weights: 
  [0.08333333 0.08333333 0.08333333 0.08333333 0.33333333 0.33333333] 
 weights sum:  1.0
-pcoords shape:  (6, 1)
+curr pcoords:
+ [2.1361372 1.8681763 1.943811  2.3130245 2.117248  1.5323611]
+curr parent ids:
+ [1 1 0 0 5 2]
+curr parent wtg ids:
+ [{1} {1} {0} {0} {3, 5} {2, 4}]
 curr data len:  6
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   6
-# Overall chi square: 644.49
+# Overall chi square: 598.72
 # THETA: 1000         
 # Done! All minimizations terminated successfully
 Skip save of results.pkl for temp testing
 ABSURDer weights: 
- [0.08488138 0.08330188 0.08822917 0.08240256 0.32893316 0.33225184]
-ABSURDer phi_eff: 0.9998084985500998
+ [0.08153662 0.07389048 0.08676578 0.07769716 0.36088568 0.31922428]
+ABSURDer phi_eff: 0.9977503338834691
 current iteration:  8
 WEER split: [0, 0, 0, 0, 1, 1]
 WEER merge: [[], [2], [], [0], [], []]
 Split indices:  [4, 5]
 split sum:  2
 merge sum:  1
-Bin attrs post WEER:  <Bin at 0x16e416a80, label=None, count=6, weight=1>
+Bin attrs post WEER:  <Bin at 0x139c1bc50, label=None, count=6, weight=1>
 New weights:
  [0.16666667 0.16666667 0.16666667 0.16666667 0.16666667 0.16666667]
 Total = 6, splitting = 2, merging = 4
 Iteration completed successfully
-Iteration wallclock: 0:00:26.662883, cputime: 0:00:00
+Iteration wallclock: 0:00:26.950320, cputime: 0:00:00
 
 
-Thu Feb 20 15:21:55 2025
+Tue Feb 25 18:04:08 2025
 Iteration 9 (10 requested)
 Beginning iteration 9
 6 segments remain in iteration 9 (6 total)
@@ -370,35 +410,40 @@ Waiting for segments to complete...
 WE weights: 
  [0.16666667 0.16666667 0.16666667 0.16666667 0.16666667 0.16666667] 
 weights sum:  0.9999999999999999
-pcoords shape:  (6, 1)
+curr pcoords:
+ [2.1191652 2.0339792 2.2037148 2.2257261 2.2557018 1.6718028]
+curr parent ids:
+ [3 4 5 3 1 1]
+curr parent wtg ids:
+ [{3} {0, 4} {2, 5} {3} {1} {1}]
 curr data len:  6
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   6
-# Overall chi square: 579.03
+# Overall chi square: 572.42
 # THETA: 1000         
 # Done! All minimizations terminated successfully
 Skip save of results.pkl for temp testing
 ABSURDer weights: 
- [0.17118047 0.17435287 0.17736698 0.1568587  0.15753979 0.16270118]
-ABSURDer phi_eff: 0.9988326000714024
+ [0.16243335 0.17956703 0.16181267 0.15730591 0.17779801 0.16108304]
+ABSURDer phi_eff: 0.9986621990645783
 current iteration:  9
-WEER split: [0, 1, 1, 0, 0, 0]
-WEER merge: [[], [], [], [0], [5], []]
-Split indices:  [1, 2]
+WEER split: [0, 1, 0, 0, 1, 0]
+WEER merge: [[], [], [], [2], [], [0]]
+Split indices:  [1, 4]
 split sum:  2
 merge sum:  1
-Bin attrs post WEER:  <Bin at 0x16e4163f0, label=None, count=6, weight=1>
+Bin attrs post WEER:  <Bin at 0x139c1b3e0, label=None, count=6, weight=1>
 New weights:
- [0.33333333 0.08333333 0.08333333 0.08333333 0.08333333 0.33333333]
+ [0.08333333 0.33333333 0.08333333 0.33333333 0.08333333 0.08333333]
 Total = 6, splitting = 2, merging = 4
 Iteration completed successfully
-Iteration wallclock: 0:00:26.813502, cputime: 0:00:00
+Iteration wallclock: 0:00:27.084887, cputime: 0:00:00
 
 
-Thu Feb 20 15:22:22 2025
+Tue Feb 25 18:04:35 2025
 Iteration 10 (10 requested)
 Beginning iteration 10
 6 segments remain in iteration 10 (6 total)
@@ -414,33 +459,38 @@ Waiting for segments to complete...
 WE weights: 
  [0.08333333 0.08333333 0.08333333 0.08333333 0.33333333 0.33333333] 
 weights sum:  1.0
-pcoords shape:  (6, 1)
+curr pcoords:
+ [2.0324757 2.8234353 2.1899884 2.2155938 2.1248882 1.56202  ]
+curr parent ids:
+ [1 0 0 1 5 3]
+curr parent wtg ids:
+ [{1} {0} {0} {1} {4, 5} {2, 3}]
 curr data len:  6
 
 # INFO ON THE DATASET
 # Number of methyls:  116
 # Number of rates:    3
 # Number of blocks:   6
-# Overall chi square: 579.12
+# Overall chi square: 608.29
 # THETA: 1000         
 # Done! All minimizations terminated successfully
 Skip save of results.pkl for temp testing
 ABSURDer weights: 
- [0.09533005 0.08908962 0.08295754 0.08111246 0.32285894 0.32865139]
-ABSURDer phi_eff: 0.9987514947416674
+ [0.08603692 0.08663713 0.08882487 0.07594242 0.33579358 0.32676508]
+ABSURDer phi_eff: 0.9993030219347306
 current iteration:  10
 WEER split: [0, 0, 0, 0, 1, 1]
-WEER merge: [[], [0], [], [2], [], []]
+WEER merge: [[1], [], [], [2], [], []]
 Split indices:  [4, 5]
 split sum:  2
-merge sum:  1
-Bin attrs post WEER:  <Bin at 0x16e416a80, label=None, count=6, weight=1>
+merge sum:  2
+Bin attrs post WEER:  <Bin at 0x139c196d0, label=None, count=6, weight=1>
 New weights:
  [0.16666667 0.16666667 0.16666667 0.16666667 0.16666667 0.16666667]
 Total = 6, splitting = 2, merging = 4
 Iteration completed successfully
-Iteration wallclock: 0:00:27.028986, cputime: 0:00:00
+Iteration wallclock: 0:00:26.886692, cputime: 0:00:00
 
 
-Thu Feb 20 15:22:49 2025
+Tue Feb 25 18:05:02 2025
 WEST run complete.
