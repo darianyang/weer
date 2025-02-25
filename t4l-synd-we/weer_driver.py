@@ -305,6 +305,9 @@ class WEERDriver(WEDriver):
         curr_parent_ids = np.asarray([seg.parent_id for seg in curr_segments])
         #print("curr pcoords: ", curr_pcoords)
         print("curr parent ids:\n", curr_parent_ids)
+        #print(self.__dir__())
+        curr_parent_wtg_ids = np.asarray([seg.wtg_parent_ids for seg in curr_segments])
+        print("curr parent wtg ids:\n", curr_parent_wtg_ids)
         
         # # first/last-of-previous frame pcoords
         # pcoords = curr_pcoords[:,0,:]
