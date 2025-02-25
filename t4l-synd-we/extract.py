@@ -73,7 +73,7 @@ def extract_data_from_log(filename, results='extracted_data.pkl'):
                 "New weights": np.array(new_we_weights),
                 "ABSURDer weights": np.array(absurder_weights),
                 "pcoords": np.array(pcoords),
-                "parent_ids": np.array(parent_ids),
+                "parent_ids": np.array(parent_ids, dtype=int),
                 "chi2": np.array(chi2),
                 "phi_eff": np.array(phi_eff)
                 }
