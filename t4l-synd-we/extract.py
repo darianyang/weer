@@ -13,8 +13,7 @@ import re
 
 def parse_parent_wtg_ids(s):
     """
-    Parse a string like "[{5} {5} {0} {0} {1, 3} {2, 4}]" into a list of sets,
-    where each set contains a tuple of integers.
+    Parse a string like "[{5} {5} {0} {0} {1, 3} {2, 4}]".
     """
     # Remove surrounding square brackets
     s = s.strip()[1:-1]
@@ -24,8 +23,10 @@ def parse_parent_wtg_ids(s):
     for group in groups:
         # Split on commas (and possibly whitespace)
         numbers = [int(x.strip()) for x in group.split(',') if x.strip() != '']
-        # append as a set
-        result.append(set(numbers))
+        # append as a tuple
+        #result.append(set(numbers)) # was using set for a single var but of course not subscriptable
+        result.append(tuple(numbers))
+
     return result
 
 # TODO: this is overall not the best, but it works for now

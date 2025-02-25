@@ -22,7 +22,8 @@ def generate_grid_positions(nodes, rows, cols):
     return positions
 
 def plot_resampling_tree(node_names, weights, metrics, edges, rows=2, cols=3, 
-                         node_size=500, node_labels=False, cbar_label='pcoord'):
+                         node_size=500, node_labels=False, cbar_label='pcoord',
+                         plot_title='WE Resampling Tree'):
     """
     Plot a resampling tree with nodes, edges, weights, and metric values.
     """
@@ -38,17 +39,12 @@ def plot_resampling_tree(node_names, weights, metrics, edges, rows=2, cols=3,
     for edge in edges:
         #print("EDGEINIT", edge)
         # case with empty tuple (no edges), continue to next node
-        if edge == ():
+        if edge == [()]:
             continue
-        # case with tuple of tuples for multiple edges
-        elif isinstance(edge[0], tuple) and len(edge) > 1:
-            for sub_edge in edge:
-                #print("SUBEDGE", sub_edge)
-                G.add_edge(sub_edge[0], sub_edge[1])
-        # standard case with tuple for a single edge connection
+        # go through all edges in the edge list
         else:
-            #print("EDGE", edge)
-            G.add_edge(edge[0], edge[1])
+            for sub_edge in edge:
+                G.add_edge(sub_edge[0], sub_edge[1])
 
     # convert metrics to array if needed
     if isinstance(metrics, list):
@@ -85,7 +81,7 @@ def plot_resampling_tree(node_names, weights, metrics, edges, rows=2, cols=3,
     cbar.set_label(cbar_label)
 
     # Show the plot
-    plt.title("Trajectory History with Weighted Ensemble Resampling")
+    plt.title(plot_title)
     plt.show()
 
 def w_tree():
@@ -95,8 +91,9 @@ def w_tree():
     """
     # TODO: eventually include a line plot sideways that shows phi_eff and chi2 for each iteration
 
+    # TODO: add to args
     # extract data from log file (and save to pickle file)
-    #extract.extract_data_from_log(f"./west.log")
+    extract.extract_data_from_log(f"./west.log")
     # load the saved pickle file
     with open("extracted_data.pkl", "rb") as f:
         data = pickle.load(f)
@@ -106,11 +103,18 @@ def w_tree():
     absurder_weights = data["ABSURDer weights"]
     pcoords = data["pcoords"]
     parent_ids = data["parent_ids"]
+    parent_wtg_ids = data["parent_wtg_ids"]
     chi2 = data["chi2"]
     phi_eff = data["phi_eff"]
 
+    #print(parent_wtg_ids)
+    #print("\nIDXED", parent_wtg_ids[1][5][0])
+
     # grab n_iters and n_segments per iter
     n_iterations, n_segments = we_weights.shape
+
+    # TODO: test accuracy with half iters for now
+    n_iterations //= 2
 
     # Create an array of node numbers and convert to strings using vectorized concatenation operator
     node_names = np.core.defchararray.add('n', 
@@ -119,30 +123,40 @@ def w_tree():
 
     # create edge tuples for connections between nodes
     edges = []
-    # set node index
-    node_i = 0
     # loop through each iteration
     for iter_i in range(n_iterations):
         if iter_i == 0:
             # empty segment parent connections in inital iteration
-            edges.append([() for _ in range(n_segments)])
-            node_i += n_segments
+            edges.append([[()] for _ in range(n_segments)])
         # otherwise, connect each segment to the parent segment
         else:
             # loop through each trajectory segment
             # make an edge connection tuple to connect from parent node to current node
             #print([(node_names[iter_i-1, parent_ids[iter_i, seg_i]]) for seg_i in range(n_segments)])
             #print(node_names[iter_i-1, parent_ids[iter_i, 0])
-            edges.append([(node_names[iter_i-1, parent_ids[iter_i, seg_i]], 
-                           node_names[iter_i, seg_i]) 
-                           for seg_i in range(n_segments)])
-            node_i += 1
+            # edges.append([(node_names[iter_i-1, parent], node_names[iter_i, seg_i])
+            #               for seg_i in range(n_segments) 
+            #               for parent in parent_wtg_ids[iter_i][seg_i]])
+            seg_edges = []
+            for seg_i in range(n_segments):
+                multi_seg_edges = []
+                for parent in parent_wtg_ids[iter_i][seg_i]:
+                    multi_seg_edges.append((node_names[iter_i-1, parent], node_names[iter_i, seg_i]))
+                seg_edges.append(multi_seg_edges)
+            edges.append(seg_edges)
+
+            # previous code without using parent_wtg_ids (single connections)
+            # edges.append([(node_names[iter_i-1, int(parent_ids[iter_i, seg_i])], 
+            #                node_names[iter_i, seg_i]) 
+            #                for seg_i in range(n_segments)])
 
     # convert to numpy array
+    #print(edges)
     edges = np.array(edges, dtype=object)
+    #print(edges)
     # plot the resampling tree
     plot_resampling_tree(node_names.flatten(), we_weights.flatten(), absurder_weights.flatten(), edges.flatten(), 
-                         rows=n_iterations, cols=n_segments, node_size=600, cbar_label='pcoord')    
+                         rows=n_iterations, cols=n_segments, node_size=600, cbar_label='ABSURDer Weight')    
 
 if __name__ == '__main__':
     # Example node attributes (these can be dynamically generated or read from a file)
