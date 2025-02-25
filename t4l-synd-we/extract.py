@@ -5,8 +5,9 @@ Input west.log file and extract weight arrays.
 import numpy as np
 import matplotlib.pyplot as plt
 import h5py
+import pickle
 
-def extract_data_from_log(filename):
+def extract_data_from_log(filename, results='extracted_data.pkl'):
     """
     Extract data from the west.log file.
 
@@ -14,6 +15,8 @@ def extract_data_from_log(filename):
     ----------
     filename : str
         Path to the west.log file.
+    results : str
+        Path to save the extracted data as a pickle file.
 
     Returns
     -------
@@ -65,17 +68,21 @@ def extract_data_from_log(filename):
             if line.startswith("ABSURDer phi_eff"):
                 phi_eff.append(float(line.split(":")[1]))
 
-    #return np.array(we_weights), np.array(new_we_weights), np.array(absurder_weights), np.array(chi2), np.array(phi_eff)
-    # return a dictionary of the extracted data
-    return {
-        "WE weights": np.array(we_weights),
-        "New weights": np.array(new_we_weights),
-        "ABSURDer weights": np.array(absurder_weights),
-        "pcoords": np.array(pcoords),
-        "parent_ids": np.array(parent_ids),
-        "chi2": np.array(chi2),
-        "phi_eff": np.array(phi_eff)
-    }
+    # return a dictionary of the extracted data (use arrays for easier indexing later)
+    data_dict = {"WE weights": np.array(we_weights),
+                "New weights": np.array(new_we_weights),
+                "ABSURDer weights": np.array(absurder_weights),
+                "pcoords": np.array(pcoords),
+                "parent_ids": np.array(parent_ids),
+                "chi2": np.array(chi2),
+                "phi_eff": np.array(phi_eff)
+                }
+    
+    # save the dictionary as a pickle file
+    with open(results, "wb") as f:
+       pickle.dump(data_dict, f)
+
+    return data_dict
 
 def extract_weights_from_h5(filename, absurder_weights):
     """

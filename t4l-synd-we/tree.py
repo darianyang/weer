@@ -6,6 +6,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib.colors as mcolors
 import numpy as np
+import pickle
 
 import extract
 
@@ -91,18 +92,24 @@ if __name__ == '__main__':
     # TODO: okay, so I need data with node-name, WE weight, and absurder_weight, and edges/connections
     # TODO: eventually include a line plot sideways that shows phi_eff and chi2 for each iteration
 
-    # TODO: also save the dict as output and just load it as pickle?
-    # data = extract.extract_data_from_log(f"./west.log")
-    # we_weights = data["WE weights"]
-    # new_we_weights = data["New weights"]
-    # absurder_weights = data["ABSURDer weights"]
-    # pcoords = data["pcoords"]
-    # parent_ids = data["parent_ids"]
-    # chi2 = data["chi2"]
-    # phi_eff = data["phi_eff"]
+    # extract data from log file (and save to pickle file)
+    #extract.extract_data_from_log(f"./west.log")
+    # load the saved pickle file
+    with open("extracted_data.pkl", "rb") as f:
+        data = pickle.load(f)
 
-    # print(data)
+    we_weights = data["WE weights"]
+    new_we_weights = data["New weights"]
+    absurder_weights = data["ABSURDer weights"]
+    pcoords = data["pcoords"]
+    parent_ids = data["parent_ids"]
+    chi2 = data["chi2"]
+    phi_eff = data["phi_eff"]
+
+    #print(data)
+    # loop through each iteration
+    print(len(we_weights))
 
 
 
-    plot_resampling_tree(node_names, weights, metrics, edges)
+    #plot_resampling_tree(node_names, weights, metrics, edges)
