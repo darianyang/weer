@@ -271,6 +271,14 @@ def plot_weights(weights):
         ax[row, col].set_title(f"WE Iteration {i+1}")
         #ax[row, col].hlines(0, 0, 24, color='gray', linestyle='--')
         ax[row, col].grid(True)
+    # only put labels on the outer plots
+    ax[4, 0].set_xlabel("Segment Index")
+    ax[4, 1].set_xlabel("Segment Index")
+    ax[0, 0].set_ylabel("Weight")
+    ax[1, 0].set_ylabel("Weight")
+    ax[2, 0].set_ylabel("Weight")
+    ax[3, 0].set_ylabel("Weight")
+    ax[4, 0].set_ylabel("Weight")
 
     ax[0,0].legend()
     plt.tight_layout()
