@@ -11,6 +11,8 @@ import numpy as np
 import pickle
 import re
 
+plt.style.use("default.mplstyle")
+
 def parse_parent_wtg_ids(s):
     """
     Parse a string like "[{5} {5} {0} {0} {1, 3} {2, 4}]".
@@ -290,10 +292,10 @@ if __name__ == "__main__":
     #filename = "test-data/west.log"
     # TODO: make comparison plot of the two conditions
     #       also include the Chi2 and Phi_eff values
-    we_weight_input = True
-    theta = 1000
-    #filename = f"we_weight_input_{we_weight_input}_theta{theta}"
-    filename = "."
+    we_weight_input = False
+    theta = 100
+    filename = f"we_weight_input_{we_weight_input}_theta{theta}"
+    #filename = "."
 
     #we_weights, new_we_weights, absurder_weights, chi2, phi_eff = extract_data_from_log(f"{filename}/west.log")
     data = extract_data_from_log(f"{filename}/west.log")
@@ -310,6 +312,12 @@ if __name__ == "__main__":
     #print(f"WE Weights: {weights.shape}")
     print(f"\nCHI2:PHI_EFF {list(zip(chi2, phi_eff))}\n")
     # plot_weights(we_weights, absurder_weights)
+    fig, ax = plt.subplots(2, 1, figsize=(6, 4))
+    ax[0].plot(chi2, linewidth=2)
+    ax[0].set_ylabel("$\chi^2$")
+    ax[1].plot(phi_eff, linewidth=2)
+    ax[1].set_ylabel("$\phi_{eff}$")
+    ax[1].set_xlabel("WE Iteration")
 
     # returns weights from h5
     weights = extract_weights_from_h5(f"{filename}/west.h5", absurder_weights)
@@ -321,8 +329,10 @@ if __name__ == "__main__":
     # plt.plot(weight_diff)
     # plt.plot(absurder_weights)
     #plot_weights(weights[:,3], weights[:,2])
-    plot_weights(weights)
+    #plot_weights(weights)
         
 
     # TODO: is there a more intuitive way to sort the walkers per iteration?
+    plt.tight_layout()
+    plt.savefig("phi_chi2.pdf")
     plt.show()

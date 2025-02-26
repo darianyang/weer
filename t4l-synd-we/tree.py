@@ -11,6 +11,8 @@ import os
 
 import extract
 
+plt.style.use("default.mplstyle")
+
 # Function to generate grid positions
 # TODO: rows is not needed I suppose
 def generate_grid_positions(nodes, rows, cols):
@@ -25,7 +27,7 @@ def generate_grid_positions(nodes, rows, cols):
 # TODO: auto detection of row/cols and node_size calc
 def plot_resampling_tree(node_names, weights, metrics, edges, rows=2, cols=3, 
                          node_size=500, node_labels=False, cbar_label='pcoord',
-                         plot_title='WE Resampling Tree'):
+                         plot_title='WE Resampling Tree', savefig=None):
     """
     Plot a resampling tree with nodes, edges, weights, and metric values.
     """
@@ -84,9 +86,11 @@ def plot_resampling_tree(node_names, weights, metrics, edges, rows=2, cols=3,
 
     # Show the plot
     plt.title(plot_title)
+    if savefig is not None:
+        plt.savefig(savefig)
     plt.show()
 
-def w_tree(logfile="west.log", data="extracted_data.pkl"):
+def w_tree(logfile="west.log", data="extracted_data.pkl", savefig=None):
     """
     Extract data from from west.log file, do data processing and formatting,
     then plot a resampling tree.
@@ -163,7 +167,7 @@ def w_tree(logfile="west.log", data="extracted_data.pkl"):
     #print(edges)
     # plot the resampling tree
     plot_resampling_tree(node_names.flatten(), we_weights.flatten(), absurder_weights.flatten(), edges.flatten(), 
-                         rows=n_iterations, cols=n_segments, node_size=1000, cbar_label='ABSURDer Weight')
+                         rows=n_iterations, cols=n_segments, node_size=1000, cbar_label='ABSURDer Weight', savefig=savefig)
 
 if __name__ == '__main__':
     # Example node attributes (these can be dynamically generated or read from a file)
@@ -176,4 +180,6 @@ if __name__ == '__main__':
     #plot_resampling_tree(node_names, weights, metrics, edges)
 
     # plot a resampling tree from west.log data
-    w_tree(logfile="we_weight_input_True_theta1000/west.log")
+    #w_tree(logfile="we_weight_input_True_theta1000/west.log", savefig="resampling_tree_we_input.pdf")
+    #w_tree(logfile="we_weight_input_False_theta100/west.log")
+    w_tree(logfile="we_weight_input_False_theta100/west.log", savefig="resampling_tree_theta100.pdf")
