@@ -292,7 +292,7 @@ if __name__ == "__main__":
     #filename = "test-data/west.log"
     # TODO: make comparison plot of the two conditions
     #       also include the Chi2 and Phi_eff values
-    we_weight_input = False
+    we_weight_input = True
     theta = 100
     filename = f"we_weight_input_{we_weight_input}_theta{theta}"
     #filename = "."
@@ -312,12 +312,13 @@ if __name__ == "__main__":
     #print(f"WE Weights: {weights.shape}")
     print(f"\nCHI2:PHI_EFF {list(zip(chi2, phi_eff))}\n")
     # plot_weights(we_weights, absurder_weights)
-    fig, ax = plt.subplots(2, 1, figsize=(6, 4))
-    ax[0].plot(chi2, linewidth=2)
-    ax[0].set_ylabel("$\chi^2$")
-    ax[1].plot(phi_eff, linewidth=2)
-    ax[1].set_ylabel("$\phi_{eff}$")
-    ax[1].set_xlabel("WE Iteration")
+    fig, ax = plt.subplots(1, 2, figsize=(4, 6), sharey=True)
+    we_iterations = np.arange(1, we_weights.shape[0] + 1)
+    ax[0].plot(chi2, we_iterations, linewidth=2)
+    ax[0].set_xlabel("$\chi^2$")
+    ax[1].plot(phi_eff, we_iterations, linewidth=2)
+    ax[1].set_xlabel("$\phi_{eff}$")
+    ax[0].set_ylabel("WE Iteration")
 
     # returns weights from h5
     weights = extract_weights_from_h5(f"{filename}/west.h5", absurder_weights)
@@ -334,5 +335,5 @@ if __name__ == "__main__":
 
     # TODO: is there a more intuitive way to sort the walkers per iteration?
     plt.tight_layout()
-    plt.savefig("phi_chi2.pdf")
+    #plt.savefig("phi_chi2.pdf")
     plt.show()
