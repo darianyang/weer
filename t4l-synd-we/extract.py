@@ -294,10 +294,9 @@ if __name__ == "__main__":
     #       also include the Chi2 and Phi_eff values
     we_weight_input = True
     theta = 100
-    filename = f"we_weight_input_{we_weight_input}_theta{theta}"
-    #filename = "."
+    #filename = f"we_weight_input_{we_weight_input}_theta{theta}"
+    filename = "."
 
-    #we_weights, new_we_weights, absurder_weights, chi2, phi_eff = extract_data_from_log(f"{filename}/west.log")
     data = extract_data_from_log(f"{filename}/west.log")
     we_weights = data["WE weights"]
     new_we_weights = data["New weights"]
@@ -308,20 +307,34 @@ if __name__ == "__main__":
     chi2 = data["chi2"]
     phi_eff = data["phi_eff"]
     print(data)
-    #weights = np.array([we_weights, new_we_weights, new_we_weights-we_weights, absurder_weights])
-    #print(f"WE Weights: {weights.shape}")
     print(f"\nCHI2:PHI_EFF {list(zip(chi2, phi_eff))}\n")
+
     # plot_weights(we_weights, absurder_weights)
-    fig, ax = plt.subplots(1, 2, figsize=(4, 6), sharey=True)
+
+    ## Plot the chi2 and phi_eff values
+    fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
     we_iterations = np.arange(1, we_weights.shape[0] + 1)
-    ax[0].plot(chi2, we_iterations, linewidth=2)
-    ax[0].set_xlabel("$\chi^2$")
-    ax[1].plot(phi_eff, we_iterations, linewidth=2)
-    ax[1].set_xlabel("$\phi_{eff}$")
-    ax[0].set_ylabel("WE Iteration")
+    #ax[0].plot(chi2, we_iterations, linewidth=2)
+    ax[0].plot(chi2, linewidth=2)
+    ax[0].set_ylabel("$\chi^2$", rotation=0, labelpad=20, va='center')
+    #ax[1].plot(phi_eff, we_iterations, linewidth=2)
+    ax[1].plot(phi_eff, linewidth=2)
+    ax[1].set_ylabel("$\phi_{eff}$", rotation=0, labelpad=20, va='center')
+    ax[1].set_xlabel("WE Iteration")
 
     # returns weights from h5
-    weights = extract_weights_from_h5(f"{filename}/west.h5", absurder_weights)
+    # data = extract_weights_from_h5(f"{filename}/west.h5", absurder_weights)
+    # we_weights = data["WE weights"]
+    # new_we_weights = data["New weights"]
+    # absurder_weights = data["ABSURDer weights"]
+    # pcoords = data["pcoords"]
+    # parent_ids = data["parent_ids"]
+    # parent_wtg_ids = data["parent_wtg_ids"]
+    # chi2 = data["chi2"]
+    # phi_eff = data["phi_eff"]
+    # print(data)
+    # print(f"\nCHI2:PHI_EFF {list(zip(chi2, phi_eff))}\n")
+
     #print(f"WE Weights: {weights.shape}")
     # loop each iteration
     # TODO: make plotting function for weight diffs and absurder weights
