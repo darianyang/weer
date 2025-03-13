@@ -292,10 +292,11 @@ if __name__ == "__main__":
     #filename = "test-data/west.log"
     # TODO: make comparison plot of the two conditions
     #       also include the Chi2 and Phi_eff values
-    we_weight_input = True
-    theta = 100
+    #we_weight_input = True
+    #theta = 100
     #filename = f"we_weight_input_{we_weight_input}_theta{theta}"
     filename = "."
+    filename = "low_split_u_weights_theta10"
 
     data = extract_data_from_log(f"{filename}/west.log")
     we_weights = data["WE weights"]
@@ -315,12 +316,15 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(2, 1, figsize=(6, 4), sharex=True)
     we_iterations = np.arange(1, we_weights.shape[0] + 1)
     #ax[0].plot(chi2, we_iterations, linewidth=2)
-    ax[0].plot(chi2, linewidth=2)
+    ax[0].plot(we_iterations, chi2, linewidth=2)
     ax[0].set_ylabel("$\chi^2$", rotation=0, labelpad=20, va='center')
     #ax[1].plot(phi_eff, we_iterations, linewidth=2)
-    ax[1].plot(phi_eff, linewidth=2)
+    ax[1].plot(we_iterations, phi_eff, linewidth=2)
     ax[1].set_ylabel("$\phi_{eff}$", rotation=0, labelpad=20, va='center')
+    ax[1].set_ylim(0,1)
+    ax[0].set_ylim(150, 300)
     ax[1].set_xlabel("WE Iteration")
+    ax[0].set_title("Low $W_{absurder}$ Split, Uniform Weights, $\\theta$=10")
 
     # returns weights from h5
     # data = extract_weights_from_h5(f"{filename}/west.h5", absurder_weights)
@@ -348,5 +352,5 @@ if __name__ == "__main__":
 
     # TODO: is there a more intuitive way to sort the walkers per iteration?
     plt.tight_layout()
-    #plt.savefig("phi_chi2.pdf")
+    plt.savefig("low_split_u_weights_theta10-50i.pdf") 
     plt.show()
