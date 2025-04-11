@@ -11,6 +11,8 @@ import os
 
 import extract
 
+from westpa.analysis import Run
+
 plt.style.use("default.mplstyle")
 
 # Function to generate grid positions
@@ -181,5 +183,16 @@ if __name__ == '__main__':
 
     # plot a resampling tree from west.log data
     #w_tree(logfile="we_weight_input_True_theta1000/west.log", savefig="resampling_tree_we_input.pdf")
+    #w_tree(logfile="we_weight_input_False_theta100/west.log", savefig="resampling_tree_theta100.pdf")
     #w_tree(logfile="we_weight_input_False_theta100/west.log")
-    w_tree(logfile="we_weight_input_False_theta100/west.log", savefig="resampling_tree_theta100.pdf")
+    
+    #w_tree(logfile="west.log")
+
+
+    # westpa.analysis test
+    run = Run.open("we_weight_input_False_theta100/west.h5")
+    def history_graph(run):
+        return nx.DiGraph((walker, walker.parent) for walker in run.walkers)
+    G = history_graph(run)
+    nx.draw(G, with_labels=False)
+    plt.show()

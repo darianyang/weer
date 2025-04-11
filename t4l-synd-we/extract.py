@@ -324,7 +324,7 @@ if __name__ == "__main__":
     ax[1].set_ylim(0,1)
     ax[0].set_ylim(150, 300)
     ax[1].set_xlabel("WE Iteration")
-    ax[0].set_title("High $W_{absurder}$ Split, Uniform Weights, $\\theta$=10")
+    ax[0].set_title("Change $W_{absurder}$ Split, Uniform Weights, $\\theta$=10")
 
     # returns weights from h5
     # data = extract_weights_from_h5(f"{filename}/west.h5", absurder_weights)
@@ -352,5 +352,6 @@ if __name__ == "__main__":
 
     # TODO: is there a more intuitive way to sort the walkers per iteration?
     plt.tight_layout()
-    plt.savefig("high_split_u_weights_theta10-50i.pdf") 
+    #plt.savefig("high_split_u_weights_theta10-50i.pdf") 
+    plt.savefig("change_split_u_weights_theta10-50i.pdf") 
     plt.show()

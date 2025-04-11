@@ -174,8 +174,16 @@ class WEERDriver(WEDriver):
         merge : list of lists
             List of list of merge decisions.
         '''
+        # TODO: calculate weight change from initial ABSURDer weights
+        #       use this to determine split/merge decisions
+        #       for the initial test case, considering uniform initial weights (final - initial)
+        absurder_weight_change = absurder_weights - (np.ones(len(segments))/len(segments))
+        sorted_indices = np.argsort(absurder_weight_change)
+
         # Sort segments by absurder weights (smallest to largest)
-        sorted_indices = np.argsort(absurder_weights)
+        #sorted_indices = np.argsort(absurder_weights)
+        # go from largest to smallest instead (TESTING)
+        #sorted_indices = np.flip(np.argsort(absurder_weights))
         
         # Initialize split and merge lists
         split = [0] * len(segments)
@@ -353,12 +361,12 @@ class WEERDriver(WEDriver):
             # run reweighting
             # TODO: could also input multiple and find the best one
             #theta = 100 # initial test value (TODO: optimize)
-            theta = 100
+            theta = 10
             # initialize ABSURDer object
             # TODO: testing use with initial WE weights, not sure if this will be for better or worse
             #       I should test with and without
-            #rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=None)
-            rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=weights)
+            rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=None)
+            #rw = absurder.ABSURDer(nmr_rates, absurder_input, nmr_err, thetas=np.array([theta]), w0=weights)
             # reweight according to the data corresponding to the selected index
             # in this test case, use R2 (TODO: use all rates eventually? Would just use -1)
             rw.reweight(1)
@@ -367,6 +375,7 @@ class WEERDriver(WEDriver):
             # TODO: save weights per iteration
             #np.savetxt(f"w_opt_{theta}.txt", absurder_weights)
             print("ABSURDer weights: \n", absurder_weights)
+            print("ABSURDer weight change: \n", (absurder_weights - (np.ones(len(segments))/len(segments))))
             print(f"ABSURDer phi_eff: {rw.phi_eff(absurder_weights)}")
             # TODO: eventually could include in resampler script or pull from cfg:
             #       theta value, use WE initial weights bool, which rate to use, etc.
